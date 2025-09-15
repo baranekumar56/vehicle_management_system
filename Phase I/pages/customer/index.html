@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .primary {
+            background-color: #241358;
+        }
+
+        .primary-text {
+            color: #241358;
+        }
+    </style>
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- The pages structure
+    
+   Nav bar 
+   div to show img and slogan
+   about div
+   achievements
+   Book now div
+   FAQ div
+   Enqiry div
+   footer for terms and conditions
+   -->
+
+    <div class="flex flex-col">
+
+        <!-- Nav Bar-->
+        <div class="w-vw sticky top-0 ">
+            <div class="flex  text-white primary sticky top-0 z-69 w-full">
+                <!-- logo-->
+                <div class="inline ">
+                    <img src="/assets/logo.png" width="100px" height="40px" alt="auto care logo" />
+                </div>
+                <div class="sm:hidden w-full flex justify-end">
+                    <button id="menu-btn" class="focus:outline-none p-4">
+                        <!-- Icon -->
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+
+
+
+
+                <!-- links -->
+                <div class="hidden sm:flex w-full justify-end p-4 ">
+
+                    <div class="link p-4">About</div>
+                    <div class="link p-4">Achievements</div>
+                    <div class="link p-4">FAQ</div>
+                    <div class="link p-4">Book</div>
+                    <div class="link p-4">Login / Signup</div>
+                </div>
+
+            </div>
+            <div id="mobile-menu"
+                class="primary max-h-0 sm:hidden overflow-hidden flex flex-col space-y-2 px-2 pb-4 justify-end text-white items-end pr-5 transition-all duration-500 ease-in">
+                <a>About</a>
+                <a>Achievements</a>
+                <a>FAQ</a>
+                <a>Book</a>
+                <a>Login / SignUp</a>
+            </div>
+        </div>
+
+
+        <!-- Div to show image and slogan -->
+
+        <section class="flex flex-col sm:flex-row primary h-screen -mt-16">
+
+            <div class="flex-1 flex justify-center items-center ">
+                <img src="/assets/main_car_image_2.png"
+                    class="w-full h-auto max-w-full sm:max-w-md md:max-w-lg lg:max-w-3xl mt-50 sm:mt-0"
+                    alt="Car Image" />
+            </div>
+
+            <div class="flex-1 flex justify-center items-center">
+
+
+                
+                <span class="text-white font-bold text-4xl sm:text-4xl md:text-6xl lg:text-6xl m-0 pl-4 pr-4">
+                    Life’s already rough — at least let your car be smooth.
+                </span>
+            </div>
+
+        </section>
+
+        <!-- for about-->
+        <!-- About Section -->
+        <section class="primary text-white mt-30">
+            <div class="w-full flex justify-center p-4 text text-3xl">
+                <div>About</div>
+            </div>
+
+            <!-- Container with max width -->
+            <div class="flex flex-col sm:flex-row-reverse items-center justify-center mx-auto max-w-5xl p-6 gap-6 ">
+
+                <!-- Image -->
+                <div class="flex-1 flex justify-center">
+                    <img src="/assets/smart-boarded-service.jpg" alt="touch panel display having mechanic"
+                        class="rounded-lg max-w-sm sm:max-w-md" />
+                </div>
+
+                <!-- Text -->
+                <div class="flex-1 text-xl leading-relaxed max-w-lg">
+                    Auto Care is a smart vehicle service management system
+                    that simplifies service booking and tracking. It helps
+                    customers schedule appointments, view history, and
+                    stay updated with ease.
+                    With Auto Care, vehicle servicing becomes
+                    faster, transparent, and hassle-free.
+                </div>
+
+            </div>
+        </section>
+
+        <!-- achievements -->
+
+        <section>
+            <div class="flex justify-center text-3xl mt-30 text-white">
+                <h2 class="justify-center text-black">Achievements</h2>
+            </div>
+
+            <div class="flex flex-col sm:flex-row p-6 gap-6 ">
+                <div class="flex-1 primary text-white flex flex-col items-center p-4  shadow-2xl">
+                    <div class="text-7xl p-4">
+                        95%
+                    </div>
+                    <div class="invisible">ererr</div>
+                    <div class="invisible">ererr</div>
+
+                    <div class="text-xl p-6 text-center">
+                        Customer Satisfaction Rate, ensuring transparency and hassle-free experiences.
+                    </div>
+                </div>
+                <div class="flex-1 primary text-white flex flex-col items-center p-4  shadow-2xl sm:scale-115">
+                    <div class="text-7xl p-4">
+                        10,000+
+                    </div>
+                    <div class="invisible">ererr</div>
+                    <div class="invisible">ererr</div>
+
+                    <div class="text-xl p-6 text-center">
+                        Vehicles Serviced through the platform with seamless tracking and updates. </div>
+                </div>
+                <div class="flex-1 primary text-white flex flex-col items-center p-4  shadow-2xl">
+                    <div class="text-7xl p-4">
+                        80%
+                    </div>
+                    <div class="invisible">ererr</div>
+                    <div class="invisible">ererr</div>
+
+                    <div class="text-xl p-6 text-center">
+                        Repeat Customers due to trust and transparency
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <section>
+
+            <div class="flex justify-center text-3xl mt-30 text-white">
+                <h2 class="justify-center text-black">Make an Appointment</h2>
+            </div>
+
+            <!-- Appointment Section -->
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-15 p-6">
+                <!-- Oil Change Card -->
+                <div class="primary text-white flex flex-col items-center p-4 shadow-2xl max-w-sm w-full">
+                    <div>
+                        <div class=" text-2xl">Service</div>
+                    </div>
+                    <div class="text-7xl p-4">
+                        <img src="/assets/Oil-Change.webp" class="w-full h-auto max-w-xs sm:max-w-sm"
+                            alt="Oil-Change image" />
+                    </div>
+                    <div class="text-xl p-6 text-center">
+                        Book oil changes, tire checks, and full service packages with ease.
+                    </div>
+
+                    <div class="flex justify-end w-full ">
+                        <button
+                            class="bg-white primary-text p-2 font-bold hover:scale-115 transistion-all duration-300">Book
+                            Now</button>
+                    </div>
+
+                </div>
+                <!-- Repair Card -->
+                <div class="primary text-white flex flex-col items-center p-4 shadow-2xl max-w-sm w-full">
+                    <div>
+                        <div class=" text-2xl">Repair</div>
+                    </div>
+                    <div class="text-7xl p-4">
+                        <img src="/assets/repair.jpg" class="w-full h-auto max-w-xs sm:max-w-sm"
+                            alt="repair image" />
+                    </div>
+                    <div class="text-xl p-6 text-center ">
+                        Fix issues quickly with expert diagnostics and repair.
+                    </div>
+                    <div class="flex justify-end w-full ">
+                        <button
+                            class="bg-white primary-text p-2 font-bold hover:scale-115 transistion-all duration-300">Book
+                            Now</button>
+                    </div>
+                </div>
+            </div>
+    </div>
+    </section>
+
+
+    <section>
+        <div class="flex justify-center text-3xl mt-30 text-white">
+            <h2 class="justify-center text-black">FAQ's</h2>
+        </div>
+
+
+        <div id="faqs" class="flex flex-col gap-6 justify-center items-center transition-all duration-300">
+            <div class="primary text-white p-4 text-xl w-3/4">
+                <div>
+                    + How do I book a service or repair appointment on Auto Care?
+                </div>
+                <div class="bg-gray-500 hidden">
+                    hello guys
+                </div>
+            </div>
+            <div class="primary text-white p-4 text-xl w-3/4">
+                <div>
+                    + Can I track the status of my vehicle service in real time?
+                </div>
+                <div class="hidden bg-gray-500">
+                    hello guys
+                </div>
+            </div>
+            <div class="primary text-white p-4 text-xl w-3/4">
+                <div>
+                    + Does Auto Care keep a history of all my past services and repairs?
+                </div>
+                <div class="hidden bg-gray-500">
+                    hello guys
+                </div>
+            </div>
+            <div class="primary text-white p-4 text-xl w-3/4">
+                <div>
+                    + Can I reschedule or cancel an appointment after booking?
+                </div>
+                <div class="hidden bg-gray-500">
+                    hello guys
+                </div>
+            </div>
+            <div class="primary text-white p-4 text-xl w-3/4">
+                <div>
+                    + Are the prices for services fixed or estimated before booking?
+                </div>
+                <div class="hidden bg-gray-500">
+                    hello guys
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
+
+    </div>
+
+
+
+    <script>
+
+        // menu button variable
+        const menu_btn = document.getElementById('menu-btn');
+        const mobile_menu = document.getElementById('mobile-menu')
+
+        menu_btn.addEventListener('click', () => {
+            // mobile_menu.classList.toggle('hidden')
+            console.log("Cllicked")
+            mobile_menu.classList.toggle('max-h-0');
+            mobile_menu.classList.toggle('max-h-96');
+        });
+
+        // faq part
+        const question_pairs = document.getElementById('faqs').children;
+        
+        for (let index = 0; index < question_pairs.length; index++) {
+
+            question_pairs[index].addEventListener('click', () => {
+
+
+                for (let i = 0; i < question_pairs.length; i++) {
+                    
+                    question_pairs[index].lastElementChild.classList.toggle('hidden')
+                    
+                    if (index != i) {
+                        question_pairs[i].lastElementChild.classList.add('hidden')
+                    }
+                }
+
+            })
+
+        }
+
+        
+
+    </script>
+
+
+</body>
+
+</html>
