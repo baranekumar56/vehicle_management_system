@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en" class="langen">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Service Management - Vehicle Services</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#241358",
+                        "primary-dark": "#1b0e29",
+                        "primary-light": "#452d68",
+                        "primary-lighter": "#6e578d",
+                        "primary-transparent": "rgba(36,19,88,0.1)"
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        ul.suggestion-list {
+            position: absolute;
+            z-index: 60;
+            background: white;
+            border: 1px solid #CBD5E0;
+            border-radius: 0.375rem;
+            max-height: 10rem;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .animate-bounce-in {
+            animation: bounce-in 0.25s ease forwards;
+        }
+
+        @keyframes bounce-in {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Sidebar and Navbar -->
+    <div id="sidebar-root"></div>
+    <div id="navbar-root"></div>
+
+
+    <main
+        class="bg-gray-100 pt-24 sm:pt-6 px-4 sm:px-6 lg:ml-[250px] transition-all duration-300 min-h-screen overflow-y-auto"
+        tabindex="0">
+
+        <!-- Desktop view -->
+        <section id="desktop-content" class="hidden sm:block max-w-7xl mx-auto">
+
+            <!-- Top bar with Add service + batch -->
+            <div class="flex justify-between gap-4 mb-6">
+                <button id="openAddServiceModalBtn"
+                    class="py-3 px-5 bg-primary text-white rounded shadow hover:bg-indigo-900 transition">
+                    Add Service to Vehicle
+                </button>
+                <div class="flex gap-3">
+                    <button id="batchActivateDesktop" disabled
+                        class="bg-green-600 text-white px-4 py-2 rounded shadow disabled:opacity-50 hover:bg-green-700 transition">
+                        Batch Activate
+                    </button>
+                    <button id="batchDeactivateDesktop" disabled
+                        class="bg-red-600 text-white px-4 py-2 rounded shadow disabled:opacity-50 hover:bg-red-700 transition">
+                        Batch Deactivate
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search bar and filter toggle -->
+            <div class="flex flex-wrap items-center gap-2 mb-4 max-w-xl relative">
+                <input type="text" id="searchInputDesktop" placeholder="Search services..."
+                    class="flex-grow border border-gray-300 rounded-l-lg px-3 py-2 text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none" />
+                <button id="searchBtnDesktop" aria-label="Search"
+                    class="bg-primary hover:bg-indigo-900 text-white px-3 rounded-r-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 stroke-current" fill="none"
+                        viewBox="0 0 24 24" stroke-width="2">
+                        <circle cx="11" cy="11" r="7" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                </button>
+
+                <button id="filterBtnDesktop" class="p-2 rounded-md hover:bg-gray-100 absolute right-0 top-0"
+                    aria-label="Toggle filter panel">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2" class="w-5 h-5 text-gray-600">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M6 10h12M9 16h6M11 20h2" />
+                    </svg>
+                </button>
+
+                <!-- Filter panel -->
+                <div id="filterPanelDesktop"
+                    class="hidden absolute top-14 right-0 z-50 bg-white rounded-xl shadow-2xl px-6 py-4 w-[320px] scale-105 animate-bounce-in transition-all duration-300">
+                    <h3 class="text-lg font-semibold mb-4">Filters</h3>
+                    <form id="filterFormDesktop" class="space-y-4">
+                        <div>
+                            <label for="filterDateFromDesktop" class="block mb-1 font-semibold">Date Added From</label>
+                            <input type="date" id="filterDateFromDesktop" name="dateFrom"
+                                class="w-full border rounded px-2 py-1" />
+                        </div>
+                        <div>
+                            <label for="filterDateToDesktop" class="block mb-1 font-semibold">Date Added To</label>
+                            <input type="date" id="filterDateToDesktop" name="dateTo"
+                                class="w-full border rounded px-2 py-1" />
+                        </div>
+                        <div>
+                            <label for="filterPriceOpDesktop" class="block mb-1 font-semibold">Price Op</label>
+                            <select id="filterPriceOpDesktop" name="priceOp" class="w-full border rounded px-2 py-1">
+                                <option value="option">Option</option>
+                                <option value="=">=</option>
+                                <option value="<">&lt;</option>
+                                <option value=">">&gt;</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterPriceDesktop" class="block mb-1 font-semibold">Price</label>
+                            <input type="number" min="0" step="0.01" id="filterPriceDesktop" name="price"
+                                placeholder="Amount" class="w-full border rounded px-2 py-1" />
+                        </div>
+                        <div>
+                            <label for="filterTimeOpDesktop" class="block mb-1 font-semibold">Time Op</label>
+                            <select id="filterTimeOpDesktop" name="timeOp" class="w-full border rounded px-2 py-1">
+                                <option value="option">Option</option>
+                                <option value="=">=</option>
+                                <option value="<">&lt;</option>
+                                <option value=">">&gt;</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterTimeDesktop" class="block mb-1 font-semibold">Time (min)</label>
+                            <input type="number" min="0" id="filterTimeDesktop" name="time" placeholder="Minutes"
+                                class="w-full border rounded px-2 py-1" />
+                        </div>
+                        <div>
+                            <label for="filterFuelDesktop" class="block mb-1 font-semibold">Fuel</label>
+                            <select id="filterFuelDesktop" name="fuel" class="w-full border rounded px-2 py-1">
+                                <option value="All">All</option>
+                                <option value="Petrol">Petrol</option>
+                                <option value="Diesel">Diesel</option>
+                                <option value="EV">EV</option>
+                                <option value="Hybrid">Hybrid</option>
+                                <option value="CNG">CNG</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterTypeDesktop" class="block mb-1 font-semibold">Vehicle Type</label>
+                            <select id="filterTypeDesktop" name="type" class="w-full border rounded px-2 py-1">
+                                <option value="All">All</option>
+                                <option value="two-wheeler">Two-Wheeler</option>
+                                <option value="four-wheeler">Four-Wheeler</option>
+                            </select>
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-primary text-white rounded py-2 hover:bg-indigo-900 transition">
+                            Apply Filter
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Services Table -->
+            <div class="overflow-x-auto rounded border border-gray-300 bg-white shadow-sm">
+                <table class="min-w-[1000px] w-full text-left text-sm border-collapse border border-gray-300">
+                    <thead class="bg-gray-100 text-gray-700">
+                        <tr>
+                            <th class="border border-gray-300 p-2 text-center">
+                                <input type="checkbox" id="selectAllDesktop" aria-label="Select all services" />
+                            </th>
+                            <th class="border border-gray-300 p-2">Brand</th>
+                            <th class="border border-gray-300 p-2">Model</th>
+                            <th class="border border-gray-300 p-2">Fuel</th>
+                            <th class="border border-gray-300 p-2">Type</th>
+                            <th class="border border-gray-300 p-2">Service Name</th>
+                            <th class="border border-gray-300 p-2">Date Added</th>
+                            <th class="border border-gray-300 p-2">Last Date Deactivated</th>
+                            <th class="border border-gray-300 p-2">Price</th>
+                            <th class="border border-gray-300 p-2">Time to Complete (min)</th>
+                            <th class="border border-gray-300 p-2">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="servicesTableBodyDesktop" class="bg-white"></tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Controls Desktop -->
+            <div
+                class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-[1000px] mx-auto px-2 select-none">
+                <button id="prevPageDesktop" disabled aria-label="Previous page"
+                    class="px-3 py-1 bg-white border rounded hover:bg-gray-50 disabled:opacity-50">
+                    Previous
+                </button>
+                <span id="pageInfoDesktop">Page 1 of 1</span>
+                <button id="nextPageDesktop" disabled aria-label="Next page"
+                    class="px-3 py-1 bg-white border rounded hover:bg-gray-50 disabled:opacity-50">
+                    Next
+                </button>
+            </div>
+        </section>
+
+        <!-- Mobile view -->
+        <section class="sm:hidden px-4">
+
+            <!-- Mobile Search Bar -->
+            <div class="mb-4 sticky top-20 z-30 bg-gray-100 p-3 rounded shadow flex flex-col gap-3">
+                <div class="relative w-full flex items-center">
+                    <input type="text" id="searchInputMobile" placeholder="Search services..."
+                        aria-label="Search services"
+                        class="w-full rounded-full px-4 pr-12 shadow-sm outline-none py-3 text-sm" />
+                    <button id="searchBtnMobile" aria-label="Search"
+                        class="absolute right-2 top-3 bg-white rounded-full p-2 shadow hover:bg-gray-100 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <button id="filterBtnMobile" aria-label="Toggle filter mobile"
+                    class="self-end bg-white rounded-full p-2 shadow hover:bg-gray-100 transition w-max">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-600" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18l-7 8v6l-4 2v-8z" />
+                    </svg>
+                </button>
+
+                <!-- Mobile Filter Panel -->
+                <div id="filterPanelMobile"
+                    class="hidden bg-white rounded-xl shadow-2xl px-6 py-4 min-w-full scale-105 animate-bounce-in transition-all duration-300">
+                    <h3 class="text-lg font-semibold mb-4">Filters</h3>
+                    <form id="filterFormMobile" class="space-y-4">
+                        <div>
+                            <label for="filterDateFromMobile" class="block mb-1 font-semibold">Date Added From</label>
+                            <input type="date" id="filterDateFromMobile" name="dateFrom"
+                                class="w-full border rounded px-2 py-1" />
+                        </div>
+                        <div>
+                            <label for="filterDateToMobile" class="block mb-1 font-semibold">Date Added To</label>
+                            <input type="date" id="filterDateToMobile" name="dateTo"
+                                class="w-full border rounded px-2 py-1" />
+                        </div>
+                        <div>
+                            <label for="filterPriceOpMobile" class="block mb-1 font-semibold">Price Op</label>
+                            <select id="filterPriceOpMobile" name="priceOp" class="w-full border rounded px-2 py-1">
+                                <option value="option">Option</option>
+                                <option value="=">=</option>
+                                <option value="<">&lt;</option>
+                                <option value=">">&gt;</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterPriceMobile" class="block mb-1 font-semibold">Price</label>
+                            <input type="number" min="0" step="0.01" id="filterPriceMobile" name="price"
+                                placeholder="Amount" class="w-full border rounded px-2 py-1" />
+                        </div>
+                        <div>
+                            <label for="filterTimeOpMobile" class="block mb-1 font-semibold">Time Op</label>
+                            <select id="filterTimeOpMobile" name="timeOp" class="w-full border rounded px-2 py-1">
+                                <option value="option">Option</option>
+                                <option value="=">=</option>
+                                <option value="<">&lt;</option>
+                                <option value=">">&gt;</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterTimeMobile" class="block mb-1 font-semibold">Time (min)</label>
+                            <input type="number" min="0" id="filterTimeMobile" name="time" placeholder="Minutes"
+                                class="w-full border rounded px-2 py-1" />
+                        </div>
+                        <div>
+                            <label for="filterFuelMobile" class="block mb-1 font-semibold">Fuel</label>
+                            <select id="filterFuelMobile" name="fuel" class="w-full border rounded px-2 py-1">
+                                <option value="All">All</option>
+                                <option value="Petrol">Petrol</option>
+                                <option value="Diesel">Diesel</option>
+                                <option value="EV">EV</option>
+                                <option value="Hybrid">Hybrid</option>
+                                <option value="CNG">CNG</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterTypeMobile" class="block mb-1 font-semibold">Vehicle Type</label>
+                            <select id="filterTypeMobile" name="type" class="w-full border rounded px-2 py-1">
+                                <option value="All">All</option>
+                                <option value="two-wheeler">Two-Wheeler</option>
+                                <option value="four-wheeler">Four-Wheeler</option>
+                            </select>
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-primary text-white rounded py-2 hover:bg-indigo-900 transition">
+                            Apply Filter
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Mobile batch activate/deactivate buttons -->
+            <div class="flex space-x-2 mb-4">
+                <button id="batchActivateMobile" disabled
+                    class="flex-grow bg-green-600 text-white px-4 py-2 rounded shadow disabled:opacity-50 hover:bg-green-700 transition text-sm">
+                    Batch Activate
+                </button>
+                <button id="batchDeactivateMobile" disabled
+                    class="flex-grow bg-red-600 text-white px-4 py-2 rounded shadow disabled:opacity-50 hover:bg-red-700 transition text-sm">
+                    Batch Deactivate
+                </button>
+            </div>
+
+            <!-- Services mobile list -->
+            <div id="servicesListMobile" class="space-y-4"></div>
+
+            <!-- Pagination controls mobile -->
+            <div class="flex justify-between items-center mt-4 text-sm text-gray-600 px-4">
+                <button id="prevPageMobile" disabled aria-label="Previous page"
+                    class="px-3 py-1 bg-white border rounded hover:bg-gray-50 disabled:opacity-50">
+                    Previous
+                </button>
+                <span id="pageInfoMobile">Page 1 of 1</span>
+                <button id="nextPageMobile" disabled aria-label="Next page"
+                    class="px-3 py-1 bg-white border rounded hover:bg-gray-50 disabled:opacity-50">
+                    Next
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Add Service to Vehicle Modal -->
+    <div id="add-service-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
+        <div role="dialog" aria-modal="true" aria-labelledby="addServiceTitle" tabindex="1"
+            class="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative shadow-lg">
+            <button id="closeAddServiceModal" aria-label="Close modal"
+                class="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-3xl font-bold">&times;</button>
+            <h2 id="addServiceTitle" class="text-2xl font-bold mb-6 text-center">Add Service to Vehicle</h2>
+            <form id="addServiceForm" autocomplete="off" class="space-y-4">
+                <div class="relative">
+                    <label for="brandInput" class="font-semibold block mb-1">Brand <span
+                            class="text-red-600">*</span></label>
+                    <input id="brandInput" name="brand" type="text" aria-autocomplete="list"
+                        aria-controls="brandSuggestionList" aria-haspopup="listbox" aria-expanded="false"
+                        class="border border-gray-300 rounded w-full p-2" />
+                    <ul id="brandSuggestionList" class="suggestion-list hidden" role="listbox"></ul>
+                    <p id="brandError" class="text-xs text-red-600 mt-1 hidden">Please choose a valid brand.</p>
+                </div>
+
+                <div>
+                    <label for="modelSelect" class="font-semibold block mb-1">Model <span
+                            class="text-red-600">*</span></label>
+                    <select id="modelSelect" name="model" disabled class="border border-gray-300 rounded w-full p-2">
+                        <option value="">Select brand first</option>
+                    </select>
+                    <p id="modelError" class="text-xs text-red-600 mt-1 hidden">Please select a model.</p>
+                </div>
+
+                <div>
+                    <label for="fuelSelect" class="font-semibold block mb-1">Fuel Type <span
+                            class="text-red-600">*</span></label>
+                    <select id="fuelSelect" name="fuel" disabled class="border border-gray-300 rounded w-full p-2">
+                        <option value="">Select fuel type</option>
+                        <option value="Petrol">Petrol</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="EV">EV</option>
+                        <option value="Hybrid">Hybrid</option>
+                        <option value="CNG">CNG</option>
+                    </select>
+                    <p id="fuelError" class="text-xs text-red-600 mt-1 hidden">Please select fuel type.</p>
+                </div>
+
+                <fieldset class="mb-2">
+                    <legend class="font-semibold mb-1">Vehicle Type <span class="text-red-600">*</span></legend>
+                    <div class="flex gap-6">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="vehicleType" value="two-wheeler" disabled />
+                            <span class="ml-2">Two-Wheelers</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="vehicleType" value="four-wheeler" disabled />
+                            <span class="ml-2">Four-Wheelers</span>
+                        </label>
+                    </div>
+                    <p id="typeError" class="text-xs text-red-600 mt-1 hidden">Please select vehicle type.</p>
+                </fieldset>
+
+                <div class="relative">
+                    <label for="serviceNameInput" class="font-semibold block mb-1">Service Name <span
+                            class="text-red-600">*</span></label>
+                    <input id="serviceNameInput" name="serviceName" type="text" autocomplete="off"
+                        aria-autocomplete="list" aria-controls="serviceSuggestionList" aria-haspopup="listbox"
+                        aria-expanded="false" disabled class="border border-gray-300 rounded w-full p-2" />
+                    <ul id="serviceSuggestionList" class="suggestion-list hidden" role="listbox"></ul>
+                    <p id="serviceError" class="text-xs text-red-600 mt-1 hidden">Please enter a service name.</p>
+                </div>
+
+                <div>
+                    <label for="timeToCompleteInput" class="font-semibold block mb-1">Time to Complete (minutes) <span
+                            class="text-red-600">*</span></label>
+                    <input id="timeToCompleteInput" name="timeToComplete" type="number" min="1" disabled
+                        class="border border-gray-300 rounded w-full p-2" />
+                    <p id="timeError" class="text-xs text-red-600 mt-1 hidden">Please enter valid time.</p>
+                </div>
+
+                <div>
+                    <label for="priceInput" class="font-semibold block mb-1">Price <span
+                            class="text-red-600">*</span></label>
+                    <input id="priceInput" name="price" type="number" min="0" step="0.01" disabled
+                        class="border border-gray-300 rounded w-full p-2" />
+                    <p id="priceError" class="text-xs text-red-600 mt-1 hidden">Please enter valid price.</p>
+                </div>
+
+                <button type="submit" id="addServiceSubmitBtn" disabled
+                    class="w-full bg-primary hover:bg-indigo-900 text-white p-3 rounded font-semibold transition disabled:opacity-50">
+                    Add Service
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" role="alert" aria-live="assertive"
+        class="fixed bottom-6 right-6 bg-green-600 text-white px-5 py-3 rounded opacity-0 pointer-events-none transition-opacity z-50">
+    </div>
+    <script type="module" src="../../../components/components-loader.js"></script>
+
+    <script>
+        let servicesData = [
+            {
+                id: "1",
+                brand: "Toyota",
+                model: "Corolla",
+                fuel: "Petrol",
+                type: "four-wheeler",
+                serviceName: "Oil Change",
+                dateAdded: "2023-01-01T00:00:00Z",
+                lastDateDeactivated: null,
+                price: 49.99,
+                timeToComplete: 30,
+                active: true
+            },
+            {
+                id: "2",
+                brand: "Honda",
+                model: "Civic",
+                fuel: "Diesel",
+                type: "four-wheeler",
+                serviceName: "Brake Inspection",
+                dateAdded: "2023-02-15T00:00:00Z",
+                lastDateDeactivated: null,
+                price: 99.99,
+                timeToComplete: 45,
+                active: false,
+            },
+            {
+                id: "3",
+                brand: "Tesla",
+                model: "Model 3",
+                fuel: "EV",
+                type: "four-wheeler",
+                serviceName: "Battery Check",
+                dateAdded: "2023-03-10T00:00:00Z",
+                lastDateDeactivated: null,
+                price: 0,
+                timeToComplete: 20,
+                active: true,
+            }
+        ];
+
+        const rowsPerPage = 10;
+        let currentPageDesktop = 1;
+        let currentPageMobile = 1;
+
+        // Elements
+        const servicesTableBodyDesktop = document.getElementById("servicesTableBodyDesktop");
+        const selectAllDesktop = document.getElementById("selectAllDesktop");
+        const batchActivateDesktop = document.getElementById("batchActivateDesktop");
+        const batchDeactivateDesktop = document.getElementById("batchDeactivateDesktop");
+        const batchActivateMobile = document.getElementById("batchActivateMobile");
+        const batchDeactivateMobile = document.getElementById("batchDeactivateMobile");
+
+        const prevPageDesktop = document.getElementById("prevPageDesktop");
+        const nextPageDesktop = document.getElementById("nextPageDesktop");
+        const pageInfoDesktop = document.getElementById("pageInfoDesktop");
+        const prevPageMobile = document.getElementById("prevPageMobile");
+        const nextPageMobile = document.getElementById("nextPageMobile");
+        const pageInfoMobile = document.getElementById("pageInfoMobile");
+
+        const servicesListMobile = document.getElementById("servicesListMobile");
+
+        const searchInputDesktop = document.getElementById("searchInputDesktop");
+        const searchBtnDesktop = document.getElementById("searchBtnDesktop");
+        const searchInputMobile = document.getElementById("searchInputMobile");
+        const searchBtnMobile = document.getElementById("searchBtnMobile");
+
+        const filterBtnDesktop = document.getElementById("filterBtnDesktop");
+        const filterPanelDesktop = document.getElementById("filterPanelDesktop");
+        const filterFormDesktop = document.getElementById("filterFormDesktop");
+
+        const filterBtnMobile = document.getElementById("filterBtnMobile");
+        const filterPanelMobile = document.getElementById("filterPanelMobile");
+        const filterFormMobile = document.getElementById("filterFormMobile");
+
+        // Selection Sets
+        let selectedDesktop = new Set();
+        let selectedMobile = new Set();
+
+        // State
+        let currentSearchText = "";
+        let currentFilters = {
+            dateFrom: null,
+            dateTo: null,
+            priceOp: "option",
+            price: null,
+            timeOp: "option",
+            time: null,
+            fuel: "All",
+            type: "All",
+        };
+
+        // Toast element
+        const toastElem = document.getElementById("toast");
+
+        function showToast(msg, duration = 3000) {
+            toastElem.textContent = msg;
+            toastElem.classList.remove("opacity-0", "pointer-events-none");
+            toastElem.classList.add("opacity-100");
+            setTimeout(() => {
+                toastElem.classList.remove("opacity-100");
+                toastElem.classList.add("opacity-0", "pointer-events-none");
+            }, duration);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return "";
+            const d = new Date(dateStr);
+            return d.toLocaleDateString();
+        }
+
+        function serviceMatchesFilters(service, filters) {
+            if (filters.dateFrom && new Date(service.dateAdded) < new Date(filters.dateFrom)) return false;
+            if (filters.dateTo && new Date(service.dateAdded) > new Date(filters.dateTo)) return false;
+            if (filters.priceOp && filters.price !== null && filters.price !== undefined && filters.price !== "" && filters.priceOp !== "option") {
+                const price = parseFloat(service.price);
+                const filterPrice = parseFloat(filters.price);
+                if (filters.priceOp === "=" && price !== filterPrice) return false;
+                if (filters.priceOp === "<" && !(price < filterPrice)) return false;
+                if (filters.priceOp === ">" && !(price > filterPrice)) return false;
+            }
+            if (filters.timeOp && filters.time !== null && filters.time !== undefined && filters.time !== "" && filters.timeOp !== "option") {
+                const time = parseInt(service.timeToComplete, 10);
+                const filterTime = parseInt(filters.time, 10);
+                if (filters.timeOp === "=" && time !== filterTime) return false;
+                if (filters.timeOp === "<" && !(time < filterTime)) return false;
+                if (filters.timeOp === ">" && !(time > filterTime)) return false;
+            }
+            if (filters.fuel !== "All" && service.fuel !== filters.fuel) return false;
+            if (filters.type !== "All" && service.type !== filters.type) return false;
+            return true;
+        }
+
+        function applyFiltersAndSearch(data, searchText, filters) {
+            const s = searchText.toLowerCase();
+            return data.filter(service => {
+                if (!serviceMatchesFilters(service, filters)) return false;
+                if (
+                    service.brand.toLowerCase().includes(s) ||
+                    service.model.toLowerCase().includes(s) ||
+                    service.serviceName.toLowerCase().includes(s)
+                ) return true;
+                return false;
+            });
+        }
+
+        function updatePaginationControls(totalItems, currentPage, prevBtn, nextBtn, pageInfo) {
+            const totalPages = Math.ceil(totalItems / rowsPerPage);
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= totalPages || totalPages === 0;
+            pageInfo.textContent = `Page ${Math.min(Math.max(currentPage, 1), totalPages || 1)} of ${totalPages || 1}`;
+        }
+
+        function renderDesktopTable(data, page, rows) {
+            const tbody = servicesTableBodyDesktop;
+            tbody.innerHTML = "";
+            const start = (page - 1) * rows;
+            const end = start + rows;
+            const chunk = data.slice(start, end);
+
+            chunk.forEach(service => {
+                const isChecked = selectedDesktop.has(service.id);
+                const deactivateButtonClass = service.active ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700";
+                const deactivateButtonText = service.active ? "Deactivate" : "Activate";
+                const tr = document.createElement("tr");
+                tr.className = "border-b border-gray-200";
+
+                tr.innerHTML = `
+      <td class="border border-gray-300 p-2 text-center">
+        <input type="checkbox" data-id="${service.id}" ${isChecked ? "checked" : ""} class="select-service-desktop" aria-label="Select service ${service.serviceName}" />
+      </td>
+      <td class="border border-gray-300 p-2">${service.brand}</td>
+      <td class="border border-gray-300 p-2">${service.model}</td>
+      <td class="border border-gray-300 p-2">${service.fuel}</td>
+      <td class="border border-gray-300 p-2">${service.type}</td>
+      <td class="border border-gray-300 p-2">${service.serviceName}</td>
+      <td class="border border-gray-300 p-2">${formatDate(service.dateAdded)}</td>
+      <td class="border border-gray-300 p-2">${formatDate(service.lastDateDeactivated)}</td>
+      <td class="border border-gray-300 p-2">
+        <span class="price-text">${service.price.toFixed(2)}</span>
+        <input type="number" min="0" step="0.01" class="edit-price-input hidden border rounded px-1 py-0.5 w-20" value="${service.price.toFixed(2)}" />
+      </td>
+      <td class="border border-gray-300 p-2">
+        <span class="time-text">${service.timeToComplete}</span>
+        <input type="number" min="0" class="edit-time-input hidden border rounded px-1 py-0.5 w-16" value="${service.timeToComplete}" />
+      </td>
+      <td class="border border-gray-300 p-2 flex items-center gap-2 justify-center whitespace-nowrap">
+        <button class="edit-btn px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs focus:outline-none" data-id="${service.id}">
+          Edit
+        </button>
+        <button class="deactivate-btn px-3 py-1 text-white rounded ${deactivateButtonClass} hover:brightness-110 text-xs focus:outline-none" data-id="${service.id}">
+  ${deactivateButtonText}
+</button>
+      </td>
+    `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderMobileList(data, page, rows) {
+            const list = servicesListMobile;
+            list.innerHTML = "";
+            const start = (page - 1) * rows;
+            const end = start + rows;
+            const chunk = data.slice(start, end);
+
+            chunk.forEach(service => {
+                const isChecked = selectedMobile.has(service.id);
+                const div = document.createElement("div");
+                div.className = "bg-white rounded-lg shadow p-4";
+                div.innerHTML = `
+      <div class="flex items-center space-x-3 mb-2">
+        <input type="checkbox" data-id="${service.id}" ${isChecked ? "checked" : ""} class="select-service-mobile" aria-label="Select service ${service.serviceName}" />
+        <h3 class="font-semibold">${service.serviceName}</h3>
+      </div>
+      <div class="text-sm text-gray-600 space-y-1">
+        <div><strong>Brand:</strong> ${service.brand}</div>
+        <div><strong>Model:</strong> ${service.model}</div>
+        <div><strong>Fuel:</strong> ${service.fuel}</div>
+        <div><strong>Type:</strong> ${service.type}</div>
+        <div><strong>Date Added:</strong> ${formatDate(service.dateAdded)}</div>
+        <div><strong>Last Date Deactivated:</strong> ${formatDate(service.lastDateDeactivated)}</div>
+        <div><strong>Price:</strong> ${service.price.toFixed(2)}</div>
+        <div><strong>Time to Complete:</strong> ${service.timeToComplete} mins</div>
+      </div>
+    `;
+                list.appendChild(div);
+            });
+        }
+
+        function renderCurrentPage() {
+            const totalItems = filteredData.length;
+            const totalPages = Math.ceil(totalItems / rowsPerPage);
+
+            if (currentPageDesktop > totalPages) currentPageDesktop = totalPages || 1;
+            if (currentPageDesktop < 1) currentPageDesktop = 1;
+            if (currentPageMobile > totalPages) currentPageMobile = totalPages || 1;
+            if (currentPageMobile < 1) currentPageMobile = 1;
+
+            renderDesktopTable(filteredData, currentPageDesktop, rowsPerPage);
+            updatePaginationControls(totalItems, currentPageDesktop, prevPageDesktop, nextPageDesktop, pageInfoDesktop);
+            renderMobileList(filteredData, currentPageMobile, rowsPerPage);
+            updatePaginationControls(totalItems, currentPageMobile, prevPageMobile, nextPageMobile, pageInfoMobile);
+
+            updateSelectAllCheckbox();
+            updateBatchButtonsState();
+        }
+
+        // Initialize filtered data
+        let filteredData = [];
+
+        // Helper: debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // Update batch buttons enabled state
+        function updateBatchButtonsState() {
+            batchActivateDesktop.disabled = selectedDesktop.size === 0;
+            batchDeactivateDesktop.disabled = selectedDesktop.size === 0;
+            batchActivateMobile.disabled = selectedMobile.size === 0;
+            batchDeactivateMobile.disabled = selectedMobile.size === 0;
+        }
+
+        // Update "select all" checkbox
+        function updateSelectAllCheckbox() {
+            const checkboxes = document.querySelectorAll(".select-service-desktop");
+            const checkedCount = [...checkboxes].filter(cb => cb.checked).length;
+            selectAllDesktop.checked = checkedCount === checkboxes.length && checkboxes.length > 0;
+        }
+
+        // Apply filters & search, then render
+        function applyFiltersAndRender() {
+            filteredData = applyFiltersAndSearch(servicesData, currentSearchText, currentFilters);
+            selectedDesktop.forEach(id => {
+                if (!filteredData.find(s => s.id === id)) selectedDesktop.delete(id);
+            });
+            selectedMobile.forEach(id => {
+                if (!filteredData.find(s => s.id === id)) selectedMobile.delete(id);
+            });
+            renderCurrentPage();
+        }
+
+        // Event listeners...
+
+        // Filter panel toggle
+        filterBtnDesktop.addEventListener("click", () => {
+            filterPanelDesktop.classList.toggle("hidden");
+        });
+        filterBtnMobile.addEventListener("click", () => {
+            filterPanelMobile.classList.toggle("hidden");
+        });
+
+        // Filter forms submit
+        filterFormDesktop.addEventListener("submit", e => {
+            e.preventDefault();
+            const formData = new FormData(filterFormDesktop);
+            currentFilters = {
+                dateFrom: formData.get("dateFrom") || null,
+                dateTo: formData.get("dateTo") || null,
+                priceOp: formData.get("priceOp") || "option",
+                price: formData.get("price") || null,
+                timeOp: formData.get("timeOp") || "option",
+                time: formData.get("time") || null,
+                fuel: formData.get("fuel") || "All",
+                type: formData.get("type") || "All",
+            };
+            filterPanelDesktop.classList.add("hidden");
+            currentPageDesktop = 1;
+            currentPageMobile = 1;
+            applyFiltersAndRender();
+        });
+
+        filterFormMobile.addEventListener("submit", e => {
+            e.preventDefault();
+            const formData = new FormData(filterFormMobile);
+            currentFilters = {
+                dateFrom: formData.get("dateFrom") || null,
+                dateTo: formData.get("dateTo") || null,
+                priceOp: formData.get("priceOp") || "option",
+                price: formData.get("price") || null,
+                timeOp: formData.get("timeOp") || "option",
+                time: formData.get("time") || null,
+                fuel: formData.get("fuel") || "All",
+                type: formData.get("type") || "All",
+            };
+            filterPanelMobile.classList.add("hidden");
+            currentPageDesktop = 1;
+            currentPageMobile = 1;
+            applyFiltersAndRender();
+        });
+
+        // Search inputs and buttons
+        searchBtnDesktop.addEventListener("click", () => {
+            currentSearchText = searchInputDesktop.value.trim();
+            currentPageDesktop = 1;
+            currentPageMobile = 1;
+            applyFiltersAndRender();
+        });
+        searchBtnMobile.addEventListener("click", () => {
+            currentSearchText = searchInputMobile.value.trim();
+            currentPageDesktop = 1;
+            currentPageMobile = 1;
+            applyFiltersAndRender();
+        });
+
+        searchInputDesktop.addEventListener("input", debounce(e => {
+            currentSearchText = e.target.value.trim();
+            currentPageDesktop = 1;
+            currentPageMobile = 1;
+            searchInputMobile.value = currentSearchText;
+            applyFiltersAndRender();
+        }, 300));
+
+        searchInputMobile.addEventListener("input", debounce(e => {
+            currentSearchText = e.target.value.trim();
+            currentPageDesktop = 1;
+            currentPageMobile = 1;
+            searchInputDesktop.value = currentSearchText;
+            applyFiltersAndRender();
+        }, 300));
+
+        // Pagination buttons
+        prevPageDesktop.addEventListener("click", () => {
+            if (currentPageDesktop > 1) {
+                currentPageDesktop--;
+                renderCurrentPage();
+            }
+        });
+        nextPageDesktop.addEventListener("click", () => {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            if (currentPageDesktop < totalPages) {
+                currentPageDesktop++;
+                renderCurrentPage();
+            }
+        });
+
+        prevPageMobile.addEventListener("click", () => {
+            if (currentPageMobile > 1) {
+                currentPageMobile--;
+                renderCurrentPage();
+            }
+        });
+        nextPageMobile.addEventListener("click", () => {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            if (currentPageMobile < totalPages) {
+                currentPageMobile++;
+                renderCurrentPage();
+            }
+        });
+
+        // Select all desktop checkbox
+        selectAllDesktop.addEventListener("change", e => {
+            const checked = e.target.checked;
+            const checkboxes = document.querySelectorAll(".select-service-desktop");
+            checkboxes.forEach(cb => {
+                cb.checked = checked;
+                const id = cb.getAttribute("data-id");
+                if (checked) selectedDesktop.add(id);
+                else selectedDesktop.delete(id);
+            });
+            updateBatchButtonsState();
+        });
+
+        // Event delegation for desktop service checkbox
+        servicesTableBodyDesktop.addEventListener("change", e => {
+            if (e.target.classList.contains("select-service-desktop")) {
+                const id = e.target.getAttribute("data-id");
+                if (e.target.checked) selectedDesktop.add(id);
+                else selectedDesktop.delete(id);
+                updateBatchButtonsState();
+                updateSelectAllCheckbox();
+            }
+        });
+
+        // Event delegation for mobile service checkbox
+        servicesListMobile.addEventListener("change", e => {
+            if (e.target.classList.contains("select-service-mobile")) {
+                const id = e.target.getAttribute("data-id");
+                if (e.target.checked) selectedMobile.add(id);
+                else selectedMobile.delete(id);
+                updateBatchButtonsState();
+            }
+        });
+
+        // Batch activate/deactivate
+        batchActivateDesktop.addEventListener("click", () => {
+            batchUpdateStatus(selectedDesktop, true);
+        });
+        batchDeactivateDesktop.addEventListener("click", () => {
+            batchUpdateStatus(selectedDesktop, false);
+        });
+        batchActivateMobile.addEventListener("click", () => {
+            batchUpdateStatus(selectedMobile, true);
+        });
+        batchDeactivateMobile.addEventListener("click", () => {
+            batchUpdateStatus(selectedMobile, false);
+        });
+
+        function batchUpdateStatus(selectedSet, activate) {
+            if (selectedSet.size === 0) return;
+            let count = 0;
+            servicesData.forEach(service => {
+                if (selectedSet.has(service.id)) {
+                    service.active = activate;
+                    if (!activate) service.lastDateDeactivated = new Date().toISOString();
+                    count++;
+                }
+            });
+            showToast(`${count} service${count !== 1 ? "s" : ""} ${activate ? "activated" : "deactivated"}.`);
+            selectedSet.clear();
+            currentPageDesktop = 1;
+            currentPageMobile = 1;
+            applyFiltersAndRender();
+            updateBatchButtonsState();
+            if (selectedSet === selectedDesktop) selectAllDesktop.checked = false;
+        }
+
+        // Event delegation for edit/save/deactivate buttons desktop
+        servicesTableBodyDesktop.addEventListener("click", function (e) {
+            const target = e.target;
+            if (target.classList.contains("edit-btn")) {
+                const tr = target.closest("tr");
+                const id = target.getAttribute("data-id");
+                const service = servicesData.find(s => s.id === id);
+                if (!service) return;
+
+                let editing = target.textContent.trim().toLowerCase() === "edit";
+                const priceInput = tr.querySelector(".edit-price-input");
+                const timeInput = tr.querySelector(".edit-time-input");
+                const priceText = tr.querySelector(".price-text");
+                const timeText = tr.querySelector(".time-text");
+
+                if (editing) {
+                    target.textContent = "Save";
+                    priceInput.classList.remove("hidden");
+                    timeInput.classList.remove("hidden");
+                    priceText.classList.add("hidden");
+                    timeText.classList.add("hidden");
+                } else {
+                    const newPrice = parseFloat(priceInput.value);
+                    const newTime = parseInt(timeInput.value);
+                    if (isNaN(newPrice) || newPrice < 0) {
+                        alert("Please enter a valid price (>=0).");
+                        return;
+                    }
+                    if (isNaN(newTime) || newTime <= 0) {
+                        alert("Please enter a valid time (>0).");
+                        return;
+                    }
+
+                    service.price = newPrice;
+                    service.timeToComplete = newTime;
+
+                    priceText.textContent = newPrice.toFixed(2);
+                    timeText.textContent = newTime;
+
+                    priceInput.classList.add("hidden");
+                    timeInput.classList.add("hidden");
+                    priceText.classList.remove("hidden");
+                    timeText.classList.remove("hidden");
+
+                    target.textContent = "Edit";
+
+                    showToast(`Service "${service.serviceName}" updated successfully!`);
+                }
+            }
+
+            if (target.classList.contains("deactivate-btn")) {
+                const id = target.getAttribute("data-id");
+                const service = servicesData.find(s => s.id === id);
+                if (service) {
+                    service.active = !service.active;
+                    if (!service.active) {
+                        service.lastDateDeactivated = new Date().toISOString();
+                        target.textContent = "Activate";
+                        target.classList.remove("bg-red-600", "hover:bg-red-700");
+                        target.classList.add("bg-green-600", "hover:bg-green-700");
+                        showToast(`Service "${service.serviceName}" deactivated successfully!`);
+                    } else {
+                        service.lastDateDeactivated = null;
+                        target.textContent = "Deactivate";
+                        target.classList.remove("bg-green-600", "hover:bg-green-700");
+                        target.classList.add("bg-red-600", "hover:bg-red-700");
+                        showToast(`Service "${service.serviceName}" activated successfully!`);
+                    }
+                    applyFiltersAndRender();
+                }
+            }
+        });
+
+        // Initialization
+        applyFiltersAndRender();
+
+        // form for adding service to vehicle
+        const addServiceModal = document.getElementById("add-service-modal");
+        const openAddServiceModalBtn = document.getElementById("openAddServiceModalBtn");
+        const closeAddServiceModalBtn = document.getElementById("closeAddServiceModal");
+        const addServiceForm = document.getElementById("addServiceForm");
+
+        const brandInput = document.getElementById("brandInput");
+        const brandSuggestionList = document.getElementById("brandSuggestionList");
+        const modelSelect = document.getElementById("modelSelect");
+        const fuelSelect = document.getElementById("fuelSelect");
+        const serviceNameInput = document.getElementById("serviceNameInput");
+        const serviceSuggestionList = document.getElementById("serviceSuggestionList");
+        const timeToCompleteInput = document.getElementById("timeToCompleteInput");
+        const priceInput = document.getElementById("priceInput");
+        const addServiceSubmitBtn = document.getElementById("addServiceSubmitBtn");
+
+        const brandError = document.getElementById("brandError");
+        const modelError = document.getElementById("modelError");
+        const fuelError = document.getElementById("fuelError");
+        const typeError = document.getElementById("typeError");
+        const serviceError = document.getElementById("serviceError");
+        const timeError = document.getElementById("timeError");
+        const priceError = document.getElementById("priceError");
+
+        // Example brand-model data for autocomplete
+        const brandModels = {
+            Toyota: ['Corolla', 'Camry', 'RAV4', 'Highlander'],
+            Honda: ['Civic', 'Accord', 'CR-V', 'Pilot'],
+            Tesla: ['Model S', 'Model 3', 'Model X', 'Model Y'],
+            Ford: ['F-150', 'Mustang', 'Escape', 'Explorer']
+        };
+
+        // Example services list for service name autocomplete
+        const servicesList = [
+            "Oil Change",
+            "Tire Rotation",
+            "Brake Inspection",
+            "Battery Check",
+            "Wheel Alignment",
+            "Air Filter Replacement"
+        ];
+
+        // Open modal
+        openAddServiceModalBtn.addEventListener("click", () => {
+            addServiceModal.classList.remove("hidden");
+            brandInput.focus();
+
+            resetAddServiceForm();
+        });
+
+        // Close modal
+        closeAddServiceModalBtn.addEventListener("click", () => {
+            addServiceModal.classList.add("hidden");
+            resetAddServiceForm();
+        });
+
+        // Reset modal form and errors
+        function resetAddServiceForm() {
+            addServiceForm.reset();
+            modelSelect.innerHTML = '<option value="">Select brand first</option>';
+            modelSelect.disabled = true;
+            fuelSelect.value = "";
+            fuelSelect.disabled = true;
+            serviceNameInput.value = "";
+            serviceNameInput.disabled = true;
+            timeToCompleteInput.value = "";
+            timeToCompleteInput.disabled = true;
+            priceInput.value = "";
+            priceInput.disabled = true;
+            addServiceSubmitBtn.disabled = true;
+
+            hideAllErrors();
+            brandSuggestionList.innerHTML = "";
+            brandSuggestionList.classList.add("hidden");
+            serviceSuggestionList.innerHTML = "";
+            serviceSuggestionList.classList.add("hidden");
+
+            const radios = addServiceForm.querySelectorAll('input[name="vehicleType"]');
+            radios.forEach(r => (r.disabled = true));
+        }
+
+        // Hide all error messages
+        function hideAllErrors() {
+            [
+                brandError,
+                modelError,
+                fuelError,
+                typeError,
+                serviceError,
+                timeError,
+                priceError
+            ].forEach(el => el.classList.add("hidden"));
+        }
+
+        // Brand input autocomplete logic
+        brandInput.addEventListener("input", e => {
+            const value = e.target.value.toLowerCase().trim();
+            if (!value) {
+                brandSuggestionList.classList.add("hidden");
+                brandSuggestionList.innerHTML = "";
+                modelSelect.disabled = true;
+                fuelSelect.disabled = true;
+                serviceNameInput.disabled = true;
+                timeToCompleteInput.disabled = true;
+                priceInput.disabled = true;
+                addServiceForm.querySelectorAll('input[name="vehicleType"]').forEach(r => (r.disabled = true));
+                return;
+            }
+            const matches = Object.keys(brandModels).filter(b => b.toLowerCase().includes(value));
+            if (matches.length === 0) {
+                brandSuggestionList.innerHTML = "<li>No matches</li>";
+                brandSuggestionList.classList.remove("hidden");
+                modelSelect.disabled = true;
+                fuelSelect.disabled = true;
+                serviceNameInput.disabled = true;
+                timeToCompleteInput.disabled = true;
+                priceInput.disabled = true;
+                addServiceForm.querySelectorAll('input[name="vehicleType"]').forEach(r => (r.disabled = true));
+            } else {
+                brandSuggestionList.innerHTML = matches.map(b => `<li tabindex="0" role="option" class="px-2 py-1 cursor-pointer hover:bg-gray-100">${b}</li>`).join("");
+                brandSuggestionList.classList.remove("hidden");
+            }
+        });
+
+        // Brand suggestion click select
+        brandSuggestionList.addEventListener("click", e => {
+            if (e.target.tagName.toLowerCase() === "li") {
+                const brand = e.target.textContent;
+                brandInput.value = brand;
+                brandSuggestionList.classList.add("hidden");
+                populateModels(brand);
+
+                fuelSelect.disabled = false;
+                serviceNameInput.disabled = false;
+                timeToCompleteInput.disabled = false;
+                priceInput.disabled = false;
+                addServiceForm.querySelectorAll('input[name="vehicleType"]').forEach(r => (r.disabled = false));
+                validateAddServiceForm();
+            }
+        });
+
+        // Keyboard select brand suggestion
+        brandSuggestionList.addEventListener("keydown", e => {
+            if (e.key === "Enter" && e.target.tagName.toLowerCase() === "li") {
+                e.preventDefault();
+                e.target.click();
+            }
+        });
+
+        // Delay hide of brand suggestions on blur
+        brandInput.addEventListener("blur", () => {
+            setTimeout(() => brandSuggestionList.classList.add("hidden"), 150);
+        });
+
+        // Populate model dropdown for the brand
+        function populateModels(brand) {
+            const models = brandModels[brand] || [];
+            modelSelect.innerHTML = models.length > 0 ? models.map(m => `<option value="${m}">${m}</option>`).join("") : '<option value="">No models found</option>';
+            modelSelect.disabled = models.length === 0;
+        }
+
+        // Service name autocomplete input
+        serviceNameInput.addEventListener("input", e => {
+            const value = e.target.value.toLowerCase().trim();
+            if (!value) {
+                serviceSuggestionList.classList.add("hidden");
+                serviceSuggestionList.innerHTML = "";
+                return;
+            }
+            const matches = servicesList.filter(s => s.toLowerCase().includes(value));
+            if (matches.length === 0) {
+                serviceSuggestionList.innerHTML = "<li>No matches</li>";
+                serviceSuggestionList.classList.remove("hidden");
+            } else {
+                serviceSuggestionList.innerHTML = matches.map(s => `<li tabindex="0" role="option" class="px-2 py-1 cursor-pointer hover:bg-gray-100">${s}</li>`).join("");
+                serviceSuggestionList.classList.remove("hidden");
+            }
+        });
+
+        // Service suggestion click select
+        serviceSuggestionList.addEventListener("click", e => {
+            if (e.target.tagName.toLowerCase() === "li") {
+                serviceNameInput.value = e.target.textContent;
+                serviceSuggestionList.classList.add("hidden");
+                validateAddServiceForm();
+            }
+        });
+
+        // Keyboard select service suggestion
+        serviceSuggestionList.addEventListener("keydown", e => {
+            if (e.key === "Enter" && e.target.tagName.toLowerCase() === "li") {
+                e.preventDefault();
+                e.target.click();
+            }
+        });
+
+        // Delay hide of service suggestions on blur
+        serviceNameInput.addEventListener("blur", () => {
+            setTimeout(() => serviceSuggestionList.classList.add("hidden"), 150);
+        });
+
+        // Add service form input validation and enable add button
+        function validateAddServiceForm() {
+            const validBrand = brandInput.value.trim() && Object.keys(brandModels).includes(brandInput.value.trim());
+            const validModel = modelSelect.value.trim() !== "";
+            const validFuel = fuelSelect.value.trim() !== "";
+            const radios = addServiceForm.querySelectorAll('input[name="vehicleType"]');
+            const validType = Array.from(radios).some(r => r.checked);
+            const validService = serviceNameInput.value.trim() !== "";
+            const validTime = parseInt(timeToCompleteInput.value, 10) > 0;
+            const validPrice = parseFloat(priceInput.value) >= 0 && priceInput.value !== "";
+
+            addServiceSubmitBtn.disabled = !(validBrand && validModel && validFuel && validType && validService && validTime && validPrice);
+        }
+
+        [
+            brandInput,
+            modelSelect,
+            fuelSelect,
+            serviceNameInput,
+            timeToCompleteInput,
+            priceInput
+        ].forEach(el => el.addEventListener("input", validateAddServiceForm));
+
+        addServiceForm.querySelectorAll('input[name="vehicleType"]').forEach(r => r.addEventListener("change", validateAddServiceForm));
+
+        // Add service form submission handler
+        addServiceForm.addEventListener("submit", e => {
+            e.preventDefault();
+            hideAllErrors();
+            let hasError = false;
+
+            if (!brandInput.value.trim() || !Object.keys(brandModels).includes(brandInput.value.trim())) {
+                brandError.classList.remove("hidden");
+                hasError = true;
+            }
+            if (!modelSelect.value.trim()) {
+                modelError.classList.remove("hidden");
+                hasError = true;
+            }
+            if (!fuelSelect.value.trim()) {
+                fuelError.classList.remove("hidden");
+                hasError = true;
+            }
+            if (![...addServiceForm.querySelectorAll('input[name="vehicleType"]')].some(r => r.checked)) {
+                typeError.classList.remove("hidden");
+                hasError = true;
+            }
+            if (!serviceNameInput.value.trim()) {
+                serviceError.classList.remove("hidden");
+                hasError = true;
+            }
+            if (!timeToCompleteInput.value || parseInt(timeToCompleteInput.value) <= 0) {
+                timeError.classList.remove("hidden");
+                hasError = true;
+            }
+            if (!priceInput.value || parseFloat(priceInput.value) < 0) {
+                priceError.classList.remove("hidden");
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            const vehicleType = [...addServiceForm.querySelectorAll('input[name="vehicleType"]')].find(r => r.checked).value;
+
+            const newService = {
+                id: crypto.randomUUID(),
+                brand: brandInput.value.trim(),
+                model: modelSelect.value.trim(),
+                fuel: fuelSelect.value,
+                type: vehicleType,
+                serviceName: serviceNameInput.value.trim(),
+                dateAdded: new Date().toISOString(),
+                lastDateDeactivated: null,
+                price: parseFloat(priceInput.value),
+                timeToComplete: parseInt(timeToCompleteInput.value, 10),
+                active: true
+            };
+
+            servicesData.push(newService);
+            showToast("Service added successfully!");
+
+            addServiceModal.classList.add("hidden");
+            resetAddServiceForm();
+
+            // Reset search and filters to show new entry
+            currentPageDesktop = 1;
+            currentPageMobile = 1;
+            currentSearchText = "";
+            searchInputDesktop.value = "";
+            searchInputMobile.value = "";
+            filterFormDesktop.reset();
+            filterFormMobile.reset();
+            currentFilters = {
+                dateFrom: null,
+                dateTo: null,
+                priceOp: "option",
+                price: null,
+                timeOp: "option",
+                time: null,
+                fuel: "All",
+                type: "All",
+            };
+
+            applyFiltersAndRender();
+        });
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Garage Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#241358",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    /* Inherit styles from issues.html similar design elements */
+    /* Modal backdrop */
+    .modal-bg {
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+
+  <!-- Navbar & Sidebar placeholders (if needed) -->
+  <div id="sidebar-root"></div>
+  <div id="navbar-root"></div>
+
+  <main class="pt-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+
+    <!-- Garage Management Title -->
+    <h1 class="text-3xl font-bold text-primary mb-6">Garage Management</h1>
+
+    <!-- Sheds Section -->
+    <section aria-label="Shed Management" class="mb-10">
+
+      <h2 class="text-xl font-semibold mb-4">Shed Status</h2>
+
+      <div class="space-y-6">
+
+        <!-- Shed List -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white shadow rounded-lg p-4 flex flex-col">
+            <h3 class="font-semibold mb-2">Shed 1</h3>
+            <p class="mb-3">Vehicle: Toyota Corolla</p>
+            <button class="text-primary font-semibold underline hover:text-primary/80 focus:outline-none" data-view-shed="1">View</button>
+            <button class="mt-2 bg-primary text-white px-3 py-1 rounded hover:bg-primary/90 focus:outline-none" data-update-shed="1">Update Sheds</button>
+            <div class="mt-3 hidden update-counter flex items-center space-x-3">
+              <button aria-label="Decrement" class="btn-decrement bg-gray-200 rounded px-2 py-1 hover:bg-gray-300">-</button>
+              <span class="counter-value font-medium text-lg">0</span>
+              <button aria-label="Increment" class="btn-increment bg-gray-200 rounded px-2 py-1 hover:bg-gray-300">+</button>
+            </div>
+            <button class="mt-3 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 focus:outline-none hidden update-status-btn">Update Status</button>
+          </div>
+
+          <div class="bg-white shadow rounded-lg p-4 flex flex-col">
+            <h3 class="font-semibold mb-2">Shed 2</h3>
+            <p class="mb-3">Vehicle: Honda Civic</p>
+            <button class="text-primary font-semibold underline hover:text-primary/80 focus:outline-none" data-view-shed="2">View</button>
+            <button class="mt-2 bg-primary text-white px-3 py-1 rounded hover:bg-primary/90 focus:outline-none" data-update-shed="2">Update Sheds</button>
+            <div class="mt-3 hidden update-counter flex items-center space-x-3">
+              <button aria-label="Decrement" class="btn-decrement bg-gray-200 rounded px-2 py-1 hover:bg-gray-300">-</button>
+              <span class="counter-value font-medium text-lg">0</span>
+              <button aria-label="Increment" class="btn-increment bg-gray-200 rounded px-2 py-1 hover:bg-gray-300">+</button>
+            </div>
+            <button class="mt-3 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 focus:outline-none hidden update-status-btn">Update Status</button>
+          </div>
+
+          <!-- Static Bottom Shed -->
+          <div aria-label="Bottom Shed Status" class="bg-white shadow rounded-lg p-4 flex flex-col">
+            <h3 class="font-semibold mb-4">Bottom Shed Status</h3>
+            <!-- Vehicle SVG Icon -->
+            <div class="flex justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-2m0 0l7-7 4 4 2 2m-9-2v8m0 0H7a2 2 0 01-2-2v-1m10-5l2 2m0 0l3 3-2 2-3-3z" />
+              </svg>
+            </div>
+            <p class="text-center font-semibold">Vehicle being serviced:</p>
+            <p class="text-center text-sm text-gray-600 mt-1">Ford Mustang GT - License #123XYZ</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Auto Schedule Toggle -->
+    <section class="mb-10 flex items-center space-x-3">
+      <label for="auto-schedule-toggle" class="font-semibold text-gray-800">Auto Schedule</label>
+      <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+        <input type="checkbox" name="toggle" id="auto-schedule-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 cursor-pointer appearance-none checked:border-primary checked:bg-primary" />
+        <label for="auto-schedule-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+      </div>
+    </section>
+
+    <!-- Schedule Button -->
+    <section class="mb-10">
+      <button id="schedule-btn" class="bg-primary text-white px-6 py-2 rounded hover:bg-primary/90 focus:outline-none">Schedule</button>
+    </section>
+
+  </main>
+
+  <!-- View Shed Modal -->
+  <div id="shed-view-modal" class="fixed inset-0 z-50 hidden modal-bg flex justify-center items-center p-4">
+    <div class="bg-white rounded shadow-lg max-w-md w-full max-h-[90vh] flex flex-col overflow-hidden relative">
+      <button id="view-modal-close" aria-label="Close" class="absolute top-3 right-3 text-gray-600 hover:text-gray-900 focus:outline-none z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <div id="view-modal-content" class="p-6 overflow-auto flex-grow space-y-4 text-gray-800">
+        <!-- Content is generated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Schedule Modal -->
+  <div id="schedule-modal" class="fixed inset-0 z-50 hidden modal-bg flex justify-center items-center p-4">
+    <div class="bg-white rounded shadow-lg max-w-7xl w-full max-h-[90vh] flex flex-col overflow-hidden relative">
+      <button id="schedule-modal-close" aria-label="Close" class="absolute top-3 right-3 text-gray-600 hover:text-gray-900 focus:outline-none z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <div class="flex flex-1 overflow-hidden h-[80vh]">
+        <!-- Left Panel: Vehicles to schedule -->
+        <section class="w-2/5 bg-gray-100 p-4 overflow-auto border-r border-gray-300">
+          <h3 class="font-semibold mb-4 text-primary">Vehicles to Schedule</h3>
+          <div id="vehicles-panel" class="space-y-4">
+            <!-- Vehicles dynamically generated here -->
+          </div>
+        </section>
+
+        <!-- Center Panel: Selected vehicle and assigned mechanics -->
+        <section class="w-3/5 flex flex-col p-4 overflow-auto">
+          <h3 class="font-semibold mb-4 text-primary">Scheduled Vehicle & Mechanics</h3>
+          <div id="selected-vehicle" class="mb-6">
+            <!-- Selected vehicle card appears here -->
+            <p class="text-gray-500">Select a vehicle from the left panel</p>
+          </div>
+          <h4 class="font-semibold mb-2">Assigned Mechanics</h4>
+          <div id="assigned-mechanics" class="space-y-4">
+            <!-- Assigned mechanics cards appear here -->
+          </div>
+        </section>
+
+        <!-- Right Panel: Mechanics list -->
+        <section class="w-2/5 bg-gray-100 p-4 overflow-auto border-l border-gray-300">
+          <h3 class="font-semibold mb-4 text-primary">Mechanics</h3>
+          <div id="mechanics-panel" class="space-y-4">
+            <!-- Mechanics dynamically generated here -->
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Shed data
+    const sheds = {
+      1: {
+        id: 1,
+        vehicle: "Toyota Corolla",
+        info: "Toyota Corolla - Service due date: 2025-12-15, Last serviced: 2025-06-10",
+        count: 0,
+      },
+      2: {
+        id: 2,
+        vehicle: "Honda Civic",
+        info: "Honda Civic - Service due date: 2025-11-20, Last serviced: 2025-05-29",
+        count: 0,
+      }
+    };
+
+    // Mechanics data (basic static list)
+    const mechanics = [
+      { id: 1, name: "John Doe", specialty: "Engine Specialist" },
+      { id: 2, name: "Jane Smith", specialty: "Transmission Expert" },
+      { id: 3, name: "Carlos Reyes", specialty: "Electrical Systems" }
+    ];
+
+    // Vehicles for scheduling (unique vehicles)
+    let vehiclesToSchedule = [
+      { id: 101, model: "Ford Mustang GT", license: "123XYZ" },
+      { id: 102, model: "Chevrolet Camaro", license: "567ABC" },
+      { id: 103, model: "Tesla Model 3", license: "TESLA3" },
+    ];
+
+    // Elements
+    const viewModal = document.getElementById("shed-view-modal");
+    const viewModalContent = document.getElementById("view-modal-content");
+    const viewModalClose = document.getElementById("view-modal-close");
+
+    const scheduleModal = document.getElementById("schedule-modal");
+    const scheduleBtn = document.getElementById("schedule-btn");
+    const scheduleModalClose = document.getElementById("schedule-modal-close");
+
+    const autoScheduleToggle = document.getElementById("auto-schedule-toggle");
+
+    // Vehicles and mechanics panels inside schedule modal
+    const vehiclesPanel = document.getElementById("vehicles-panel");
+    const mechanicsPanel = document.getElementById("mechanics-panel");
+    const selectedVehicleContainer = document.getElementById("selected-vehicle");
+    const assignedMechanicsContainer = document.getElementById("assigned-mechanics");
+
+    // Helper: render vehicles in left panel
+    function renderVehiclesPanel() {
+      vehiclesPanel.innerHTML = "";
+      vehiclesToSchedule.forEach((v) => {
+        const card = document.createElement("div");
+        card.className = "bg-white p-4 rounded shadow cursor-pointer hover:shadow-md";
+        card.innerHTML = `
+          <p class="font-semibold">${v.model}</p>
+          <p class="text-sm text-gray-600">License: ${v.license}</p>
+          <button class="mt-2 border border-primary text-primary rounded px-3 py-1 text-sm hover:bg-primary hover:text-white transition" data-select-vehicle="${v.id}">Select</button>
+        `;
+        vehiclesPanel.appendChild(card);
+      });
+    }
+
+    // Helper: render mechanics in right panel
+    function renderMechanicsPanel() {
+      mechanicsPanel.innerHTML = "";
+      mechanics.forEach((m) => {
+        const card = document.createElement("div");
+        card.className = "bg-white p-4 rounded shadow flex flex-col";
+        card.innerHTML = `
+          <p class="font-semibold">${m.name}</p>
+          <p class="text-sm text-gray-600">${m.specialty}</p>
+          <button class="mt-auto bg-primary text-white rounded px-3 py-1 hover:bg-primary/90 transition assign-btn" data-assign-mechanic="${m.id}">Assign</button>
+        `;
+        mechanicsPanel.appendChild(card);
+      });
+    }
+
+    // State for currently selected vehicle and assigned mechanics
+    let selectedVehicle = null;
+    let assignedMechanics = [];
+
+    // Render selected vehicle in center panel
+    function renderSelectedVehicle() {
+      if (!selectedVehicle) {
+        selectedVehicleContainer.innerHTML = `<p class="text-gray-500">Select a vehicle from the left panel</p>`;
+        assignedMechanicsContainer.innerHTML = "";
+        return;
+      }
+      selectedVehicleContainer.innerHTML = `
+        <div class="bg-white shadow p-4 rounded">
+          <p class="font-semibold text-lg">${selectedVehicle.model}</p>
+          <p class="text-sm text-gray-700">License: ${selectedVehicle.license}</p>
+        </div>
+      `;
+    }
+
+    // Render assigned mechanics in center panel
+    function renderAssignedMechanics() {
+      assignedMechanicsContainer.innerHTML = "";
+      assignedMechanics.forEach((m) => {
+        const mechCard = document.createElement("div");
+        mechCard.className = "bg-white p-3 rounded shadow flex justify-between items-center";
+        mechCard.innerHTML = `
+          <div>
+            <p class="font-semibold">${m.name}</p>
+            <p class="text-sm text-gray-700">${m.specialty}</p>
+          </div>
+          <button class="text-red-600 hover:text-red-800 focus:outline-none remove-mechanic-btn" data-remove-mechanic="${m.id}" aria-label="Remove mechanic">&times;</button>
+        `;
+        assignedMechanicsContainer.appendChild(mechCard);
+      });
+    }
+
+    // Event delegation for assigning mechanic
+    mechanicsPanel.addEventListener("click", (e) => {
+      if (e.target.matches("[data-assign-mechanic]")) {
+        if (!selectedVehicle) {
+          alert("Select a vehicle first.");
+          return;
+        }
+        const mechId = parseInt(e.target.getAttribute("data-assign-mechanic"));
+        const mechanic = mechanics.find(m => m.id === mechId);
+        if (!assignedMechanics.some(m => m.id === mechId)) {
+          assignedMechanics.push(mechanic);
+          renderAssignedMechanics();
+        }
+      }
+    });
+
+    // Remove mechanic from assigned list
+    assignedMechanicsContainer.addEventListener("click", (e) => {
+      if (e.target.matches("[data-remove-mechanic]")) {
+        const remId = parseInt(e.target.getAttribute("data-remove-mechanic"));
+        assignedMechanics = assignedMechanics.filter(m => m.id !== remId);
+        renderAssignedMechanics();
+      }
+    });
+
+    // Event delegation for selecting vehicle
+    vehiclesPanel.addEventListener("click", (e) => {
+      if (e.target.matches("[data-select-vehicle]")) {
+        const vehId = parseInt(e.target.getAttribute("data-select-vehicle"));
+        selectedVehicle = vehiclesToSchedule.find(v => v.id === vehId);
+        assignedMechanics = [];
+        renderSelectedVehicle();
+        renderAssignedMechanics();
+      }
+    });
+
+    // Show view modal with shed info on clicking view button
+    document.querySelectorAll("[data-view-shed]").forEach(btn => {
+      btn.addEventListener("click", e => {
+        const shedId = e.target.getAttribute("data-view-shed");
+        const shed = sheds[shedId];
+        if (shed) {
+          viewModalContent.innerHTML = `
+            <h2 class="text-xl font-semibold mb-4">Shed ${shed.id} Details</h2>
+            <p class="mb-2">${shed.info}</p>
+          `;
+          viewModal.classList.remove("hidden");
+        }
+      });
+    });
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 480 512">
+    <path fill="currentColor" d="m438.66 212.33l-11.24-28.1l-19.93-49.83C390.38 91.63 349.57 64 303.5 64h-127c-46.06 0-86.88 27.63-103.99 70.4l-19.93 49.83l-11.24 28.1C17.22 221.5 0 244.66 0 272v48c0 16.12 6.16 30.67 16 41.93V416c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32v-32h256v32c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32v-54.07c9.84-11.25 16-25.8 16-41.93v-48c0-27.34-17.22-50.5-41.34-59.67zm-306.73-54.16c7.29-18.22 24.94-30.17 44.57-30.17h127c19.63 0 37.28 11.95 44.57 30.17L368 208H112l19.93-49.83zM80 319.8c-19.2 0-32-12.76-32-31.9S60.8 256 80 256s48 28.71 48 47.85s-28.8 15.95-48 15.95zm320 0c-19.2 0-48 3.19-48-15.95S380.8 256 400 256s32 12.76 32 31.9s-12.8 31.9-32 31.9z"/>
+</svg>
+    // Close view modal
+    viewModalClose.addEventListener("click", () => {
+      viewModal.classList.add("hidden");
+    });
+
+    // Update sheds button toggle counter UI
+    document.querySelectorAll("[data-update-shed]").forEach(btn => {
+      btn.addEventListener("click", e => {
+        const parent = e.target.closest("div");
+        const updateCounter = parent.querySelector(".update-counter");
+        const updateStatusBtn = parent.querySelector(".update-status-btn");
+        updateCounter.classList.toggle("hidden");
+        updateStatusBtn.classList.toggle("hidden");
+      });
+    });
+
+    // Increment / decrement counter and enable update status button
+    document.querySelectorAll(".update-counter").forEach(counterDiv => {
+      let count = 0;
+      const countSpan = counterDiv.querySelector(".counter-value");
+      const btnInc = counterDiv.querySelector(".btn-increment");
+      const btnDec = counterDiv.querySelector(".btn-decrement");
+      const updateStatusBtn = counterDiv.nextElementSibling;
+
+      btnInc.addEventListener("click", () => {
+        count++;
+        countSpan.textContent = count;
+        updateStatusBtn.classList.remove("hidden");
+      });
+      btnDec.addEventListener("click", () => {
+        if (count > 0) {
+          count--;
+          countSpan.textContent = count;
+          updateStatusBtn.classList.remove("hidden");
+        }
+      });
+    });
+
+    // On clicking Update Status button, update the shed count
+    document.querySelectorAll(".update-status-btn").forEach(btn => {
+      btn.addEventListener("click", e => {
+        const parent = e.target.closest("div");
+        const shedIdText = parent.querySelector("h3").textContent || "";
+        const shedId = shedIdText.match(/\d+/) ? shedIdText.match(/\d+/)[0] : null;
+        const counterDiv = parent.querySelector(".update-counter");
+        if (shedId && counterDiv) {
+          const countSpan = counterDiv.querySelector(".counter-value");
+          sheds[shedId].count = parseInt(countSpan.textContent);
+          alert(`Shed ${shedId} count updated to ${sheds[shedId].count}`);
+          // Reset counter UI
+          countSpan.textContent = "0";
+          e.target.classList.add("hidden");
+          counterDiv.classList.add("hidden");
+        }
+      });
+    });
+
+    // Auto schedule toggle functionality
+    autoScheduleToggle.addEventListener("change", () => {
+      if (autoScheduleToggle.checked) {
+        alert("Auto schedule enabled");
+      } else {
+        alert("Auto schedule disabled");
+      }
+    });
+
+    // Schedule modal opening
+    scheduleBtn.addEventListener("click", () => {
+      scheduleModal.classList.remove("hidden");
+      renderVehiclesPanel();
+      renderMechanicsPanel();
+      renderSelectedVehicle();
+      renderAssignedMechanics();
+    });
+
+    // Schedule modal closing
+    scheduleModalClose.addEventListener("click", () => {
+      scheduleModal.classList.add("hidden");
+      selectedVehicle = null;
+      assignedMechanics = [];
+    });
+
+    // Mobile responsive adjustment for schedule modal
+    function adjustScheduleModalForMobile() {
+      const modal = scheduleModal.querySelector("div > div");
+      if (window.innerWidth < 640) {
+        modal.style.flexDirection = "column";
+        modal.querySelector("section:nth-child(1)").style.width = "100%";
+        modal.querySelector("section:nth-child(2)").style.width = "100%";
+        modal.querySelector("section:nth-child(3)").style.width = "100%";
+        modal.querySelector("section:nth-child(1)").style.borderRight = "none";
+        modal.querySelector("section:nth-child(3)").style.borderLeft = "none";
+        modal.querySelector("section:nth-child(1)").style.borderBottom = "1px solid #d1d5db";
+        modal.querySelector("section:nth-child(3)").style.borderTop = "1px solid #d1d5db";
+      } else {
+        modal.style.flexDirection = "row";
+        modal.querySelector("section:nth-child(1)").style.width = "40%";
+        modal.querySelector("section:nth-child(2)").style.width = "60%";
+        modal.querySelector("section:nth-child(3)").style.width = "40%";
+        modal.querySelector("section:nth-child(1)").style.borderRight = "1px solid #d1d5db";
+        modal.querySelector("section:nth-child(3)").style.borderLeft = "1px solid #d1d5db";
+        modal.querySelector("section:nth-child(1)").style.borderBottom = "none";
+        modal.querySelector("section:nth-child(3)").style.borderTop = "none";
+      }
+    }
+
+    window.addEventListener("resize", adjustScheduleModalForMobile);
+    adjustScheduleModalForMobile();
+  });
+</script>
+
+</body>
+</html>

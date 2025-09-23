@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Service Management - Booking Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#241358',
+                    },
+                },
+            },
+        };
+    </script>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+<div id="sidebar-root"></div>
+  <div id="navbar-root"></div>
+    <!-- Common Modal - Outside sections so it can be accessed from both desktop and mobile -->
+    <div id="booking-modal"
+        class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md max-h-full flex flex-col overflow-hidden relative"
+            style="height: 100vh;">
+            <button id="modal-close-btn" aria-label="Close modal"
+                class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+            <div id="modal-content" class="p-6 overflow-auto flex-grow"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="bg-gray-100 pt-24 sm:pt-6 px-2 sm:px-4 lg:ml-[250px] transition-all duration-300 min-h-screen overflow-y-auto" tabindex="0">
+
+        <!-- Desktop View -->
+        <section id="desktop-content" class="hidden sm:block">
+            <h1 class="text-2xl font-bold mb-2 pb-8">Service History
+
+            </h1>
+            <div class="flex justify-between mb-6 relative">
+                <div>
+                </div>
+                <div class="flex items-center gap-2 w-full max-w-lg bg-white shadow rounded-lg px-3 py-2 relative">
+                    <input type="text" id="searchInputDesktop" placeholder="Search by name, email, id"
+                        class="flex-grow outline-none border-none focus:ring-0 text-sm px-2" />
+                    <button id="searchBtnDesktop" class="p-2 rounded-md hover:bg-gray-100" aria-label="Search">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+                        </svg>
+                    </button>
+                    <button id="filterBtnDesktop" class="p-2 rounded-md hover:bg-gray-100"
+                        aria-label="Toggle filter panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-5 h-5 text-gray-600">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M6 10h12M9 16h6M11 20h2" />
+                        </svg>
+                    </button>
+
+                    <!-- Desktop Filter Panel -->
+                    <div id="filterPanelDesktop"
+                        class="hidden absolute top-14 right-0 z-50 bg-white rounded-xl shadow-2xl scale-105 animate-bounce-in px-6 py-4 transition-all duration-300 min-w-[300px]">
+                        <h3 class="text-lg font-semibold mb-4">Filters</h3>
+                        <label class="block mb-4">
+                            <span class="text-sm block mb-1">Category</span>
+                            <select id="filterCategoryDesktop" class="w-full border rounded px-2 py-1">
+                                <option value="">All</option>
+                                <option value="Service">Service</option>
+                                <option value="Repair">Repair</option>
+                                <option value="Maintenance">Maintenance</option>
+                                <option value="Inspection">Inspection</option>
+                            </select>
+                        </label>
+                        <label class="block mb-4">
+                            <span class="text-sm block mb-1">Date Range</span>
+                            <input type="date" id="filterDateFromDesktop" class="w-full border rounded px-2 py-1 mb-2">
+                            <input type="date" id="filterDateToDesktop" class="w-full border rounded px-2 py-1">
+                        </label>
+                        <button id="applyFilterDesktop"
+                            class="w-full mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Apply
+                            Filter</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center p-10">
+                <div class="overflow-x-auto w-full max-w-7xl">
+                    <h2 class="text-xl font-semibold mb-2">Booking Info</h2>
+                    <div class="flex justify-center">
+                        <table
+                            class="min-w-[1000px] w-full table-auto border border-gray-300 bg-white shadow-sm rounded-md">
+                            <thead class="bg-gray-100 text-gray-700 text-sm">
+                                <tr>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Booking ID</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Date</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Time</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Amount</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Status</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Category</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bookingTableBodyDesktop" class="text-sm"></tbody>
+                        </table>
+                    </div>
+
+                    <div
+                        class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-7xl mx-auto px-2 select-none">
+                        <button id="prevPageDesktop" class="disabled:opacity-50" aria-label="Previous page">←
+                            Previous</button>
+                        <span id="pageInfoDesktop"></span>
+                        <button id="nextPageDesktop" class="disabled:opacity-50" aria-label="Next page">Next
+                            →</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mobile View -->
+        <section class="sm:hidden">
+            <div class="relative mb-4 px-4 flex items-center gap-2">
+                <div class="flex items-center w-full relative">
+                    <input type="text" id="searchInputMobile"
+                        class="w-full rounded-full px-4 pr-12 shadow-sm outline-none py-3"
+                        placeholder="Search by name, email, id" aria-label="Search bookings" />
+                    <button id="searchBtnMobile"
+                        class="absolute right-2 top-[6px] bg-white rounded-full p-2 shadow hover:bg-gray-100"
+                        aria-label="Search">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex justify-end px-4 relative mb-4">
+                <button id="filterBtnMobile" class="bg-white rounded-full p-2 shadow hover:bg-gray-100"
+                    aria-label="Toggle filter mobile">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-600" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 4h18l-7 8v6l-4 2v-8z" />
+                    </svg>
+                </button>
+                <div id="filterPanelMobile"
+                    class="hidden absolute top-12 right-0 z-50 bg-white rounded-xl shadow-2xl scale-105 animate-bounce-in px-6 py-4 transition-all duration-300 min-w-[300px]">
+                    <h3 class="text-lg font-semibold mb-4">Filters</h3>
+                    <label class="block mb-4">
+                        <span class="text-sm block mb-1">Category</span>
+                        <select id="filterCategoryMobile" class="w-full border rounded px-2 py-1">
+                            <option value="">All</option>
+                            <option value="Service">Service</option>
+                            <option value="Repair">Repair</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Inspection">Inspection</option>
+                        </select>
+                    </label>
+                    <label class="block mb-4">
+                        <span class="text-sm block mb-1">Date Range</span>
+                        <input type="date" id="filterDateFromMobile" class="w-full border rounded px-2 py-1 mb-2">
+                        <input type="date" id="filterDateToMobile" class="w-full border rounded px-2 py-1">
+                    </label>
+                    <button id="applyFilterMobile"
+                        class="w-full mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Apply
+                        Filter</button>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-lg font-semibold mb-2 px-4">Booking Info</h2>
+                <div id="bookingListMobile" class="p-2 space-y-3"></div>
+                <div
+                    class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-md mx-auto px-4 select-none">
+                    <button id="prevPageMobile" class="disabled:opacity-50" aria-label="Previous page">←
+                        Previous</button>
+                    <span id="pageInfoMobile"></span>
+                    <button id="nextPageMobile" class="disabled:opacity-50" aria-label="Next page">Next →</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+  <script type="module" src="../../../components/user-components-loader.js"></script>
+
+    <script>
+        // Sample booking data - dynamically loaded
+        const bookings = [
+            { id: 66886, amount: 45454, status: 'Completed', date: '12/10/2025', time: '9:00 AM', category: 'Service', email: 'john@example.com', phone: '+1234567890', vehicle: 'Toyota Camry', notes: 'Regular service checkup' },
+            { id: 545454, amount: 44548, status: 'OnGoing', date: '13/10/2025', time: '11:00 AM', category: 'Repair', email: 'barane@example.com', phone: '+1234567891', vehicle: 'Honda Civic', notes: 'Brake repair needed' },
+            { id: 654646, amount: 78789, status: 'Pending', date: '15/10/2025', time: '2:00 PM', category: 'Service', email: 'kumar@example.com', phone: '+1234567892', vehicle: 'Ford Focus', notes: 'Oil change and inspection' },
+            { id: 789012, amount: 11111, status: 'Canceled', date: '16/10/2025', time: '10:00 AM', category: 'Maintenance', email: 'alice@example.com', phone: '+1234567893', vehicle: 'BMW X3', notes: 'Scheduled maintenance' },
+            { id: 890123, amount: 22222, status: 'Completed', date: '17/10/2025', time: '3:00 PM', category: 'Inspection', email: 'bob@example.com', phone: '+1234567894', vehicle: 'Mercedes C-Class', notes: 'Annual inspection' },
+            { id: 901234, amount: 33333, status: 'Completed', date: '18/10/2025', time: '4:00 PM', category: 'Service', email: 'charlie@example.com', phone: '+1234567895', vehicle: 'Audi A4', notes: 'Tire rotation and balance' }
+        ];
+
+        let filteredBookings = [...bookings];
+
+        // Elements references
+        const tableBodyDesktop = document.getElementById("bookingTableBodyDesktop");
+        const prevBtnDesktop = document.getElementById("prevPageDesktop");
+        const nextBtnDesktop = document.getElementById("nextPageDesktop");
+        const pageInfoDesktop = document.getElementById("pageInfoDesktop");
+        const searchInputDesktop = document.getElementById("searchInputDesktop");
+        const searchBtnDesktop = document.getElementById("searchBtnDesktop");
+        const filterCategoryDesktop = document.getElementById("filterCategoryDesktop");
+        const filterDateFromDesktop = document.getElementById("filterDateFromDesktop");
+        const filterDateToDesktop = document.getElementById("filterDateToDesktop");
+        const filterBtnDesktop = document.getElementById("filterBtnDesktop");
+        const filterPanelDesktop = document.getElementById("filterPanelDesktop");
+        const applyFilterDesktop = document.getElementById("applyFilterDesktop");
+
+        const bookingListMobile = document.getElementById("bookingListMobile");
+        const prevBtnMobile = document.getElementById("prevPageMobile");
+        const nextBtnMobile = document.getElementById("nextPageMobile");
+        const pageInfoMobile = document.getElementById("pageInfoMobile");
+        const searchInputMobile = document.getElementById("searchInputMobile");
+        const searchBtnMobile = document.getElementById("searchBtnMobile");
+        const filterBtnMobile = document.getElementById("filterBtnMobile");
+        const filterPanelMobile = document.getElementById("filterPanelMobile");
+        const applyFilterMobile = document.getElementById("applyFilterMobile");
+        const filterCategoryMobile = document.getElementById("filterCategoryMobile");
+        const filterDateFromMobile = document.getElementById("filterDateFromMobile");
+        const filterDateToMobile = document.getElementById("filterDateToMobile");
+
+        const bookingModal = document.getElementById("booking-modal");
+        const modalCloseBtn = document.getElementById("modal-close-btn");
+        const modalContent = document.getElementById("modal-content");
+
+        let currentPageDesktop = 1;
+        const rowsPerPageDesktop = 10;
+        let currentPageMobile = 1;
+        const rowsPerPageMobile = 5;
+
+        // --- RENDER functions unified ---
+        function render() {
+            renderTableDesktop();
+            renderMobileListPaginated();
+            updatePaginationDesktop();
+            updatePaginationMobile();
+        }
+
+        function renderTableDesktop() {
+            const start = (currentPageDesktop - 1) * rowsPerPageDesktop;
+            const end = start + rowsPerPageDesktop;
+            const pageData = filteredBookings.slice(start, end);
+
+            tableBodyDesktop.innerHTML = "";
+            pageData.forEach((booking, idx) => {
+                const globalIdx = start + idx;
+                tableBodyDesktop.innerHTML += `
+            <tr class="hover:bg-gray-50">
+                <td class="py-2 px-4 border border-gray-300">${booking.id}</td>
+                <td class="py-2 px-4 border border-gray-300">${booking.date}</td>
+                <td class="py-2 px-4 border border-gray-300">${booking.time}</td>
+                <td class="py-2 px-4 border border-gray-300">${booking.amount}</td>
+                <td class="py-2 px-4 border border-gray-300">${booking.status}</td>
+                <td class="py-2 px-4 border border-gray-300">${booking.category}</td>
+                <td class="py-2 px-4 border border-gray-300">
+                <button class="viewDetailsDesktop text-blue-600 hover:underline" data-index="${globalIdx}">
+                    View Details
+                </button>
+                </td>
+            </tr>
+            `;
+            });
+            attachDesktopEvents();
+        }
+
+        function renderMobileListPaginated() {
+            const start = (currentPageMobile - 1) * rowsPerPageMobile;
+            const end = start + rowsPerPageMobile;
+            const pageData = filteredBookings.slice(start, end);
+
+            bookingListMobile.innerHTML = "";
+            pageData.forEach((booking, idx) => {
+                const globalIdx = start + idx;
+                bookingListMobile.innerHTML += `
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center">
+                <div class="mr-3 text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                
+                <div class="flex-1">
+                    <div class="font-semibold text-gray-900">#${booking.id}</div>
+                    <div class="text-sm text-gray-600">Status : ${booking.status}</div>
+                    <div class="text-xs text-gray-500 mt-1">${booking.date} • ${booking.time} • ${booking.category}</div>
+                </div>
+                
+                <button class="viewDetailsMobile text-gray-400 hover:text-gray-600 ml-2" data-index="${globalIdx}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+            `;
+            });
+            attachMobileEvents();
+        }
+
+        // Attach events for desktop action buttons
+        function attachDesktopEvents() {
+            document.querySelectorAll(".viewDetailsDesktop").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const idx = parseInt(this.getAttribute("data-index"));
+                    const booking = filteredBookings[idx];
+                    showBookingDetails(booking);
+                });
+            });
+        }
+
+        // Attach events for mobile action buttons
+        function attachMobileEvents() {
+            document.querySelectorAll(".viewDetailsMobile").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const idx = parseInt(this.getAttribute("data-index"));
+                    const booking = filteredBookings[idx];
+                    showBookingDetails(booking);
+                });
+            });
+        }
+
+        // Show booking details modal
+        function showBookingDetails(booking) {
+            modalContent.innerHTML = `
+                <h3 class="text-xl font-semibold mb-6 pr-8">Booking Details</h3>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Booking ID</label>
+                            <p class="mt-1 text-sm text-gray-900">#${booking.id}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Booking Status</label>
+                            <p class="mt-1 text-sm text-gray-900">${booking.status}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Category</label>
+                            <p class="mt-1 text-sm text-gray-900">${booking.category}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Date</label>
+                            <p class="mt-1 text-sm text-gray-900">${booking.date}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Time</label>
+                            <p class="mt-1 text-sm text-gray-900">${booking.time}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Email</label>
+                        <p class="mt-1 text-sm text-gray-900">${booking.email}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Phone</label>
+                        <p class="mt-1 text-sm text-gray-900">${booking.phone}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Vehicle</label>
+                        <p class="mt-1 text-sm text-gray-900">${booking.vehicle}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Notes</label>
+                        <p class="mt-1 text-sm text-gray-900">${booking.notes}</p>
+                    </div>
+                </div>
+            `;
+            bookingModal.classList.remove('hidden');
+        }
+
+        // Close modal
+        modalCloseBtn.addEventListener('click', () => {
+            bookingModal.classList.add('hidden');
+        });
+
+        // Close modal when clicking outside
+        bookingModal.addEventListener('click', (e) => {
+            if (e.target === bookingModal) {
+                bookingModal.classList.add('hidden');
+            }
+        });
+
+        // Pagination functions
+        function updatePaginationDesktop() {
+            const totalPages = Math.ceil(filteredBookings.length / rowsPerPageDesktop);
+            pageInfoDesktop.textContent = `Page ${currentPageDesktop} of ${totalPages}`;
+            prevBtnDesktop.disabled = currentPageDesktop === 1;
+            nextBtnDesktop.disabled = currentPageDesktop === totalPages || totalPages === 0;
+        }
+        prevBtnDesktop.addEventListener("click", () => {
+            if (currentPageDesktop > 1) {
+                currentPageDesktop--;
+                render();
+            }
+        });
+        nextBtnDesktop.addEventListener("click", () => {
+            const totalPages = Math.ceil(filteredBookings.length / rowsPerPageDesktop);
+            if (currentPageDesktop < totalPages) {
+                currentPageDesktop++;
+                render();
+            }
+        });
+
+        function updatePaginationMobile() {
+            const totalPages = Math.ceil(filteredBookings.length / rowsPerPageMobile);
+            pageInfoMobile.textContent = `Page ${currentPageMobile} of ${totalPages}`;
+            prevBtnMobile.disabled = currentPageMobile === 1;
+            nextBtnMobile.disabled = currentPageMobile === totalPages || totalPages === 0;
+        }
+        prevBtnMobile.addEventListener("click", () => {
+            if (currentPageMobile > 1) {
+                currentPageMobile--;
+                render();
+            }
+        });
+        nextBtnMobile.addEventListener("click", () => {
+            const totalPages = Math.ceil(filteredBookings.length / rowsPerPageMobile);
+            if (currentPageMobile < totalPages) {
+                currentPageMobile++;
+                render();
+            }
+        });
+
+        // Search functionality - Only on search button click
+        function performSearch() {
+            const searchTermDesktop = searchInputDesktop.value.toLowerCase();
+            const searchTermMobile = searchInputMobile.value.toLowerCase();
+            console.log(searchTermDesktop)
+            
+            // Use whichever search term is not empty, or combine both
+            const searchTerm = searchTermDesktop || searchTermMobile;
+            console.log( searchTerm.length)
+            if (searchTerm === '' || searchTerm.length === 0) {
+                filteredBookings = [...bookings];
+                applyCurrentFilters();
+                return;
+            }
+            
+            filteredBookings = bookings.filter(booking => 
+                booking.name.toLowerCase().includes(searchTerm) ||
+                booking.id.toString().includes(searchTerm) ||
+                booking.bookerId.toString().includes(searchTerm) ||
+                booking.email.toLowerCase().includes(searchTerm) ||
+                booking.category.toLowerCase().includes(searchTerm) ||
+                booking.vehicle.toLowerCase().includes(searchTerm)
+            );
+            
+            // Apply any active filters to the search results
+            applyCurrentFilters();
+            
+            currentPageDesktop = 1;
+            currentPageMobile = 1;
+            render();
+        }
+
+        // Search event listeners - ONLY on button click
+        searchBtnDesktop.addEventListener("click", performSearch);
+        searchInputDesktop.addEventListener("keydown", e => {
+            if (e.key === "Enter") {
+                performSearch();
+            }
+        });
+
+        searchBtnMobile.addEventListener("click", performSearch);
+        searchInputMobile.addEventListener("keydown", e => {
+            if (e.key === "Enter") {
+                performSearch();
+            }
+        });
+
+        // Filter panel toggle for desktop
+        filterBtnDesktop.addEventListener("click", e => {
+            e.stopPropagation();
+            filterPanelDesktop.classList.toggle("hidden");
+        });
+
+        // Filter panel toggle for mobile
+        filterBtnMobile.addEventListener("click", e => {
+            e.stopPropagation();
+            filterPanelMobile.classList.toggle("hidden");
+        });
+
+        // Close filter panels when clicking outside
+        document.addEventListener("click", e => {
+            if (!filterPanelDesktop.classList.contains("hidden") && 
+                !filterPanelDesktop.contains(e.target) && 
+                e.target !== filterBtnDesktop) {
+                filterPanelDesktop.classList.add("hidden");
+            }
+            if (!filterPanelMobile.classList.contains("hidden") && 
+                !filterPanelMobile.contains(e.target) && 
+                e.target !== filterBtnMobile) {
+                filterPanelMobile.classList.add("hidden");
+            }
+        });
+
+        // Apply current filters to the current dataset (search results or full dataset)
+        function applyCurrentFilters() {
+            const categoryDesktop = filterCategoryDesktop.value;
+            const categoryMobile = filterCategoryMobile.value;
+            const dateFromDesktop = filterDateFromDesktop.value;
+            const dateToDesktop = filterDateToDesktop.value;
+            const dateFromMobile = filterDateFromMobile.value;
+            const dateToMobile = filterDateToMobile.value;
+
+            // Use whichever values are not empty
+            const categoryFilter = categoryDesktop || categoryMobile;
+            const dateFrom = dateFromDesktop || dateFromMobile;
+            const dateTo = dateToDesktop || dateToMobile;
+
+            if (categoryFilter || dateFrom || dateTo) {
+                filteredBookings = filteredBookings.filter(booking => {
+                    // Category filter
+                    const categoryMatch = categoryFilter === '' || booking.category === categoryFilter;
+
+                    // Date filter (basic implementation)
+                    let dateMatch = true;
+                    if (dateFrom || dateTo) {
+                        const bookingDate = new Date(booking.date.split('/').reverse().join('-'));
+                        if (dateFrom) {
+                            const fromDate = new Date(dateFrom);
+                            if (bookingDate < fromDate) dateMatch = false;
+                        }
+                        if (dateTo) {
+                            const toDate = new Date(dateTo);
+                            if (bookingDate > toDate) dateMatch = false;
+                        }
+                    }
+
+                    return categoryMatch && dateMatch;
+                });
+            }
+        }
+
+        // Apply filters function
+        function applyFilters() {
+            // Start with full dataset or current search results
+            const searchTermDesktop = searchInputDesktop.value.toLowerCase();
+            const searchTermMobile = searchInputMobile.value.toLowerCase();
+            const searchTerm = searchTermDesktop || searchTermMobile;
+            
+            if (searchTerm !== '') {
+                filteredBookings = bookings.filter(booking => 
+                    booking.name.toLowerCase().includes(searchTerm) ||
+                    booking.id.toString().includes(searchTerm) ||
+                    booking.bookerId.toString().includes(searchTerm) ||
+                    booking.email.toLowerCase().includes(searchTerm) ||
+                    booking.category.toLowerCase().includes(searchTerm) ||
+                    booking.vehicle.toLowerCase().includes(searchTerm)
+                );
+            } else {
+                filteredBookings = [...bookings];
+            }
+
+            // Apply filters to the current dataset
+            applyCurrentFilters();
+
+            currentPageDesktop = 1;
+            currentPageMobile = 1;
+            render();
+        }
+
+        // Apply filter button events
+        applyFilterDesktop.addEventListener("click", () => {
+            filterPanelDesktop.classList.add("hidden");
+            applyFilters();
+        });
+
+        applyFilterMobile.addEventListener("click", () => {
+            filterPanelMobile.classList.add("hidden");
+            applyFilters();
+        });
+
+        // Filter input change events
+        filterCategoryDesktop.addEventListener("change", applyFilters);
+        filterDateFromDesktop.addEventListener("change", applyFilters);
+        filterDateToDesktop.addEventListener("change", applyFilters);
+        filterCategoryMobile.addEventListener("change", applyFilters);
+        filterDateFromMobile.addEventListener("change", applyFilters);
+        filterDateToMobile.addEventListener("change", applyFilters);
+
+        // Initial render
+        render();
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Mechanic Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#241358',
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <div id="sidebar-root"></div>
+    <div id="navbar-root"></div>
+
+    <main id="main-content"
+        class="bg-gray-100 pt-24 sm:pt-6 px-2 sm:px-4 lg:ml-[250px] transition-all duration-300 min-h-screen overflow-y-auto"
+        tabindex="0">
+
+        <!-- Desktop View -->
+        <section id="desktop-content" class="hidden sm:block">
+            <h1 class="text-2xl font-bold mb-2 pb-8">Mechanic Management</h1>
+            <!-- Search & Filter Bar -->
+            <div class="flex justify-between mb-6 relative">
+                <div class="ml-10">
+                    <button id="add-mechanic" class="p-4 outline outline-gray-200 bg-white rounded">Add
+                        Mechanic</button>
+                </div>
+                <div class="flex items-center gap-2 w-full max-w-lg bg-white shadow rounded-lg px-3 py-2">
+                    <input type="text" id="searchInputDesktop" placeholder="Search customers..."
+                        class="flex-grow outline-none border-none focus:ring-0 text-sm px-2" />
+                    <button id="searchBtnDesktop" class="p-2 rounded-md hover:bg-gray-100" aria-label="Search">
+                        <!-- Search SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+                        </svg>
+                    </button>
+                    <button id="filterBtnDesktop" class="p-2 rounded-md hover:bg-gray-100"
+                        aria-label="Toggle filter panel">
+                        <!-- Filter SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-5 h-5 text-gray-600">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M6 10h12M9 16h6M11 20h2" />
+                        </svg>
+                    </button>
+                </div>
+                <!-- Floating Filter Panel -->
+                <div id="filterPanelDesktop"
+                    class="hidden absolute top-14 right-0 z-50 bg-white rounded-xl shadow-2xl scale-105 animate-bounce-in px-6 py-4 transition-all duration-300 min-w-[300px]">
+                    <h3 class="text-lg font-semibold mb-2">Filters</h3>
+                    <label class="block mb-2">
+                        <span class="text-sm">Services More Than</span>
+                        <input type="number" id="filterServicesDesktop" class="w-full border rounded px-2 py-1 mt-1"
+                            placeholder="e.g. 3" />
+                    </label>
+                    <button id="applyFilterDesktop"
+                        class="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Apply Filter</button>
+                </div>
+            </div>
+
+            <!-- Customer Info Table -->
+            <div class="flex justify-center">
+                <div class="overflow-x-auto w-full max-w-5xl">
+                    <h2 class="text-xl font-semibold mb-2">Mechanic Info</h2>
+                    <table class="min-w-[700px] w-full table-auto border border-gray-300 bg-white shadow-sm rounded-md">
+                        <thead class="bg-gray-100 text-gray-700 text-sm">
+                            <tr>
+
+                                <th class="py-2 px-4 border border-gray-300 text-left">Mechanic Id</th>
+                                <th class="py-2 px-4 border border-gray-300 text-left">Name</th>
+                                <th class="py-2 px-4 border border-gray-300 text-left">Email</th>
+                                <th class="py-2 px-4 border border-gray-300 text-left">Phone</th>
+                                <th class="py-2 px-4 border border-gray-300 text-left">Address</th>
+                                <th class="py-2 px-4 border border-gray-300 text-left">Total Services</th>
+                                <th class="py-2 px-4 border border-gray-300 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTableBodyDesktop" class="text-sm"></tbody>
+                    </table>
+                    <!-- Pagination -->
+                    <div class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-5xl mx-auto px-2">
+                        <button id="prevPageDesktop" class="disabled:opacity-50" aria-label="Previous page">
+                            ← Previous
+                        </button>
+                        <span id="pageInfoDesktop"></span>
+                        <button id="nextPageDesktop" class="disabled:opacity-50" aria-label="Next page">Next →</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Desktop add mechanic modal -->
+            <div id="add-mechanic-modal"
+                class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                    <h3 class="text-lg font-bold mb-4 text-center">Add Mech</h3>
+                    <div id="desktop-modalContent" class="text-sm"></div>
+                    <div class="flex justify-end mt-4">
+                        <button onclick="closeMechanicAddModal()"
+                            class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">Close</button>
+                    </div>
+                    <div>
+                        <form class="flex-col ">
+
+                            <div><label class="font-medium block">Email: </label><input name="email" type="email"
+                                    class="outline-gray-300 p-2 border border-gray-200 w-full" /></div>
+                            <div><label class="font-medium block">Name: </label><input name="name" type="text"
+                                    class="outline-gray-300 p-2 border border-gray-200 w-full" /></div>
+                            <div><label class="font-medium block">Phone: </label><input name="phone" type="number"
+                                    class="outline-gray-300 p-2 border border-gray-200 w-full" /></div>
+                            <div><label class="font-medium block">Experience: </label><input name="xperience"
+                                    type="number" class="outline-gray-300 p-2 border border-gray-200 w-full" /></div>
+                            <div><label class="font-medium block">Start Date: </label><input name="start_date"
+                                    type="date" class="outline-gray-300 p-2 border border-gray-200 w-full" /></div>
+                            <div><label class="font-medium block">Initial Password: </label><input
+                                    name="initial_password" type="text"
+                                    class="outline-gray-300 p-2 border border-gray-200 w-full" /></div>
+
+                            <div class="flex justify-between mt-4">
+                                <div></div>
+                                <button class="bg-primary text-white p-2" type="submit">Add Mechanic</button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Desktop Modal -->
+            <div id="desktop-viewModal"
+                class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                    <h3 class="text-lg font-bold mb-4">Mechanic Details</h3>
+                    <div id="desktop-modalContent" class="text-sm"></div>
+                    <div class="flex justify-end mt-4">
+                        <button onclick="closeDesktopModal()"
+                            class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">Close</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Toast -->
+            <div id="toastDesktop"
+                class="hidden fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg">
+                User deleted successfully
+            </div>
+        </section>
+
+        <!-- Mobile View -->
+        <section class="sm:hidden">
+            <!-- Search & Filter -->
+            <div class="relative mb-4">
+                <div class="flex items-center w-full max-w-full relative">
+                    <input type="text" id="searchInputMobile"
+                        class="w-full rounded-full px-4 pr-12 shadow-sm outline-none py-3"
+                        placeholder="Search customers..." aria-label="Search customers" />
+                    <button id="searchBtnMobile"
+                        class="absolute right-2 top-[6px] bg-white rounded-full p-2 shadow hover:bg-gray-100"
+                        aria-label="Search">
+                        <!-- Search SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="flex justify-end px-4 relative">
+                <button id="filterBtnMobile" class="bg-white rounded-full p-2 shadow hover:bg-gray-100"
+                    aria-label="Toggle filter mobile">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-600" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 4h18l-7 8v6l-4 2v-8z" />
+                    </svg>
+                </button>
+                <div id="filterPanelMobile"
+                    class="hidden absolute top-12 right-0 z-50 bg-white rounded-xl shadow-2xl scale-105 animate-bounce-in px-6 py-4 transition-all duration-300 min-w-[220px]">
+                    <h3 class="text-lg font-semibold mb-2">Filters</h3>
+                    <label class="block mb-2">
+                        <span class="text-sm">Services More Than</span>
+                        <input type="number" id="filterServicesMobile" class="w-full border rounded px-2 py-1 mt-1"
+                            placeholder="e.g. 3" />
+                    </label>
+                    <button id="applyFilterMobile"
+                        class="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 w-full">Apply
+                        Filter</button>
+                </div>
+            </div>
+            <!-- Customer List Mobile -->
+            <div>
+                <h2 class="text-lg font-semibold mb-2 px-4">Mechanic Info</h2>
+                <div id="customerListMobile" class="p-2 space-y-2"></div>
+                <div id="paginationMobile"
+                    class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-md mx-auto px-4">
+                    <button id="prevPageMobile" class="disabled:opacity-50" aria-label="Previous page">←
+                        Previous</button>
+                    <span id="pageInfoMobile"></span>
+                    <button id="nextPageMobile" class="disabled:opacity-50" aria-label="Next page">Next →</button>
+                </div>
+            </div>
+            <!-- Mobile Modal -->
+            <div id="customer-modal"
+                class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
+                <div class="bg-white rounded-lg shadow-lg w-full max-w-md max-h-full flex flex-col overflow-hidden relative"
+                    style="height: 100vh;">
+                    <button id="modal-close-btn" aria-label="Close modal"
+                        class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                    <div id="modal-content" class="p-6 overflow-auto flex-grow">
+                        <!-- Dynamic customer info will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Add Mechanic Modal -->
+            <div id="add-mechanic-modal-mobile"
+                class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                    <h3 class="text-lg font-bold mb-4 text-center">Add Mech (Mobile)</h3>
+                    <form id="addMechanicFormMobile" class="flex flex-col space-y-3">
+                        <div><label class="font-medium block">Email: </label>
+                            <input name="email" type="email"
+                                class="outline-gray-300 p-2 border border-gray-200 w-full" />
+                        </div>
+                        <div><label class="font-medium block">Name: </label>
+                            <input name="name" type="text" class="outline-gray-300 p-2 border border-gray-200 w-full" />
+                        </div>
+                        <div><label class="font-medium block">Phone: </label>
+                            <input name="phone" type="number"
+                                class="outline-gray-300 p-2 border border-gray-200 w-full" />
+                        </div>
+                        <div><label class="font-medium block">Experience: </label>
+                            <input name="xperience" type="number"
+                                class="outline-gray-300 p-2 border border-gray-200 w-full" />
+                        </div>
+                        <div><label class="font-medium block">Start Date: </label>
+                            <input name="start_date" type="date"
+                                class="outline-gray-300 p-2 border border-gray-200 w-full" />
+                        </div>
+                        <div><label class="font-medium block">Initial Password: </label>
+                            <input name="initial_password" type="text"
+                                class="outline-gray-300 p-2 border border-gray-200 w-full" />
+                        </div>
+                        <div class="flex justify-end space-x-2 mt-4">
+                            <button type="button" id="closeAddMechMobile"
+                                class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">Close</button>
+                            <button type="submit" class="bg-primary text-white px-3 py-1 rounded">Add Mechanic</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="../../../components/components-loader.js"></script>
+
+
+    <script>
+        // Shared customer data
+        const customers = [
+            { id: "68686", name: "John", email: "john-44@a.in", phone: "96565464855", address: "xxx, yyy, zzz", services: 7 },
+            { id: "545454", name: "Barane", email: "bk@gmail.com", phone: "4894848458", address: "aaa, zzz", services: 3 },
+            { id: "565468", name: "Kumar", email: "kumar@a.com", phone: "4186468681", address: "ttt, uuu, zzz", services: 1 },
+            { id: "111111", name: "Alice", email: "alice@mail.com", phone: "999888777", address: "abc street", services: 5 },
+            { id: "222222", name: "Bob", email: "bob@mail.com", phone: "111222333", address: "def road", services: 2 },
+            { id: "333333", name: "Charlie", email: "charlie@mail.com", phone: "444555666", address: "ghi ave", services: 9 },
+            { id: "444444", name: "David", email: "david@mail.com", phone: "777888999", address: "jkl lejfhgbherjgbj ergrge grgerge rgergerger errekjerkt hrktwhrkjth    gwrjghrjwghane", services: 4 },
+            { id: "555555", name: "Eva", email: "eva@mail.com", phone: "123123123", address: "mno park", services: 6 }
+        ];
+
+        // Desktop Variables
+        const tableBodyDesktop = document.getElementById("customerTableBodyDesktop");
+        const prevBtnDesktop = document.getElementById("prevPageDesktop");
+        const nextBtnDesktop = document.getElementById("nextPageDesktop");
+        const pageInfoDesktop = document.getElementById("pageInfoDesktop");
+        const searchInputDesktop = document.getElementById("searchInputDesktop");
+        const searchBtnDesktop = document.getElementById("searchBtnDesktop");
+        const filterBtnDesktop = document.getElementById("filterBtnDesktop");
+        const filterPanelDesktop = document.getElementById("filterPanelDesktop");
+        const applyFilterDesktop = document.getElementById("applyFilterDesktop");
+        const filterServicesDesktop = document.getElementById("filterServicesDesktop");
+        const toastDesktop = document.getElementById("toastDesktop");
+
+        // Mobile Variables
+        const customerListMobile = document.getElementById("customerListMobile");
+        const searchInputMobile = document.getElementById("searchInputMobile");
+        const searchBtnMobile = document.getElementById("searchBtnMobile");
+        const filterBtnMobile = document.getElementById("filterBtnMobile");
+        const filterPanelMobile = document.getElementById("filterPanelMobile");
+        const applyFilterMobile = document.getElementById("applyFilterMobile");
+        const filterServicesMobile = document.getElementById("filterServicesMobile");
+        const customerModalMobile = document.getElementById("customer-modal");
+        const modalCloseBtnMobile = document.getElementById("modal-close-btn");
+        const modalContentMobile = document.getElementById("modal-content");
+        const addMechanicModalMobile = document.getElementById('add-mechanic-modal-mobile');
+        const addMechanicFormMobile = document.getElementById('addMechanicFormMobile');
+        const closeAddMechMobileBtn = document.getElementById('closeAddMechMobile');
+        const menuActions = document.getElementById('menu_actions');
+
+        // Desktop Modals
+        const desktopViewModal = document.getElementById("desktop-viewModal");
+        const desktopModalContent = document.getElementById("desktop-modalContent");
+
+        // Mobile Pagination Variables
+        const prevBtnMobile = document.getElementById("prevPageMobile");
+        const nextBtnMobile = document.getElementById("nextPageMobile");
+        const pageInfoMobile = document.getElementById("pageInfoMobile");
+
+        // Desktop Pagination
+        let currentPageDesktop = 1;
+        const rowsPerPageDesktop = 5;
+        let filteredDataDesktop = [...customers];
+
+        // Mobile Pagination
+        let currentPageMobile = 1;
+        const rowsPerPageMobile = 5;
+        const fullDataMobile = [...customers];
+        let filteredDataMobile = [...fullDataMobile];
+
+        // ---- Desktop Functions ----
+
+        function renderTableDesktop(data) {
+            filteredDataDesktop = data;
+            const start = (currentPageDesktop - 1) * rowsPerPageDesktop;
+            const end = start + rowsPerPageDesktop;
+            const pageData = filteredDataDesktop.slice(start, end);
+
+            tableBodyDesktop.innerHTML = "";
+            pageData.forEach((c, idx) => {
+                const row = document.createElement("tr");
+                row.className = "hover:bg-gray-50";
+                row.innerHTML = `
+                   
+                    <td class="py-2 px-4 border border-gray-300">${c.id}</td>
+                    <td class="py-2 px-4 border border-gray-300">${c.name}</td>
+                    <td class="py-2 px-4 border border-gray-300">${c.email}</td>
+                    <td class="py-2 px-4 border border-gray-300">${c.phone}</td>
+                    <td class="py-2 px-4 border border-gray-300">${c.address}</td>
+                    <td class="py-2 px-4 border border-gray-300">${c.services}</td>
+                    <td class="py-2 px-4 border border-gray-300 relative">
+                        <button class="actionBtnDesktop p-1 rounded hover:bg-gray-200 ce">⋮</button>
+                        <div class="actionMenuDesktop hidden absolute right-0 mt-1 bg-white border rounded shadow-lg z-10">
+                            <button class="block w-full px-4 py-2 text-left hover:bg-gray-100 viewBtnDesktop">View</button>
+                            <button class="block w-full px-4 py-2 text-left hover:bg-gray-100 deactivateBtnDesktop">Deactivate</button>
+                        </div>
+                    </td>
+                `;
+                tableBodyDesktop.appendChild(row);
+            });
+
+            attachDesktopActionEvents();
+            updatePaginationDesktop();
+        }
+
+        function attachDesktopActionEvents() {
+            document.querySelectorAll(".actionBtnDesktop").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const menu = btn.nextElementSibling;
+                    if (menu) menu.classList.toggle("hidden");
+                });
+            });
+
+            document.querySelectorAll(".viewBtnDesktop").forEach((btn, idx) => {
+                btn.addEventListener("click", () => {
+                    const customerIndex = (currentPageDesktop - 1) * rowsPerPageDesktop + idx;
+                    showDesktopModal(filteredDataDesktop[customerIndex]);
+                });
+            });
+
+            document.querySelectorAll(".deactivateBtnDesktop").forEach((btn, idx) => {
+                btn.addEventListener("click", () => {
+                    const customerIndex = (currentPageDesktop - 1) * rowsPerPageDesktop + idx;
+                    const customer = filteredDataDesktop[customerIndex];
+                    if (confirm(`Deactivate ${customer.name}?`)) {
+                        showToastDesktop();
+                    }
+                });
+            });
+        }
+
+        function updatePaginationDesktop() {
+            const totalPages = Math.ceil(filteredDataDesktop.length / rowsPerPageDesktop);
+            pageInfoDesktop.textContent = `Page ${currentPageDesktop} of ${totalPages}`;
+            prevBtnDesktop.disabled = currentPageDesktop === 1;
+            nextBtnDesktop.disabled = currentPageDesktop === totalPages;
+        }
+
+        function showDesktopModal(customer) {
+            desktopModalContent.innerHTML = `
+                <p><strong>ID:</strong> ${customer.id}</p>
+                <p><strong>Name:</strong> ${customer.name}</p>
+                <p><strong>Email:</strong> ${customer.email}</p>
+                <p><strong>Phone:</strong> ${customer.phone}</p>
+                <p><strong>Address:</strong> ${customer.address}</p>
+                <p><strong>Services:</strong> ${customer.services}</p>
+            `;
+            desktopViewModal.classList.remove("hidden");
+        }
+
+        function closeDesktopModal() {
+            desktopViewModal.classList.add("hidden");
+        }
+
+        function showToastDesktop() {
+            toastDesktop.classList.remove("hidden");
+            setTimeout(() => toastDesktop.classList.add("hidden"), 3000);
+        }
+
+        // Desktop Pagination events
+        prevBtnDesktop.addEventListener("click", () => {
+            if (currentPageDesktop > 1) {
+                currentPageDesktop--;
+                renderTableDesktop(filteredDataDesktop);
+            }
+        });
+
+        nextBtnDesktop.addEventListener("click", () => {
+            const totalPages = Math.ceil(filteredDataDesktop.length / rowsPerPageDesktop);
+            if (currentPageDesktop < totalPages) {
+                currentPageDesktop++;
+                renderTableDesktop(filteredDataDesktop);
+            }
+        });
+
+        // Desktop Search by SVG button and enter
+        searchBtnDesktop.addEventListener("click", () => {
+            const query = searchInputDesktop.value.trim().toLowerCase();
+            currentPageDesktop = 1;
+            filteredDataDesktop = customers.filter(c =>
+                c.name.toLowerCase().includes(query) ||
+                c.email.toLowerCase().includes(query) ||
+                c.phone.toLowerCase().includes(query) ||
+                c.id.toLowerCase().includes(query)
+            );
+            renderTableDesktop(filteredDataDesktop);
+        });
+        searchInputDesktop.addEventListener("keydown", e => {
+            if (e.key === "Enter") searchBtnDesktop.click();
+        });
+
+        // Desktop Filter floating panel
+        filterBtnDesktop.addEventListener("click", (e) => {
+            e.stopPropagation();
+            filterPanelDesktop.classList.toggle("hidden");
+        });
+        document.addEventListener("click", (e) => {
+            if (!filterPanelDesktop.classList.contains("hidden") && !filterPanelDesktop.contains(e.target) && e.target !== filterBtnDesktop) {
+                filterPanelDesktop.classList.add("hidden");
+            }
+        });
+
+        applyFilterDesktop.addEventListener("click", () => {
+            const minServices = parseInt(filterServicesDesktop.value) || 0;
+            currentPageDesktop = 1;
+            filteredDataDesktop = customers.filter(c => c.services > minServices);
+            renderTableDesktop(filteredDataDesktop);
+        });
+
+        desktopViewModal.addEventListener("click", e => {
+            if (e.target === desktopViewModal) closeDesktopModal();
+        });
+
+        // ---- Mobile Functions ----
+
+        function renderMobileListPaginated(data) {
+            filteredDataMobile = data;
+            const start = (currentPageMobile - 1) * rowsPerPageMobile;
+            const end = start + rowsPerPageMobile;
+            const pageData = filteredDataMobile.slice(start, end);
+
+            customerListMobile.innerHTML = "";
+            pageData.forEach((c, idx) => {
+                const item = document.createElement("div");
+                item.className = "border-b border-black font-medium py-4 flex items-center justify-between px-4";
+                item.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5.121 17.804A9.97 9.97 0 0112 15c2.21 0 4.24.72 5.879 1.928M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>${c.name}</span>
+                    </div>
+                    <button aria-label="View details for ${c.name}" class="viewBtnMobile" data-index="${start + idx}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                `;
+                customerListMobile.appendChild(item);
+            });
+
+            updatePaginationMobile();
+            attachMobileViewEvents();
+        }
+
+        function updatePaginationMobile() {
+            const totalPages = Math.ceil(filteredDataMobile.length / rowsPerPageMobile);
+            pageInfoMobile.textContent = `Page ${currentPageMobile} of ${totalPages}`;
+            prevBtnMobile.disabled = currentPageMobile === 1;
+            nextBtnMobile.disabled = currentPageMobile === totalPages;
+        }
+
+        function attachMobileViewEvents() {
+            document.querySelectorAll(".viewBtnMobile").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const idx = parseInt(btn.getAttribute("data-index"));
+                    showMobileModal(filteredDataMobile[idx]);
+                });
+            });
+        }
+
+        function showMobileModal(customer) {
+            modalContentMobile.innerHTML = `
+                <p><strong>ID:</strong> ${customer.id}</p>
+                <p><strong>Name:</strong> ${customer.name}</p>
+                <p><strong>Email:</strong> ${customer.email}</p>
+                <p><strong>Phone:</strong> ${customer.phone}</p>
+                <p><strong>Address:</strong> ${customer.address}</p>
+                <p><strong>Services:</strong> ${customer.services}</p>
+            `;
+            customerModalMobile.classList.remove("hidden");
+        }
+
+        function closeMobileModal() {
+            customerModalMobile.classList.add("hidden");
+        }
+
+        // Mobile Pagination events
+        prevBtnMobile.addEventListener("click", () => {
+            if (currentPageMobile > 1) {
+                currentPageMobile--;
+                renderMobileListPaginated(filteredDataMobile);
+            }
+        });
+
+        nextBtnMobile.addEventListener("click", () => {
+            const totalPages = Math.ceil(filteredDataMobile.length / rowsPerPageMobile);
+            if (currentPageMobile < totalPages) {
+                currentPageMobile++;
+                renderMobileListPaginated(filteredDataMobile);
+            }
+        });
+
+        // Mobile Search by SVG button and enter
+        searchBtnMobile.addEventListener("click", () => {
+            const query = searchInputMobile.value.trim().toLowerCase();
+            filteredDataMobile = fullDataMobile.filter(c =>
+                c.name.toLowerCase().includes(query) ||
+                c.email.toLowerCase().includes(query) ||
+                c.phone.toLowerCase().includes(query) ||
+                c.id.toLowerCase().includes(query)
+            );
+            currentPageMobile = 1;
+            renderMobileListPaginated(filteredDataMobile);
+        });
+        searchInputMobile.addEventListener("keydown", e => {
+            if (e.key === "Enter") searchBtnMobile.click();
+        });
+
+        // Mobile Filter floating panel
+        filterBtnMobile.addEventListener("click", (e) => {
+            e.stopPropagation();
+            filterPanelMobile.classList.toggle("hidden");
+        });
+        document.addEventListener("click", (e) => {
+            if (!filterPanelMobile.classList.contains("hidden") && !filterPanelMobile.contains(e.target) && e.target !== filterBtnMobile) {
+                filterPanelMobile.classList.add("hidden");
+            }
+        });
+
+        applyFilterMobile.addEventListener("click", () => {
+            const minServices = parseInt(filterServicesMobile.value) || 0;
+            filteredDataMobile = fullDataMobile.filter(c => c.services > minServices);
+            currentPageMobile = 1;
+            renderMobileListPaginated(filteredDataMobile);
+        });
+
+        modalCloseBtnMobile.addEventListener("click", closeMobileModal);
+
+        customerModalMobile.addEventListener("click", (e) => {
+            if (e.target === customerModalMobile) {
+                closeMobileModal();
+            }
+        });
+
+        // Initial renders
+        renderTableDesktop(customers);
+        renderMobileListPaginated(fullDataMobile);
+
+        function closeDesktopModal() {
+            desktopViewModal.classList.add("hidden");
+        }
+
+
+        const mechanic_add = document.getElementById('add-mechanic');
+        const desktop_mechanic_add_modal = document.getElementById('add-mechanic-modal');
+
+        function closeMechanicAddModal() {
+            desktop_mechanic_add_modal.classList.add('hidden');
+        }
+
+
+        mechanic_add.addEventListener('click', () => {
+            console.log("clicked new")
+            if (desktop_mechanic_add_modal.classList.contains('hidden')) desktop_mechanic_add_modal.classList.remove('hidden');
+            else desktop_mechanic_add_modal.classList.add('hidden')
+        })
+
+        // mechanic addition section
+
+        function showToast(message, type = "error") {
+            const toast = document.createElement("div");
+            toast.innerText = message;
+            toast.className = `
+        fixed bottom-5 right-5 px-4 py-2 rounded shadow-lg text-white z-[9999]
+        ${type === "error" ? "bg-red-500" : "bg-green-500"}
+    `;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // --- Form Validation ---
+        document.querySelector("#add-mechanic-modal form").addEventListener("submit", async function (e) {
+            e.preventDefault(); // prevent actual submit
+
+            const email = this.email.value.trim();
+            const name = this.name.value.trim();
+            const phone = this.phone.value.trim();
+            const exp = this.xperience.value.trim();
+            const startDate = this.start_date.value;
+            const password = this.initial_password.value.trim();
+
+            // Basic validations
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showToast("Please enter a valid email.");
+                return;
+            }
+            if (!name) {
+                showToast("Name cannot be empty.");
+                return;
+            }
+            if (!phone || phone.length < 8) {
+                showToast("Please enter a valid phone number.");
+                return;
+            }
+            if (!exp || isNaN(exp) || exp < 0) {
+                showToast("Experience must be a valid non-negative number.");
+                return;
+            }
+            if (!startDate) {
+                showToast("Start date is required.");
+                return;
+            }
+            if (!password || password.length < 6) {
+                showToast("Password must be at least 6 characters.");
+                return;
+            }
+
+            // If everything is fine
+            showToast("Mechanic added successfully!", "success");
+
+            // Example: collect data
+            const formData = {
+                email,
+                name,
+                phone,
+                exp,
+                startDate,
+                password,
+                deleted: false,
+                role: "mechanic"
+            };
+
+            console.log(formData)
+
+            const response = await fetch("http://localhost:3000/users", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: await JSON.stringify(formData)
+            })
+
+
+            try {
+                if (!response.ok) {
+                    throw new Error('Error saving data from server');
+                }
+
+                alert("Mechanic added successfully...")
+            }
+            catch (err) {
+                console.log(err)
+            }
+
+
+            // now we gett the nav bar component and add profile icon then with the functionality menu
+
+
+        });
+
+
+        document.addEventListener('navbarLoaded', () => {
+            const menu_actions = document.getElementById('menu_actions');
+
+            menu_actions.addEventListener('click', (event) => {
+                event.stopPropagation();
+
+                let dropdown = document.getElementById('pageActionsDropdown');
+                if (dropdown) {
+                    dropdown.classList.toggle('hidden');
+                    return;
+                }
+
+                dropdown = document.createElement('div');
+                dropdown.id = 'pageActionsDropdown';
+                dropdown.className = 'absolute right-0 mt-12 w-44 rounded-md shadow-lg bg-primary text-white ring-1 ring-black ring-opacity-5 z-50';
+
+                dropdown.innerHTML = `
+      <button id="addMechanicBtn" class="block w-full text-left px-4 py-2 hover:bg-indigo-700 focus:outline-none" type="button">
+        Add Mechanic
+      </button>
+      <!-- Add more buttons here if needed -->
+    `;
+
+                menu_actions.parentElement.appendChild(dropdown);
+
+                dropdown.querySelector('#addMechanicBtn').addEventListener('click', () => {
+                    dropdown.classList.add('hidden');
+
+                    // Your logic to show mobile or desktop modal
+                    if (window.innerWidth < 640) {  // Tailwind 'sm' breakpoint 
+                        addMechanicModalMobile.classList.remove('hidden');
+                    } else {
+                        const desktopAddBtn = document.getElementById('add-mechanic');
+                        if (desktopAddBtn) desktopAddBtn.click();
+                    }
+                });
+            });
+
+            // Close dropdown if clicked outside
+            document.addEventListener('click', () => {
+                const dropdown = document.getElementById('pageActionsDropdown');
+                if (dropdown) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+
+
+
+
+        });
+
+        closeAddMechMobileBtn.addEventListener('click', () => {
+            addMechanicModalMobile.classList.add('hidden');
+        });
+
+        // Handle mobile form submit
+        addMechanicFormMobile.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const form = event.target;
+            const email = form.email.value.trim();
+            const name = form.name.value.trim();
+            const phone = form.phone.value.trim();
+            const exp = form.xperience.value.trim();
+            const startDate = form.start_date.value;
+            const password = form.initial_password.value.trim();
+
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                alert('Please enter a valid email.');
+                return;
+            }
+            if (!name) {
+                alert('Name cannot be empty.');
+                return;
+            }
+            if (!phone || phone.length < 8) {
+                alert('Please enter a valid phone number.');
+                return;
+            }
+            if (!exp || isNaN(exp) || exp < 0) {
+                alert('Experience must be a valid non-negative number.');
+                return;
+            }
+            if (!startDate) {
+                alert('Start date is required.');
+                return;
+            }
+            if (!password || password.length < 6) {
+                alert('Password must be at least 6 characters.');
+                return;
+            }
+
+            const formData = { email, name, phone, exp, startDate, password, deleted: false, role: "mechanic" };
+
+            try {
+                const response = await fetch("http://localhost:3000/users", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData)
+                });
+                if (!response.ok) throw new Error('Error saving data from server');
+                alert('Mechanic added successfully!');
+                addMechanicModalMobile.classList.add('hidden');
+                form.reset();
+            } catch (err) {
+                console.error(err);
+                alert('Failed to add mechanic. Please try again.');
+            }
+        });
+
+
+
+
+
+
+
+    </script>
+</body>
+
+</html>

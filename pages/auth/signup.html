@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="w-full min-h-screen flex items-center justify-center">
+        <div
+            class="w-full max-w-3xl mx-auto my-auto flex flex-col sm:flex-row bg-white sm:rounded-2xl sm:shadow-xl sm:overflow-hidden sm:w-[48rem]">
+
+            <!-- Blue Panel -->
+            <div class="w-full sm:w-1/2 bg-[#2d216b]"></div>
+            <!-- Form Panel -->
+            <div class="w-full sm:w-1/2 flex items-center justify-center py-8 px-6">
+                <div class="w-full">
+                    <h2 class="text-3xl mb-8 font-normal">Sign Up</h2>
+                    <form class="flex flex-col">
+                        <label for="email" class="mb-1 text-lg">Email</label>
+                        <input id="email" type="email"
+                            class="mb-3 p-2 border border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-[#279cff]"
+                            required>
+
+                        <label for="username" class="mb-1 text-lg">User Name</label>
+                        <input id="username" type="text"
+                            class="mb-3 p-2 border border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-[#279cff]"
+                            required>
+
+                        <label for="password" class="mb-1 text-lg">Password</label>
+                        <input id="password" type="password"
+                            class="mb-3 p-2 border border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-[#279cff]"
+                            required>
+
+                        <label for="confirm" class="mb-1 text-lg">Confirm Password</label>
+                        <input id="confirm" type="password"
+                            class="mb-3 p-2 border border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-[#279cff]"
+                            required>
+
+                        <label for="phone" class="mb-1 text-lg">Phone</label>
+                        <input id="phone" type="number"
+                            class="mb-3 p-2 border border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-[#279cff]"
+                            required>
+
+                        <label for="idproof" class="mb-1 text-lg">Id Proof (Aadhar or License )</label>
+                        <input id="idproof" type="file"
+                            class="mb-6 p-2 border border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-[#279cff]"
+                            required>
+
+                        <button type="submit"
+                            class="bg-[#2d216b] text-white py-2 rounded hover:bg-[#279cff] transition-colors">Sign
+                            Up</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.querySelector("form");
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // Get form values
+        const email = document.getElementById("email").value.trim();
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+        const confirm = document.getElementById("confirm").value;
+        const phone = document.getElementById("phone").value.trim();
+        const idproof = document.getElementById("idproof").files[0];
+
+        // --- Basic Validation ---
+        if (!email || !username || !password || !confirm || !phone || !idproof) {
+            alert("All fields are required!");
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            alert("Please enter a valid email address.");
+            return;
+        }
+
+        if (password !== confirm) {
+            alert("Passwords do not match!");
+            return;
+        }
+
+        if (password.length < 6) {
+            alert("Password must be at least 6 characters long.");
+            return;
+        }
+
+        if (!/^\d{10}$/.test(phone)) {
+            alert("Please enter a valid 10-digit phone number.");
+            return;
+        }
+
+        // --- Convert file to Base64 ---
+        const fileToBase64 = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = (error) => reject(error);
+                reader.readAsDataURL(file);
+            });
+        };
+
+        try {
+            const idproofBase64 = await fileToBase64(idproof);
+
+            // --- Prepare JSON body ---
+            const body = {
+                email,
+                username,
+                password,
+                phone,
+                role: "admin",
+                idproof: idproofBase64   // contains "data:<mimetype>;base64,..."
+            };
+
+            const res = await fetch("http://localhost:3000/users", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                alert("User registered successfully!");
+                console.log(data);
+                form.reset();
+            } else {
+                const error = await res.json();
+                alert("Error: " + (error.message || "Something went wrong"));
+            }
+        } catch (err) {
+            console.error("Request failed:", err);
+            alert("Failed to send request.");
+        }
+    });
+});
+</script>
+
+
+
+</body>
+
+</html>

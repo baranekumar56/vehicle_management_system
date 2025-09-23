@@ -1,0 +1,90 @@
+<!-- Modified sidebar.html with overflow-y-auto on sidebar -->
+<aside
+    class="sidebar bg-primary fixed top-0 left-0 h-full w-[250px] flex flex-col justify-between text-white z-40 hidden lg:flex overflow-y-auto">
+    <style>
+        /* Add these styles to style.css to make the sidebar scrollable internally with hidden scrollbar */
+        .sidebar {
+            overflow-y: auto;
+            /* enable vertical scrolling inside sidebar */
+            scrollbar-width: none;
+            /* Firefox: hide scrollbar */
+            -ms-overflow-style: none;
+            /* IE 10+ hide scrollbar */
+        }
+
+        .sidebar::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera hide scrollbar */
+        }
+    </style>
+    <div>
+        <div class="flex items-center space-x-2 px-6 ">
+            <div class="inline flex justify-center w-full">
+                    <img src="/assets/logo.png" width="100px" height="20px" alt="auto care logo" />
+            </div>
+            <!-- <span class="font-bold text-lg">AutoCare</span> -->
+        </div>
+        
+        <nav class="mt-6">
+            <ul class="space-y-2 px-4">
+                <li>
+                    <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">Dashboard</a>
+                </li>
+                <li>
+                    <button type="button"
+                        class="flex items-center w-full py-2 px-3 rounded hover:bg-indigo-900 transition focus:outline-none sidebar-user-btn"
+                        aria-expanded="false" aria-controls="sidebar-user-submenu">
+                        User Management
+                    </button>
+                    <div id="sidebar-user-submenu" class="pl-8 mt-1 space-y-1 hidden">
+                        <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">Customer
+                            Management</a>
+                        <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">Mechanic
+                            Management</a>
+                    </div>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">Bookings</a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">Garage
+                        Management</a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">Service
+                        Management</a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">Payments &
+                        Billings</a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">Reports</a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">Issues &
+                        Tickets</a>
+                </li>
+                <li>
+                    <a href="#"
+                        class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">Notifications</a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">Content
+                        Management</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div class="px-6 py-4">
+        <div class="flex items-center space-x-2 px-6 py-4 p-4">
+            <span
+                class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white text-primary font-bold">AC</span>
+            <span class="text-white font-medium text-wrap">Barane kumar</span>
+        </div>
+        <button type="button"
+            class="w-full flex items-center py-2 px-3 rounded bg-indigo-900 hover:bg-indigo-800 font-medium transition">
+            Log out
+        </button>
+    </div>
+</aside>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Repair Booking</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .primary {
+      background-color: #241358;
+    }
+
+    .primary-text {
+      color: #241358;
+    }
+
+    .booking-confirmation {
+      display: none;
+      position: fixed;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #e0ffe0;
+      border: 2px solid #28a745;
+      border-radius: 8px;
+      padding: 1rem 2rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #155724;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+  </style>
+</head>
+
+<body class="primary flex justify-center items-center min-h-screen">
+
+  <div class="bg-white w-full sm:max-w-3xl lg:max-w-4xl shadow-lg sm:rounded-2xl p-6 sm:p-8 lg:p-10 h-screen flex flex-col">
+
+    <!-- Step Indicator -->
+    <div class="flex justify-between items-center mb-6">
+      <div class="flex-1 flex items-center">
+        <div id="step1Indicator"
+          class="step w-8 h-8 flex items-center justify-center rounded-full bg-blue-600 text-white font-bold">1</div>
+        <div id="bar1" class="flex-1 h-1 bg-gray-300"></div>
+        <div id="step2Indicator"
+          class="step w-8 h-8 flex items-center justify-center rounded-full bg-gray-300 text-gray-700 font-bold">2</div>
+        <div id="bar2" class="flex-1 h-1 bg-gray-300"></div>
+        <div id="step3Indicator"
+          class="step w-8 h-8 flex items-center justify-center rounded-full bg-gray-300 text-gray-700 font-bold">3</div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form id="repairForm" class="flex-grow flex flex-col" novalidate>
+
+      <!-- Step 1 -->
+      <div id="step1" class="step-content flex-grow flex flex-col">
+        <h2 class="text-xl sm:text-2xl font-semibold mb-4 primary-text">Professional Details</h2>
+        <div class="space-y-3 flex-grow">
+          <input type="text" name="name" placeholder="Name" class="w-full border rounded-lg p-3" required />
+          <input type="email" name="email" placeholder="Email" class="w-full border rounded-lg p-3" required />
+          <input type="tel" name="phone" placeholder="Phone" class="w-full border rounded-lg p-3" required />
+          <select id="pickup-option" name="pickup" class="w-full border rounded-lg p-3" required>
+            <option value="">Need Pickup?</option>
+            <option value="no">No Need Pickup</option>
+            <option value="yes">Need Pickup</option>
+          </select>
+          <div id="address" class="hidden">
+            <textarea name="address" placeholder="Address"
+              class="w-full border rounded-lg p-3 sm:w-3/4"></textarea>
+          </div>
+        </div>
+        <div class="flex justify-end mt-4">
+          <button type="button" id="nextBtn1"
+            class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div id="step2" class="step-content hidden flex-grow flex flex-col">
+        <h2 class="text-xl sm:text-2xl font-semibold mb-4 primary-text">Vehicle Details</h2>
+        <div class="space-y-3 flex-grow">
+          <input type="text" name="vehicleNo" placeholder="Vehicle No" class="w-full border rounded-lg p-3" required />
+          <input type="text" name="brand" placeholder="Brand" class="w-full border rounded-lg p-3" required />
+          <input type="text" name="model" placeholder="Model" class="w-full border rounded-lg p-3" required />
+          <input type="text" name="vehicleType" placeholder="Vehicle Type" class="w-full border rounded-lg p-3" required />
+          <input type="text" name="fuelType" placeholder="Fuel Type" class="w-full border rounded-lg p-3" required />
+          <input type="file" name="rcBook" class="w-full border rounded-lg p-3" />
+        </div>
+        <div class="flex justify-between mt-4">
+          <button type="button" id="prevBtn2"
+            class="bg-gray-300 px-6 py-3 rounded-lg shadow-lg hover:bg-gray-400 transition">Back</button>
+          <button type="button" id="nextBtn2"
+            class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div id="step3" class="step-content hidden flex-grow flex flex-col">
+        <h2 class="text-xl sm:text-2xl font-semibold mb-4 primary-text">Repair Description</h2>
+        <textarea name="repairDescription" placeholder="Describe the repair needed"
+          class="w-full border rounded-lg p-3 mb-6 flex-grow" rows="6" required></textarea>
+        <div class="flex justify-between mt-4">
+          <button type="button" id="prevBtn3"
+            class="bg-gray-300 px-6 py-3 rounded-lg shadow-lg hover:bg-gray-400 transition">Back</button>
+          <button type="submit"
+            class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition">Submit</button>
+        </div>
+      </div>
+
+    </form>
+
+  </div>
+
+  <div id="bookingConfirmation" class="booking-confirmation">
+    Booking Confirmed
+  </div>
+
+  <script>
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const step3 = document.getElementById('step3');
+
+    const step1Indicator = document.getElementById('step1Indicator');
+    const step2Indicator = document.getElementById('step2Indicator');
+    const step3Indicator = document.getElementById('step3Indicator');
+
+    const bar1 = document.getElementById('bar1');
+    const bar2 = document.getElementById('bar2');
+
+    const nextBtn1 = document.getElementById('nextBtn1');
+    const nextBtn2 = document.getElementById('nextBtn2');
+    const prevBtn2 = document.getElementById('prevBtn2');
+    const prevBtn3 = document.getElementById('prevBtn3');
+
+    const pickupOption = document.getElementById('pickup-option');
+    const addressDiv = document.getElementById('address');
+    const form = document.getElementById('repairForm');
+    const bookingConfirmation = document.getElementById('bookingConfirmation');
+
+    function updateStepIndicators(step) {
+      if (step === 1) {
+        step1Indicator.classList.add('bg-blue-600', 'text-white');
+        step2Indicator.classList.remove('bg-blue-600', 'text-white');
+        step2Indicator.classList.add('bg-gray-300', 'text-gray-700');
+        step3Indicator.classList.remove('bg-blue-600', 'text-white');
+        step3Indicator.classList.add('bg-gray-300', 'text-gray-700');
+        bar1.classList.remove('bg-blue-600');
+        bar1.classList.add('bg-gray-300');
+        bar2.classList.remove('bg-blue-600');
+        bar2.classList.add('bg-gray-300');
+      } else if (step === 2) {
+        step1Indicator.classList.add('bg-blue-600', 'text-white');
+        step2Indicator.classList.remove('bg-gray-300', 'text-gray-700');
+        step2Indicator.classList.add('bg-blue-600', 'text-white');
+        step3Indicator.classList.remove('bg-blue-600', 'text-white');
+        step3Indicator.classList.add('bg-gray-300', 'text-gray-700');
+        bar1.classList.remove('bg-gray-300');
+        bar1.classList.add('bg-blue-600');
+        bar2.classList.remove('bg-blue-600');
+        bar2.classList.add('bg-gray-300');
+      } else if (step === 3) {
+        step1Indicator.classList.add('bg-blue-600', 'text-white');
+        step2Indicator.classList.add('bg-blue-600', 'text-white');
+        step3Indicator.classList.remove('bg-gray-300', 'text-gray-700');
+        step3Indicator.classList.add('bg-blue-600', 'text-white');
+        bar1.classList.remove('bg-gray-300');
+        bar1.classList.add('bg-blue-600');
+        bar2.classList.remove('bg-gray-300');
+        bar2.classList.add('bg-blue-600');
+      }
+    }
+
+    function showStep(step) {
+      step1.classList.toggle('hidden', step !== 1);
+      step2.classList.toggle('hidden', step !== 2);
+      step3.classList.toggle('hidden', step !== 3);
+      updateStepIndicators(step);
+    }
+
+    function validateStep(step) {
+      let valid = true;
+      let inputs;
+      if (step === 1) {
+        inputs = step1.querySelectorAll('input[required], select[required], textarea[required]');
+      } else if (step === 2) {
+        inputs = step2.querySelectorAll('input[required], select[required], textarea[required]');
+      } else if (step === 3) {
+        inputs = step3.querySelectorAll('input[required], select[required], textarea[required]');
+      }
+      inputs.forEach(input => {
+        if (!input.checkValidity()) {
+          input.reportValidity();
+          valid = false;
+        }
+      });
+      return valid;
+    }
+
+    function getFormDataWithBase64File() {
+      return new Promise((resolve, reject) => {
+        const data = {};
+        // Step 1 fields
+        data.name = step1.querySelector('input[name="name"]').value.trim();
+        data.email = step1.querySelector('input[name="email"]').value.trim();
+        data.phone = step1.querySelector('input[name="phone"]').value.trim();
+        data.pickup = step1.querySelector('select[name="pickup"]').value;
+        if (data.pickup === 'yes') {
+          data.address = step1.querySelector('textarea[name="address"]').value.trim();
+        } else {
+          data.address = '';
+        }
+
+        // Step 2 fields
+        data.vehicleNo = step2.querySelector('input[name="vehicleNo"]').value.trim();
+        data.brand = step2.querySelector('input[name="brand"]').value.trim();
+        data.model = step2.querySelector('input[name="model"]').value.trim();
+        data.vehicleType = step2.querySelector('input[name="vehicleType"]').value.trim();
+        data.fuelType = step2.querySelector('input[name="fuelType"]').value.trim();
+
+        const rcBookInput = step2.querySelector('input[name="rcBook"]');
+        if (rcBookInput.files.length > 0) {
+          const file = rcBookInput.files[0];
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            data.rcBookBase64 = e.target.result; // base64 encoded string with mime prefix
+            // Step 3 fields
+            data.repairDescription = step3.querySelector('textarea[name="repairDescription"]').value.trim();
+            resolve(data);
+          };
+          reader.onerror = function () {
+            reject(new Error('Failed to read file'));
+          };
+          reader.readAsDataURL(file);
+        } else {
+          data.rcBookBase64 = '';
+          // Step 3 fields
+          data.repairDescription = step3.querySelector('textarea[name="repairDescription"]').value.trim();
+          resolve(data);
+        }
+      });
+    }
+
+    nextBtn1.addEventListener('click', () => {
+      if (validateStep(1)) {
+        showStep(2);
+      }
+    });
+
+    prevBtn2.addEventListener('click', () => {
+      showStep(1);
+    });
+
+    nextBtn2.addEventListener('click', () => {
+      if (validateStep(2)) {
+        showStep(3);
+      }
+    });
+
+    prevBtn3.addEventListener('click', () => {
+      showStep(2);
+    });
+
+    pickupOption.addEventListener('input', () => {
+      if (pickupOption.value === 'yes') {
+        addressDiv.classList.remove('hidden');
+        addressDiv.querySelector('textarea').required = true;
+      } else {
+        addressDiv.classList.add('hidden');
+        addressDiv.querySelector('textarea').required = false;
+      }
+    });
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (validateStep(3)) {
+        try {
+          const formData = await getFormDataWithBase64File();
+          console.log('Final validated data with base64 file:', formData);
+
+          form.style.display = 'none';
+          bookingConfirmation.style.display = 'block';
+        } catch (err) {
+          alert('Error reading RC Book file');
+        }
+      }
+    });
+
+    // Initialize on page load
+    showStep(1);
+  </script>
+</body>
+
+</html>

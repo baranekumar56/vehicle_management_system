@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Services</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" /> <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> tailwind.config = { theme: { extend: { colors: { primary: '#241358', }, }, }, }; </script>
+    <style>
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, and Opera */
+        }
+
+        #model-suggestion-list {
+            /* Already handled with tailwind, but enforce just in case */
+            position: absolute !important;
+            z-index: 60;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <div id="sidebar-root"></div>
+    <div id="navbar-root"></div>
+    <main id="main-content-service-management"
+        class="bg-gray-100 pt-24 sm:pt-6 px-2 sm:px-4 lg:ml-[250px] transition-all duration-300 min-h-screen overflow-y-auto"
+        tabindex="0">
+        <!-- Desktop View -->
+        <section id="desktop-content" class="hidden sm:block">
+            <h1 class="text-2xl font-bold ">Services</h1>
+
+            <!-- Search & Filter Bar -->
+            <div class="flex justify-between mb-6 relative p-2 max-w-6xl">
+                <div class="flex items-center gap-2 w-full max-w-lg bg-white shadow rounded-lg px-3 py-2">
+                    <input type="text" id="searchInputDesktop" placeholder="Search services..."
+                        class="flex-grow outline-none border-none focus:ring-0 text-sm px-2" />
+                    <button id="searchBtnDesktop" class="p-2 rounded-md hover:bg-gray-100" aria-label="Search">
+                        <!-- Search SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+                        </svg>
+                    </button>
+                    <button id="filterBtnDesktop" class="p-2 rounded-md hover:bg-gray-100"
+                        aria-label="Toggle filter panel">
+                        <!-- Filter SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-5 h-5 text-gray-600">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M6 10h12M9 16h6M11 20h2" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Batch Activate / Deactivate Buttons -->
+                <div class="flex items-center gap-4">
+                    <button id="batchActivateDesktop"
+                        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                        disabled>
+                        Activate Selected
+                    </button>
+                    <button id="batchDeactivateDesktop"
+                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50" disabled>
+                        Deactivate Selected
+                    </button>
+                </div>
+            </div>
+
+            <!-- Floating Filter Panel -->
+            <div id="filterPanelDesktop"
+                class="hidden absolute top-14 right-0 z-50 bg-white rounded-xl shadow-2xl scale-105 animate-bounce-in px-6 py-4 transition-all duration-300 min-w-[320px]">
+                <h3 class="text-lg font-semibold mb-4">Filters</h3>
+                <form id="filterFormDesktop" class="space-y-4">
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterDateFromDesktop">Date Added From</label>
+                        <input type="date" id="filterDateFromDesktop" name="dateFrom"
+                            class="w-full border rounded px-2 py-1" />
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterDateToDesktop">Date Added To</label>
+                        <input type="date" id="filterDateToDesktop" name="dateTo"
+                            class="w-full border rounded px-2 py-1" />
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterPriceOpDesktop">Price Op</label>
+                        <select id="filterPriceOpDesktop" name="priceOp" class="w-full border rounded px-2 py-1">
+                            <option value="=">=</option>
+                            <option value=">=">≥</option>
+                            <option value="<=">≤</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterPriceDesktop">Price</label>
+                        <input type="number" min="0" step="0.01" id="filterPriceDesktop" name="price"
+                            class="w-full border rounded px-2 py-1" placeholder="Amount" />
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterTimeOpDesktop">Time Op</label>
+                        <select id="filterTimeOpDesktop" name="timeOp" class="w-full border rounded px-2 py-1">
+                            <option value="=">=</option>
+                            <option value=">=">≥</option>
+                            <option value="<=">≤</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterTimeDesktop">Time (min)</label>
+                        <input type="number" min="0" id="filterTimeDesktop" name="time"
+                            class="w-full border rounded px-2 py-1" placeholder="Minutes" />
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterFuelDesktop">Fuel</label>
+                        <select id="filterFuelDesktop" name="fuel" class="w-full border rounded px-2 py-1">
+                            <option value="">All</option>
+                            <option>Petrol</option>
+                            <option>Diesel</option>
+                            <option>EV</option>
+                            <option>Hybrid</option>
+                            <option>CNG</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterTypeDesktop">Vehicle Type</label>
+                        <select id="filterTypeDesktop" name="type" class="w-full border rounded px-2 py-1">
+                            <option value="">All</option>
+                            <option value="two-wheeler">Two-Wheeler</option>
+                            <option value="four-wheeler">Four-Wheeler</option>
+                        </select>
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-primary text-white rounded py-2 hover:bg-indigo-900 transition">Apply
+                        Filter</button>
+                    <button type="button" id="clearFilterDesktop"
+                        class="w-full mt-1 border border-gray-400 rounded py-2 hover:bg-gray-100 transition">Clear
+                        Filter</button>
+                </form>
+            </div>
+
+            <div class="flex justify-center">
+                <div class="overflow-x-auto w-full max-w-6xl">
+                    <h2 class="text-xl font-semibold mb-2">Vehicle Service Info</h2>
+                    <table
+                        class="min-w-[1000px] w-full table-auto border border-gray-300 bg-white shadow-sm rounded-md">
+                        <thead class="bg-gray-100 text-gray-700 text-sm">
+                            <tr>
+                                <th class="border border-gray-300 p-2"><input type="checkbox" id="selectAllDesktop"
+                                        aria-label="Select all" /></th>
+                                <th class="border border-gray-300 p-2">Brand</th>
+                                <th class="border border-gray-300 p-2">Model</th>
+                                <th class="border border-gray-300 p-2">Fuel</th>
+                                <th class="border border-gray-300 p-2">Type</th>
+                                <th class="border border-gray-300 p-2">Service Name</th>
+                                <th class="border border-gray-300 p-2">Date Added</th>
+                                <th class="border border-gray-300 p-2">Last Date Deactivated</th>
+                                <th class="border border-gray-300 p-2">Price</th>
+                                <th class="border border-gray-300 p-2">Time to Complete (min)</th>
+                                <th class="border border-gray-300 p-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTableBodyDesktop" class="text-sm"></tbody>
+                    </table>
+                    <!-- Pagination -->
+                    <div class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-6xl mx-auto px-2">
+                        <button id="prevPageDesktop" class="disabled:opacity-50" aria-label="Previous page">←
+                            Previous</button>
+                        <span id="pageInfoDesktop"></span>
+                        <button id="nextPageDesktop" class="disabled:opacity-50" aria-label="Next page">Next →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toast -->
+            <div id="toastDesktop"
+                class="hidden fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg">
+                User deleted successfully
+            </div>
+
+            <div id="toast" role="alert" aria-live="assertive"
+                class="fixed bottom-6 right-6 bg-green-600 text-white px-5 py-3 rounded opacity-0 pointer-events-none transition-opacity z-50">
+            </div>
+        </section>
+
+        <!-- Mobile View -->
+        <section class="sm:hidden">
+            <!-- Search & Filter -->
+            <div class="relative mb-4">
+                <div class="flex items-center w-full max-w-full relative">
+                    <input type="text" id="searchInputMobile"
+                        class="w-full rounded-full px-4 pr-12 shadow-sm outline-none py-3"
+                        placeholder="Search services..." aria-label="Search services" />
+                    <button id="searchBtnMobile"
+                        class="absolute right-2 top-[6px] bg-white rounded-full p-2 shadow hover:bg-gray-100"
+                        aria-label="Search">
+                        <!-- Search SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="flex justify-end px-4 relative">
+                <button id="filterBtnMobile" class="bg-white rounded-full p-2 shadow hover:bg-gray-100"
+                    aria-label="Toggle filter mobile">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-600" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 4h18l-7 8v6l-4 2v-8z" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Batch Activate / Deactivate Buttons -->
+            <div class="flex justify-end gap-4 px-4 mb-4">
+                <button id="batchActivateMobile"
+                    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50" disabled>
+                    Activate Selected
+                </button>
+                <button id="batchDeactivateMobile"
+                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50" disabled>
+                    Deactivate Selected
+                </button>
+            </div>
+
+            <div id="filterPanelMobile"
+                class="hidden absolute top-12 right-0 z-50 bg-white rounded-xl shadow-2xl scale-105 animate-bounce-in px-6 py-4 transition-all duration-300 min-w-[220px]">
+                <h3 class="text-lg font-semibold mb-2">Filters</h3>
+                <form id="filterFormMobile" class="space-y-4">
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterDateFromMobile">Date Added From</label>
+                        <input type="date" id="filterDateFromMobile" name="dateFrom"
+                            class="w-full border rounded px-2 py-1" />
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterDateToMobile">Date Added To</label>
+                        <input type="date" id="filterDateToMobile" name="dateTo"
+                            class="w-full border rounded px-2 py-1" />
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterPriceOpMobile">Price Op</label>
+                        <select id="filterPriceOpMobile" name="priceOp" class="w-full border rounded px-2 py-1">
+                            <option value="=">=</option>
+                            <option value=">=">≥</option>
+                            <option value="<=">≤</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterPriceMobile">Price</label>
+                        <input type="number" min="0" step="0.01" id="filterPriceMobile" name="price"
+                            class="w-full border rounded px-2 py-1" placeholder="Amount" />
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterTimeOpMobile">Time Op</label>
+                        <select id="filterTimeOpMobile" name="timeOp" class="w-full border rounded px-2 py-1">
+                            <option value="=">=</option>
+                            <option value=">=">≥</option>
+                            <option value="<=">≤</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterTimeMobile">Time (min)</label>
+                        <input type="number" min="0" id="filterTimeMobile" name="time"
+                            class="w-full border rounded px-2 py-1" placeholder="Minutes" />
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterFuelMobile">Fuel</label>
+                        <select id="filterFuelMobile" name="fuel" class="w-full border rounded px-2 py-1">
+                            <option value="">All</option>
+                            <option>Petrol</option>
+                            <option>Diesel</option>
+                            <option>EV</option>
+                            <option>Hybrid</option>
+                            <option>CNG</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-semibold" for="filterTypeMobile">Vehicle Type</label>
+                        <select id="filterTypeMobile" name="type" class="w-full border rounded px-2 py-1">
+                            <option value="">All</option>
+                            <option value="two-wheeler">Two-Wheeler</option>
+                            <option value="four-wheeler">Four-Wheeler</option>
+                        </select>
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-primary text-white rounded py-2 hover:bg-indigo-900 transition">Apply
+                        Filter</button>
+                    <button type="button" id="clearFilterMobile"
+                        class="w-full mt-1 border border-gray-400 rounded py-2 hover:bg-gray-100 transition">Clear
+                        Filter</button>
+                </form>
+            </div>
+
+            <div>
+                <h2 class="text-lg font-semibold mb-2 px-4">Vehicle Service Info</h2>
+                <div id="customerListMobile" class="p-2 space-y-2"></div>
+                <div id="paginationMobile"
+                    class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-md mx-auto px-4">
+                    <button id="prevPageMobile" class="disabled:opacity-50" aria-label="Previous page">←
+                        Previous</button>
+                    <span id="pageInfoMobile"></span>
+                    <button id="nextPageMobile" class="disabled:opacity-50" aria-label="Next page">Next →</button>
+                </div>
+                <div class="px-4 pb-6 flex items-center">
+                    <input type="checkbox" id="selectAllMobile" aria-label="Select all" class="mr-2" /> <label
+                        for="selectAllMobile">Select
+                        All</label>
+                </div>
+            </div>
+
+            <div id="customer-modal"
+                class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
+                <div class="bg-white rounded-lg shadow-lg w-full max-w-md max-h-full flex flex-col overflow-hidden relative"
+                    style="height: 100vh;">
+                    <button id="modal-close-btn" aria-label="Close modal"
+                        class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                    <div id="modal-content" class="p-6 overflow-auto flex-grow">
+                        <!-- Dynamic customer info will be inserted here -->
+                        <form id="editServiceForm" autocomplete="off" class="space-y-4">
+
+                            <div class="relative">
+                                <label for="editPrice" class="font-semibold block mb-1">Price <span
+                                        class="text-red-600">*</span></label>
+                                <input id="editPrice" name="price" type="number" min="0" step="0.01" autocomplete="off"
+                                    class="border border-gray-300 rounded w-full p-2" />
+                                <p id="priceError" class="text-xs text-red-600 mt-1 hidden">Please enter valid price.
+                                </p>
+                            </div>
+
+                            <div>
+                                <label for="editTimeToComplete" class="font-semibold block mb-1">Time to Complete
+                                    (minutes) <span class="text-red-600">*</span></label>
+                                <input id="editTimeToComplete" name="timeToComplete" type="number" min="1"
+                                    class="border border-gray-300 rounded w-full p-2" />
+                                <p id="timeError" class="text-xs text-red-600 mt-1 hidden">Please enter valid time.</p>
+                            </div>
+
+                            <button type="submit" id="editServiceSubmitBtn"
+                                class="w-full bg-primary hover:bg-indigo-900 text-white p-3 rounded font-semibold transition disabled:opacity-50">
+                                Save Changes
+                            </button>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+  // Data storage for services (sample demo data)
+  let servicesData = [
+    {
+      id: 1, brand: "Toyota", model: "Camry", fuel: "Petrol", type: "four-wheeler", serviceName: "Oil Change",
+      dateAdded: "2023-01-15", lastDeactivated: "", price: 1500, timeToComplete: 30, active: true
+    },
+    {
+      id: 2, brand: "Honda", model: "CBR500R", fuel: "Petrol", type: "two-wheeler", serviceName: "Engine Tune-up",
+      dateAdded: "2023-05-20", lastDeactivated: "", price: 1200, timeToComplete: 45, active: true
+    },
+    {
+      id: 3, brand: "Tesla", model: "Model 3", fuel: "EV", type: "four-wheeler", serviceName: "Battery Health Check",
+      dateAdded: "2024-03-10", lastDeactivated: "2025-01-01", price: 3000, timeToComplete: 60, active: false
+    },
+    {
+      id: 4, brand: "Yamaha", model: "R15", fuel: "Petrol", type: "two-wheeler", serviceName: "Brake Replacement",
+      dateAdded: "2022-11-05", lastDeactivated: "", price: 900, timeToComplete: 50, active: true
+    }
+  ];
+
+  let filteredServices = [...servicesData];
+  let currentPageDesktop = 1;
+  const rowsPerPageDesktop = 5;
+  let currentPageMobile = 1;
+  const rowsPerPageMobile = 5;
+
+  // Desktop DOM Elements
+  const tableBodyDesktop = document.getElementById("customerTableBodyDesktop");
+  const searchInputDesktop = document.getElementById("searchInputDesktop");
+  const searchBtnDesktop = document.getElementById("searchBtnDesktop");
+  const filterBtnDesktop = document.getElementById("filterBtnDesktop");
+  const filterPanelDesktop = document.getElementById("filterPanelDesktop");
+  const filterFormDesktop = document.getElementById("filterFormDesktop");
+  const clearFilterDesktopBtn = document.getElementById("clearFilterDesktop");
+  const batchActivateDesktopBtn = document.getElementById("batchActivateDesktop");
+  const batchDeactivateDesktopBtn = document.getElementById("batchDeactivateDesktop");
+  const selectAllDesktopCheckbox = document.getElementById("selectAllDesktop");
+  const prevPageDesktop = document.getElementById("prevPageDesktop");
+  const nextPageDesktop = document.getElementById("nextPageDesktop");
+  const pageInfoDesktop = document.getElementById("pageInfoDesktop");
+
+  // Mobile DOM elements
+  const customerListMobile = document.getElementById("customerListMobile");
+  const searchInputMobile = document.getElementById("searchInputMobile");
+  const searchBtnMobile = document.getElementById("searchBtnMobile");
+  const filterBtnMobile = document.getElementById("filterBtnMobile");
+  const filterPanelMobile = document.getElementById("filterPanelMobile");
+  const filterFormMobile = document.getElementById("filterFormMobile");
+  const clearFilterMobileBtn = document.getElementById("clearFilterMobile");
+  const batchActivateMobileBtn = document.getElementById("batchActivateMobile");
+  const batchDeactivateMobileBtn = document.getElementById("batchDeactivateMobile");
+  const selectAllMobileCheckbox = document.getElementById("selectAllMobile");
+  const prevPageMobile = document.getElementById("prevPageMobile");
+  const nextPageMobile = document.getElementById("nextPageMobile");
+  const pageInfoMobile = document.getElementById("pageInfoMobile");
+
+  // Modal elements and form
+  const modal = document.getElementById("customer-modal");
+  const modalCloseBtn = document.getElementById("modal-close-btn");
+  const editPriceInput = document.getElementById("editPrice");
+  const editTimeInput = document.getElementById("editTimeToComplete");
+  const editServiceForm = document.getElementById("editServiceForm");
+  const editServiceSubmitBtn = document.getElementById("editServiceSubmitBtn");
+  const priceError = document.getElementById("priceError");
+  const timeError = document.getElementById("timeError");
+
+  // State
+  let editServiceIndex = null;
+
+  // Utility: Format date as YYYY-MM-DD for inputs/display consistency
+  function formatDate(dateString) {
+    if (!dateString) return "-";
+    const d = new Date(dateString);
+    return d.toISOString().split("T")[0];
+  }
+
+  // --------- Rendering ------------
+
+  function renderTableDesktop() {
+    const start = (currentPageDesktop - 1) * rowsPerPageDesktop;
+    const end = start + rowsPerPageDesktop;
+    const pageServices = filteredServices.slice(start, end);
+
+    tableBodyDesktop.innerHTML = "";
+
+    pageServices.forEach((service, idx) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td class="border border-gray-300 p-2 text-center"><input type="checkbox" class="rowCheckboxDesktop" data-index="${start + idx}" aria-label="Select row" /></td>
+        <td class="border border-gray-300 p-2">${service.brand}</td>
+        <td class="border border-gray-300 p-2">${service.model}</td>
+        <td class="border border-gray-300 p-2">${service.fuel}</td>
+        <td class="border border-gray-300 p-2">${service.type}</td>
+        <td class="border border-gray-300 p-2">${service.serviceName}</td>
+        <td class="border border-gray-300 p-2">${formatDate(service.dateAdded)}</td>
+        <td class="border border-gray-300 p-2">${service.lastDeactivated ? formatDate(service.lastDeactivated) : "-"}</td>
+        <td class="border border-gray-300 p-2">${service.price.toFixed(2)}</td>
+        <td class="border border-gray-300 p-2">${service.timeToComplete}</td>
+        <td class="border border-gray-300 p-2 text-center space-x-2">
+          <button class="text-blue-600 hover:underline edit-btn" data-index="${start + idx}">Edit</button>
+          <button class="text-red-600 hover:underline deactivate-btn" data-index="${start + idx}">${service.active ? "Deactivate" : "Activate"}</button>
+        </td>
+      `;
+      tableBodyDesktop.appendChild(row);
+    });
+
+    pageInfoDesktop.textContent = `Page ${currentPageDesktop} of ${Math.ceil(filteredServices.length / rowsPerPageDesktop)}`;
+    prevPageDesktop.disabled = currentPageDesktop === 1;
+    nextPageDesktop.disabled = currentPageDesktop === Math.ceil(filteredServices.length / rowsPerPageDesktop);
+
+    updateBatchButtonsDesktop();
+    updateSelectAllDesktopCheckbox();
+
+    attachTableEventListeners();
+  }
+
+  function renderListMobile() {
+    const start = (currentPageMobile - 1) * rowsPerPageMobile;
+    const end = start + rowsPerPageMobile;
+    const pageServices = filteredServices.slice(start, end);
+
+    customerListMobile.innerHTML = "";
+
+    pageServices.forEach((service, idx) => {
+      const div = document.createElement("div");
+      div.className = "border border-gray-300 rounded p-3 space-y-1 relative";
+
+      div.innerHTML = `
+        <input type="checkbox" class="rowCheckboxMobile absolute top-3 left-3" data-index="${start + idx}" aria-label="Select row" />
+        <div class="pl-8"><strong>Brand:</strong> ${service.brand}</div>
+        <div class="pl-8"><strong>Model:</strong> ${service.model}</div>
+        <div class="pl-8"><strong>Fuel:</strong> ${service.fuel}</div>
+        <div class="pl-8"><strong>Type:</strong> ${service.type}</div>
+        <div class="pl-8"><strong>Service:</strong> ${service.serviceName}</div>
+        <div class="pl-8"><strong>Date Added:</strong> ${formatDate(service.dateAdded)}</div>
+        <div class="pl-8"><strong>Last Deactivated:</strong> ${service.lastDeactivated ? formatDate(service.lastDeactivated) : "-"}</div>
+        <div class="pl-8"><strong>Price:</strong> ${service.price.toFixed(2)}</div>
+        <div class="pl-8"><strong>Time (min):</strong> ${service.timeToComplete}</div>
+        <div class="space-x-2 mt-2 text-center pl-8">
+          <button class="text-blue-600 underline text-sm edit-btn" data-index="${start + idx}">Edit</button>
+          <button class="text-red-600 underline text-sm deactivate-btn" data-index="${start + idx}">${service.active ? "Deactivate" : "Activate"}</button>
+        </div>
+      `;
+
+      customerListMobile.appendChild(div);
+    });
+
+    pageInfoMobile.textContent = `Page ${currentPageMobile} of ${Math.ceil(filteredServices.length / rowsPerPageMobile)}`;
+    prevPageMobile.disabled = currentPageMobile === 1;
+    nextPageMobile.disabled = currentPageMobile === Math.ceil(filteredServices.length / rowsPerPageMobile);
+
+    updateBatchButtonsMobile();
+    updateSelectAllMobileCheckbox();
+
+    attachListEventListeners();
+  }
+
+  // Pagination
+
+  prevPageDesktop.addEventListener("click", () => {
+    if (currentPageDesktop > 1) {
+      currentPageDesktop--;
+      renderTableDesktop();
+    }
+  });
+
+  nextPageDesktop.addEventListener("click", () => {
+    if (currentPageDesktop < Math.ceil(filteredServices.length / rowsPerPageDesktop)) {
+      currentPageDesktop++;
+      renderTableDesktop();
+    }
+  });
+
+  prevPageMobile.addEventListener("click", () => {
+    if (currentPageMobile > 1) {
+      currentPageMobile--;
+      renderListMobile();
+    }
+  });
+
+  nextPageMobile.addEventListener("click", () => {
+    if (currentPageMobile < Math.ceil(filteredServices.length / rowsPerPageMobile)) {
+      currentPageMobile++;
+      renderListMobile();
+    }
+  });
+
+  // Filter toggle
+
+  filterBtnDesktop.addEventListener("click", e => {
+    e.stopPropagation();
+    filterPanelDesktop.classList.toggle("hidden");
+  });
+
+  filterBtnMobile.addEventListener("click", e => {
+    e.stopPropagation();
+    filterPanelMobile.classList.toggle("hidden");
+  });
+
+  document.addEventListener("click", e => {
+    if (!filterPanelDesktop.contains(e.target) && !filterBtnDesktop.contains(e.target)) {
+      filterPanelDesktop.classList.add("hidden");
+    }
+    if (!filterPanelMobile.contains(e.target) && !filterBtnMobile.contains(e.target)) {
+      filterPanelMobile.classList.add("hidden");
+    }
+  });
+
+  // Search and Filter
+
+  function filterBySearch(text) {
+    const searchText = text.toLowerCase().trim();
+    filteredServices = servicesData.filter(svc => {
+      const combined = [svc.brand, svc.model, svc.fuel, svc.type, svc.serviceName].join(" ").toLowerCase();
+      return combined.includes(searchText);
+    });
+  }
+
+  function applyFiltersFromForms() {
+    const formDesktopData = new FormData(filterFormDesktop);
+    const formMobileData = filterFormMobile ? new FormData(filterFormMobile) : null;
+
+    const getValue = (form, key) => form ? form.get(key) || "" : "";
+
+    const dateFrom = getValue(formDesktopData, "dateFrom") || getValue(formMobileData, "dateFrom");
+    const dateTo = getValue(formDesktopData, "dateTo") || getValue(formMobileData, "dateTo");
+    const priceOp = getValue(formDesktopData, "priceOp") || getValue(formMobileData, "priceOp") || "=";
+    const priceVal = parseFloat(getValue(formDesktopData, "price") || getValue(formMobileData, "price")) || null;
+    const timeOp = getValue(formDesktopData, "timeOp") || getValue(formMobileData, "timeOp") || "=";
+    const timeVal = parseInt(getValue(formDesktopData, "time") || getValue(formMobileData, "time")) || null;
+    const fuelVal = getValue(formDesktopData, "fuel") || getValue(formMobileData, "fuel") || "";
+    const typeVal = getValue(formDesktopData, "type") || getValue(formMobileData, "type") || "";
+
+    filteredServices = filteredServices.filter(service => {
+      let valid = true;
+      if (dateFrom) valid = valid && new Date(service.dateAdded) >= new Date(dateFrom);
+      if (dateTo) valid = valid && new Date(service.dateAdded) <= new Date(dateTo);
+      if (priceVal !== null && !isNaN(priceVal)) {
+        switch (priceOp) {
+          case "=": valid = valid && service.price === priceVal; break;
+          case ">=": valid = valid && service.price >= priceVal; break;
+          case "<=": valid = valid && service.price <= priceVal; break;
+        }
+      }
+      if (timeVal !== null && !isNaN(timeVal)) {
+        switch (timeOp) {
+          case "=": valid = valid && service.timeToComplete === timeVal; break;
+          case ">=": valid = valid && service.timeToComplete >= timeVal; break;
+          case "<=": valid = valid && service.timeToComplete <= timeVal; break;
+        }
+      }
+      if (fuelVal) valid = valid && service.fuel === fuelVal;
+      if (typeVal) valid = valid && service.type === typeVal;
+      return valid;
+    });
+  }
+
+
+  searchBtnDesktop.addEventListener("click", () => {
+    filterBySearch(searchInputDesktop.value);
+    applyFiltersFromForms();
+    currentPageDesktop = 1;
+    currentPageMobile = 1;
+    renderTableDesktop();
+    renderListMobile();
+  });
+  searchInputDesktop.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      searchBtnDesktop.click();
+    }
+  });
+
+  searchBtnMobile.addEventListener("click", () => {
+    filterBySearch(searchInputMobile.value);
+    applyFiltersFromForms();
+    currentPageDesktop = 1;
+    currentPageMobile = 1;
+    renderTableDesktop();
+    renderListMobile();
+  });
+  searchInputMobile.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      searchBtnMobile.click();
+    }
+  });
+
+  filterFormDesktop.addEventListener("submit", e => {
+    e.preventDefault();
+    filterBySearch(searchInputDesktop.value);
+    applyFiltersFromForms();
+    currentPageDesktop = 1;
+    currentPageMobile = 1;
+    renderTableDesktop();
+    renderListMobile();
+    filterPanelDesktop.classList.add("hidden");
+  });
+
+  if (filterFormMobile) {
+    filterFormMobile.addEventListener("submit", e => {
+      e.preventDefault();
+      filterBySearch(searchInputMobile.value);
+      applyFiltersFromForms();
+      currentPageDesktop = 1;
+      currentPageMobile = 1;
+      renderTableDesktop();
+      renderListMobile();
+      filterPanelMobile.classList.add("hidden");
+    });
+  }
+
+  clearFilterDesktopBtn.addEventListener("click", () => {
+    filterFormDesktop.reset();
+    filterPanelDesktop.classList.add("hidden");
+    resetFilters();
+  });
+
+  if (clearFilterMobileBtn) {
+    clearFilterMobileBtn.addEventListener("click", () => {
+      filterFormMobile.reset();
+      filterPanelMobile.classList.add("hidden");
+      resetFilters();
+    });
+  }
+
+  function resetFilters() {
+    searchInputDesktop.value = "";
+    searchInputMobile.value = "";
+    filteredServices = [...servicesData];
+    currentPageDesktop = 1;
+    currentPageMobile = 1;
+    renderTableDesktop();
+    renderListMobile();
+  }
+
+  // --------- Row Checkboxes and Batch Actions (Desktop) -----------
+
+  function updateBatchButtonsDesktop() {
+    const anyChecked = [...tableBodyDesktop.querySelectorAll(".rowCheckboxDesktop")].some(cb => cb.checked);
+    batchActivateDesktopBtn.disabled = !anyChecked;
+    batchDeactivateDesktopBtn.disabled = !anyChecked;
+  }
+  function updateSelectAllDesktopCheckbox() {
+    const checkboxes = [...tableBodyDesktop.querySelectorAll(".rowCheckboxDesktop")];
+    if (checkboxes.length === 0) {
+      selectAllDesktopCheckbox.checked = false;
+      selectAllDesktopCheckbox.indeterminate = false;
+      return;
+    }
+    const checkedBoxes = checkboxes.filter(cb => cb.checked);
+    if (checkedBoxes.length === 0) {
+      selectAllDesktopCheckbox.checked = false;
+      selectAllDesktopCheckbox.indeterminate = false;
+    } else if (checkedBoxes.length === checkboxes.length) {
+      selectAllDesktopCheckbox.checked = true;
+      selectAllDesktopCheckbox.indeterminate = false;
+    } else {
+      selectAllDesktopCheckbox.indeterminate = true;
+    }
+  }
+  selectAllDesktopCheckbox.addEventListener("change", () => {
+    const isChecked = selectAllDesktopCheckbox.checked;
+    tableBodyDesktop.querySelectorAll(".rowCheckboxDesktop").forEach(cb => {
+      cb.checked = isChecked;
+    });
+    updateBatchButtonsDesktop();
+  });
+  tableBodyDesktop.addEventListener("change", e => {
+    if (e.target.classList.contains("rowCheckboxDesktop")) {
+      updateBatchButtonsDesktop();
+      updateSelectAllDesktopCheckbox();
+    }
+  });
+  batchActivateDesktopBtn.addEventListener("click", () => {
+    batchChangeActivation(true);
+  });
+  batchDeactivateDesktopBtn.addEventListener("click", () => {
+    batchChangeActivation(false);
+  });
+
+  // --------- Row Checkboxes and Batch Actions (Mobile) -----------
+
+  function updateBatchButtonsMobile() {
+    const anyChecked = [...customerListMobile.querySelectorAll(".rowCheckboxMobile")].some(cb => cb.checked);
+    batchActivateMobileBtn.disabled = !anyChecked;
+    batchDeactivateMobileBtn.disabled = !anyChecked;
+  }
+  function updateSelectAllMobileCheckbox() {
+    const checkboxes = [...customerListMobile.querySelectorAll(".rowCheckboxMobile")];
+    if (checkboxes.length === 0) {
+      selectAllMobileCheckbox.checked = false;
+      selectAllMobileCheckbox.indeterminate = false;
+      return;
+    }
+    const checkedBoxes = checkboxes.filter(cb => cb.checked);
+    if (checkedBoxes.length === 0) {
+      selectAllMobileCheckbox.checked = false;
+      selectAllMobileCheckbox.indeterminate = false;
+    } else if (checkedBoxes.length === checkboxes.length) {
+      selectAllMobileCheckbox.checked = true;
+      selectAllMobileCheckbox.indeterminate = false;
+    } else {
+      selectAllMobileCheckbox.indeterminate = true;
+    }
+  }
+  selectAllMobileCheckbox.addEventListener("change", () => {
+    const isChecked = selectAllMobileCheckbox.checked;
+    customerListMobile.querySelectorAll(".rowCheckboxMobile").forEach(cb => {
+      cb.checked = isChecked;
+    });
+    updateBatchButtonsMobile();
+  });
+  customerListMobile.addEventListener("change", e => {
+    if (e.target.classList.contains("rowCheckboxMobile")) {
+      updateBatchButtonsMobile();
+      updateSelectAllMobileCheckbox();
+    }
+  });
+  batchActivateMobileBtn.addEventListener("click", () => {
+    batchChangeActivation(true);
+  });
+  batchDeactivateMobileBtn.addEventListener("click", () => {
+    batchChangeActivation(false);
+  });
+
+  // --------- Batch Activation/Deactivation -----------
+
+  function batchChangeActivation(activate) {
+    const selectedIndexes = new Set();
+
+    [...tableBodyDesktop.querySelectorAll(".rowCheckboxDesktop")].forEach(cb => {
+      if (cb.checked) selectedIndexes.add(parseInt(cb.dataset.index));
+    });
+    [...customerListMobile.querySelectorAll(".rowCheckboxMobile")].forEach(cb => {
+      if (cb.checked) selectedIndexes.add(parseInt(cb.dataset.index));
+    });
+    if (selectedIndexes.size === 0) return;
+    const action = activate ? "Activate" : "Deactivate";
+    if (!confirm(`${action} ${selectedIndexes.size} selected service(s)?`)) return;
+
+    selectedIndexes.forEach(i => {
+      const service = filteredServices[i];
+      if (!service) return;
+      service.active = activate;
+      if (!activate && !service.lastDeactivated) service.lastDeactivated = new Date().toISOString();
+      if (activate) service.lastDeactivated = "";
+      const origIndex = servicesData.findIndex(s => s.id === service.id);
+      if (origIndex !== -1) {
+        servicesData[origIndex].active = activate;
+        servicesData[origIndex].lastDeactivated = service.lastDeactivated;
+      }
+    });
+
+    renderTableDesktop();
+    renderListMobile();
+
+    batchActivateDesktopBtn.disabled = true;
+    batchDeactivateDesktopBtn.disabled = true;
+    batchActivateMobileBtn.disabled = true;
+    batchDeactivateMobileBtn.disabled = true;
+    selectAllDesktopCheckbox.checked = false;
+    selectAllMobileCheckbox.checked = false;
+  }
+
+  // --------- Edit and Deactivate Buttons Handling -----------
+
+  function attachTableEventListeners() {
+    tableBodyDesktop.querySelectorAll(".edit-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const index = parseInt(btn.dataset.index);
+        openEditModal(index);
+      });
+    });
+
+    tableBodyDesktop.querySelectorAll(".deactivate-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const index = parseInt(btn.dataset.index);
+        toggleActivation(index);
+      });
+    });
+  }
+
+  function attachListEventListeners() {
+    customerListMobile.querySelectorAll(".edit-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const index = parseInt(btn.dataset.index);
+        openEditModal(index);
+      });
+    });
+
+    customerListMobile.querySelectorAll(".deactivate-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const index = parseInt(btn.dataset.index);
+        toggleActivation(index);
+      });
+    });
+  }
+
+  function toggleActivation(index) {
+    const service = filteredServices[index];
+    if (!service) return;
+    if (service.active) {
+      if (confirm(`Deactivate service "${service.serviceName}" for ${service.brand} ${service.model}?`)) {
+        service.active = false;
+        if (!service.lastDeactivated) service.lastDeactivated = new Date().toISOString();
+      }
+    } else {
+      if (confirm(`Activate service "${service.serviceName}" for ${service.brand} ${service.model}?`)) {
+        service.active = true;
+        service.lastDeactivated = "";
+      }
+    }
+    const origIndex = servicesData.findIndex(s => s.id === service.id);
+    if (origIndex !== -1) {
+      servicesData[origIndex].active = service.active;
+      servicesData[origIndex].lastDeactivated = service.lastDeactivated;
+    }
+    renderTableDesktop();
+    renderListMobile();
+  }
+
+  // --------- Modal Edit -----------
+
+  function openEditModal(index) {
+    editServiceIndex = index;
+    const service = filteredServices[index];
+    if (!service) return;
+
+    editPriceInput.value = service.price.toFixed(2);
+    editTimeInput.value = service.timeToComplete;
+    priceError.classList.add("hidden");
+    timeError.classList.add("hidden");
+    editServiceSubmitBtn.disabled = false;
+    modal.classList.remove("hidden");
+  }
+
+  modalCloseBtn.addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  function closeModal() {
+    editServiceIndex = null;
+    modal.classList.add("hidden");
+  }
+
+  function validateModalInputs() {
+    let valid = true;
+    const price = parseFloat(editPriceInput.value);
+    const time = parseInt(editTimeInput.value);
+
+    if (isNaN(price) || price < 0) {
+      priceError.classList.remove("hidden");
+      valid = false;
+    } else {
+      priceError.classList.add("hidden");
+    }
+
+    if (isNaN(time) || time < 1) {
+      timeError.classList.remove("hidden");
+      valid = false;
+    } else {
+      timeError.classList.add("hidden");
+    }
+
+    editServiceSubmitBtn.disabled = !valid;
+    return valid;
+  }
+
+  editPriceInput.addEventListener("input", validateModalInputs);
+  editTimeInput.addEventListener("input", validateModalInputs);
+
+  editServiceForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!validateModalInputs()) return;
+    if (editServiceIndex === null) return;
+
+    const price = parseFloat(editPriceInput.value);
+    const time = parseInt(editTimeInput.value);
+    const service = filteredServices[editServiceIndex];
+    if (!service) return;
+
+    service.price = price;
+    service.timeToComplete = time;
+
+    const origIndex = servicesData.findIndex(s => s.id === service.id);
+    if (origIndex !== -1) {
+      servicesData[origIndex].price = price;
+      servicesData[origIndex].timeToComplete = time;
+    }
+
+    closeModal();
+    renderTableDesktop();
+    renderListMobile();
+  });
+
+  // --------- Initialization -----------
+
+  function init() {
+    filteredServices = [...servicesData];
+    currentPageDesktop = 1;
+    currentPageMobile = 1;
+    renderTableDesktop();
+    renderListMobile();
+  }
+
+  init();
+});
+
+    </script>
+</body>
+
+</html>

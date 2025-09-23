@@ -1,0 +1,97 @@
+<!-- navbar.html -->
+<nav class="block lg:hidden bg-primary w-full fixed top-0 left-0 z-50" aria-label="Mobile Navigation">
+  <div class="flex items-center justify-between px-4  w-full">
+    <span class="flex items-center ">
+      <div class="inline flex justify-center w-full">
+        <img src="/assets/logo.png" class="w-20 h-20 p-0" alt="auto care logo" />
+      </div>
+    </span>
+    <button
+      class="mobile-navbar__hamburger flex flex-col justify-center items-center w-10 h-10 rounded focus:outline-none focus:ring-2 focus:ring-white"
+      type="button" aria-label="Open navigation menu" aria-controls="mobile-nav-panel" aria-expanded="false"
+      tabindex="0">
+      <span class="block w-6 h-0.5 bg-white my-1 transition"></span>
+      <span class="block w-6 h-0.5 bg-white my-1 transition"></span>
+      <span class="block w-6 h-0.5 bg-white my-1 transition"></span>
+    </button>
+  </div>
+  <div
+    class="mobile-nav-overlay fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-300 opacity-0 pointer-events-none"
+    tabindex="-1" aria-hidden="true"></div>
+  <aside
+    class="mobile-nav-panel fixed top-0 right-0 h-full w-4/5 max-w-xs bg-primary text-white z-50 transform translate-x-full transition-transform duration-300 ease-in-out"
+    id="mobile-nav-panel" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1">
+    <nav class="mt-6">
+      <ul class="space-y-2 px-4">
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Dashboard
+          </a>
+        </li>
+        <li>
+          <button type="button"
+            class="flex items-center w-full py-2 px-3 rounded hover:bg-indigo-900 transition focus:outline-none mobile-user-btn"
+            aria-expanded="false" aria-controls="mobile-user-submenu">
+            User Management
+          </button>
+          <div id="mobile-user-submenu" class="pl-8 mt-1 space-y-1 hidden">
+            <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">
+              Customer Management
+            </a>
+            <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">
+              Mechanic Management
+            </a>
+          </div>
+        </li>
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Bookings
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Garage Management
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Service Management
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Payments & Billings
+          </a>
+        </li>
+
+
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Reports
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Issues & Tickets
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Notifications
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Content Management
+          </a>
+        </li>
+        <li>
+          <button
+            class="w-full flex items-center py-2 px-3 rounded bg-indigo-900 hover:bg-indigo-800 font-medium transition">
+            Log out
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+</nav>

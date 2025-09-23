@@ -1,0 +1,89 @@
+<nav class="block lg:hidden bg-primary w-full fixed top-0 left-0 z-50" aria-label="Mobile Navigation">
+  <div class="flex items-center justify-between px-4  w-full">
+    <span class="flex items-center ">
+      <div class="inline flex justify-center w-full">
+        <img src="/assets/logo.png" class="w-16 h-16 p-0" alt="auto care logo" />
+      </div>
+    </span>
+    <div class="add-functionalities flex flex-row-reverse">
+      <button
+        class="mobile-navbar__hamburger flex flex-col justify-center items-center w-10 h-10 rounded focus:outline-none focus:ring-2 focus:ring-white"
+        type="button" aria-label="Open navigation menu" aria-controls="mobile-nav-panel" aria-expanded="false"
+        tabindex="0">
+        <span class="block w-6 h-0.5 bg-white my-1 transition"></span>
+        <span class="block w-6 h-0.5 bg-white my-1 transition"></span>
+        <span class="block w-6 h-0.5 bg-white my-1 transition"></span>
+      </button>
+      <img id="profile_icon" src="/assets/profile_icon.png" class="h-10 w-10 mr-2 rounded-3xl border p-1" />
+      <button id="menu_actions" aria-label="Page actions menu"
+        class="p-2 rounded  focus:outline-none focus:ring-2 focus:ring-primary click:rotate(180)">
+        <svg class="w-6 h-6 inline-block align-middle text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+    </div>
+  </div>
+  <div
+    class="mobile-nav-overlay fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-300 opacity-0 pointer-events-none"
+    tabindex="-1" aria-hidden="true"></div>
+  <aside
+    class="mobile-nav-panel fixed top-0 right-0 h-full w-4/5 max-w-xs bg-primary text-white z-50 transform translate-x-full transition-transform duration-300 ease-in-out"
+    id="mobile-nav-panel" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1">
+    <nav class="mt-6">
+      <ul class="space-y-2 px-4">
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Appointments
+          </a>
+        </li>
+        <li>
+          <button type="button"
+            class="flex items-center w-full py-2 px-3 rounded hover:bg-indigo-900 transition focus:outline-none mobile-user-btn"
+            aria-expanded="false" aria-controls="mobile-user-submenu">
+            Book an Appointment
+          </button>
+          <div id="mobile-user-submenu" class="pl-8 mt-1 space-y-1 hidden">
+            <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">
+              Service
+            </a>
+            <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">
+              Repair
+            </a>
+          </div>
+        </li>
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Vehicle Management
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Service History
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Payments
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Issues & Tickets
+          </a>
+        </li>
+        <li>
+          <button
+            class="w-full flex items-center py-2 px-3 rounded bg-indigo-900 hover:bg-indigo-800 font-medium transition">
+            Log out
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+</nav>

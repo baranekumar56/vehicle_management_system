@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service Booking</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <style>
+    .primary {
+      background-color: #241358;
+    }
+
+    .primary-text {
+      color: #241358;
+    }
+
+    #package-list {
+      display: none;
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    }
+
+
+    #package-modal {
+      display: none;
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    }
+
+    #package-description {
+      max-width: 90%;
+      max-height: 90%;
+    }
+  </style>
+</head>
+
+<body class="primary flex justify-center items-center min-h-screen">
+
+  <div class="bg-white w-full sm:max-w-3xl lg:max-w-4xl shadow-lg sm:rounded-2xl p-6 sm:p-8 lg:p-10 h-screen ">
+
+    <!-- cancel button-->
+    <div class="flex justify-end mb-2">
+      <img src="/assets/cancel.png" alt="cancel icon" class="w-10 h-10" />
+    </div>
+    <!-- Progress Bar -->
+    <div class="flex justify-between items-center mb-6">
+      <div class="flex-1 flex items-center">
+        <div class="step w-8 h-8 flex items-center justify-center rounded-full bg-blue-600 text-white font-bold">1</div>
+        <div class="flex-1 h-1 bg-gray-300"></div>
+        <div class="step w-8 h-8 flex items-center justify-center rounded-full bg-gray-300 text-gray-700 font-bold">2
+        </div>
+        <div class="flex-1 h-1 bg-gray-300"></div>
+        <div class="step w-8 h-8 flex items-center justify-center rounded-full bg-gray-300 text-gray-700 font-bold">3
+        </div>
+        <div class="flex-1 h-1 bg-gray-300"></div>
+        <div class="step w-8 h-8 flex items-center justify-center rounded-full bg-gray-300 text-gray-700 font-bold">4
+        </div>
+        <div class="flex-1 h-1 bg-gray-300"></div>
+        <div class="step w-8 h-8 flex items-center justify-center rounded-full bg-gray-300 text-gray-700 font-bold">5
+        </div>
+      </div>
+    </div>
+
+    <!-- Step Content -->
+    <form id="multiStepForm">
+      <!-- Step 1 -->
+      <div class="step-content">
+        <h2 class="text-xl sm:text-2xl font-semibold mb-4">Personal Details</h2>
+        <div class="space-y-3">
+          <div class=" flex justify-end text-blue-500 cursor-pointer">
+            <div>Auto fill</div>
+          </div>
+          <input type="text" placeholder="Name" class="w-full border rounded-lg p-2 sm:p-3" />
+          <input type="email" placeholder="Email" class="w-full border rounded-lg p-2 sm:p-3" />
+          <input type="tel" placeholder="Phone" class="w-full border rounded-lg p-2 sm:p-3" />
+          <select id="pickup-option" class="w-full border rounded-lg p-2 sm:p-3">
+            <option value="no">Need Pickup - No</option>
+            <option value="yes">Need Pickup - Yes</option>
+          </select>
+          <div id="address" class="hidden ">
+            <div class="text-blue-500 flex justify-end"> <img src="/assets/gps (1).png" class="w-6 h-6 inline"
+                alt="gps option hover:mouse-pointer" /></div>
+
+            <textarea placeholder="Address" class=" w-full border rounded-lg p-2 sm:p-3 sm:w-3/4"></textarea>
+
+          </div>
+
+        </div>
+        <div class="flex justify-end mt-4">
+          <button type="button"
+            class="next-btn bg-blue-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-content hidden">
+        <h2 class="text-xl sm:text-2xl font-semibold mb-4">Vehicle Details</h2>
+        <div class="space-y-3">
+          <div class=" flex justify-end text-blue-500 cursor-pointer">
+            <div>Auto fill</div>
+          </div>
+          <input type="text" placeholder="Vehicle No" class="w-full border rounded-lg p-2 sm:p-3" />
+          <input type="text" placeholder="Brand" class="w-full border rounded-lg p-2 sm:p-3" />
+          <input type="text" placeholder="Model" class="w-full border rounded-lg p-2 sm:p-3" />
+          <input type="text" placeholder="Vehicle Type" class="w-full border rounded-lg p-2 sm:p-3" />
+          <input type="text" placeholder="Fuel Type" class="w-full border rounded-lg p-2 sm:p-3" />
+          <input type="file" placeholder="Vehicle RC Book" class="w-full border rounded-lg p-2 sm:p-3" />
+
+        </div>
+        <div class="flex justify-between mt-4">
+          <button type="button"
+            class="prev-btn bg-gray-300 px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg">Back</button>
+          <button type="button"
+            class="next-btn bg-blue-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-content hidden">
+        <div class="sm:flex sm:gap-6">
+          <!-- Left side: search + services -->
+          <div class="flex-1">
+            <h2 class="text-xl sm:text-2xl font-semibold mb-4">Service Selection</h2>
+
+            <!-- mobile "View Packages" -->
+            <div class="sm:hidden flex justify-end text-blue-500 mb-2">
+              <div id="package-view-button">View Packages</div>
+            </div>
+
+            <!-- Search -->
+            <input type="text" placeholder="Search services..." class="w-full border rounded-lg p-2 sm:p-3 mb-4" />
+
+            <!-- Checkboxes -->
+            <div class="space-y-2 max-h-40 overflow-y-auto">
+              <div class="flex justify-between">
+                <label>Oil change</label>
+                <img src="/assets/plus.png" alt="correct image" class="w-5 h-5" />
+              </div>
+
+              <div class="flex justify-between">
+                <label>Oil change</label>
+                <img src="/assets/plus.png" alt="correct image" class="w-5 h-5" />
+              </div>
+              <div class="flex justify-between">
+                <label>Oil change</label>
+                <img src="/assets/plus.png" alt="correct image" class="w-5 h-5" />
+              </div>
+              <div class="flex justify-between">
+                <label>Oil change</label>
+                <img src="/assets/plus.png" alt="correct image" class="w-5 h-5" />
+              </div>
+              <div class="flex justify-between">
+                <label>Oil change</label>
+                <img src="/assets/plus.png" alt="correct image" class="w-5 h-5" />
+              </div>
+              <div class="flex justify-between">
+                <label>Oil change</label>
+                <img src="/assets/plus.png" alt="correct image" class="w-5 h-5" />
+              </div>
+              <div class="flex justify-between">
+                <label>Oil change</label>
+                <img src="/assets/plus.png" alt="correct image" class="w-5 h-5" />
+              </div>
+              <div class="flex justify-between">
+                <label>Oil change</label>
+                <img src="/assets/plus.png" alt="correct image" class="w-5 h-5" />
+              </div>
+
+            </div>
+
+            <div>
+              <h3 class="text-xl sm:text-2xl font-semibold mb-4">Selected Services</h3>
+
+              <!-- fixed: id + class -->
+              <div id="selected-services" class="max-h-40 overflow-y-auto border rounded p-2 space-y-1 ">
+
+                <div class="flex justify-between">
+                  <span>Oil check</span>
+                  <img src="/assets/minus.png" class="w-5 h-5 inline" alt="remove service" />
+                </div>
+
+                <div class="flex justify-between">
+                  <span>Oil check</span>
+                  <img src="/assets/minus.png" class="w-5 h-5 inline" alt="remove service" />
+                </div>
+                <div class="flex justify-between">
+                  <span>Oil check</span>
+                  <img src="/assets/minus.png" class="w-5 h-5 inline" alt="remove service" />
+                </div>
+                <div class="flex justify-between">
+                  <span>Oil check</span>
+                  <img src="/assets/minus.png" class="w-5 h-5 inline" alt="remove service" />
+                </div>
+                <div class="flex justify-between">
+                  <span>Oil check</span>
+                  <img src="/assets/minus.png" class="w-5 h-5 inline" alt="remove service" />
+                </div>
+                <div class="flex justify-between">
+                  <span>Oil check</span>
+                  <img src="/assets/minus.png" class="w-5 h-5 inline" alt="remove service" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right side: Packages (desktop only) -->
+          <div class="hidden sm:flex flex-col flex-1 max-h-[450px] overflow-y-auto">
+            <h3 class="text-xl sm:text-2xl font-semibold mb-4 text-center">Packages</h3>
+            <div id="packages" class="flex flex-col">
+              <div class="flex justify-between hover:cursor-pointer mb-2 shadow-lg p-4 ">
+                <div class="text-lg">General Service</div>
+                <img src="/assets/detail-arrow.png" class="w-6 h-6" />
+              </div>
+
+              <div class="flex justify-between hover:cursor-pointer mb-2 shadow-lg p-4 ">
+                <div class="text-lg">General Service</div>
+                <img src="/assets/detail-arrow.png" class="w-6 h-6" />
+              </div>
+
+              <div class="flex justify-between hover:cursor-pointer mb-2 shadow-lg p-4 ">
+                <div class="text-lg">General Service</div>
+                <img src="/assets/detail-arrow.png" class="w-6 h-6" />
+              </div>
+
+              <div class="flex justify-between hover:cursor-pointer mb-2 shadow-lg p-4 ">
+                <div class="text-lg">General Service</div>
+                <img src="/assets/detail-arrow.png" class="w-6 h-6" />
+              </div>
+
+              <div class="flex justify-between hover:cursor-pointer mb-2 shadow-lg p-4 ">
+                <div class="text-lg">General Service</div>
+                <img src="/assets/detail-arrow.png" class="w-6 h-6" />
+              </div>
+            </div>
+          </div>
+
+          <!-- this section will be used for displaying packages for mobile view -->
+          <div id="mobile-package-list"
+            class="absolute hidden z-69 top-0 left-0 w-screen h-screen bg-white max-h-screen overflow-y-auto bg-opactiy-25 p-4">
+            <div class="flex flex-col justify-center">
+              <div class="flex justify-end">
+                <img id="mobile-package-list-cancel" src="/assets/cancel.png" class="w-10 h-10" />
+              </div>
+              <div>
+                <div class="flex flex-col max-h-[450px] overflow-y-auto">
+                  <h3 class="text-xl sm:text-2xl font-semibold mb-4 text-center">Packages</h3>
+                  <div id="packages" class="flex flex-col">
+                    <div class="flex justify-between hover:cursor-pointer mb-2 shadow-lg p-4 ">
+                      <div class="text-lg">General Service</div>
+                      <img src="/assets/detail-arrow.png" class="w-6 h-6" />
+                    </div>
+
+                    <div class="flex justify-between hover:cursor-pointer mb-2 shadow-lg p-4 ">
+                      <div class="text-lg">General Service</div>
+                      <img src="/assets/detail-arrow.png" class="w-6 h-6" />
+                    </div>
+
+                    <div class="flex justify-between hover:cursor-pointer mb-2 shadow-lg p-4 ">
+                      <div class="text-lg">General Service</div>
+                      <img src="/assets/detail-arrow.png" class="w-6 h-6" />
+                    </div>
+
+                    <div class="flex justify-between hover:cursor-pointer mb-2 shadow-lg p-4 ">
+                      <div class="text-lg">General Service</div>
+                      <img src="/assets/detail-arrow.png" class="w-6 h-6" />
+                    </div>
+
+                    <div class="flex justify-between hover:cursor-pointer mb-2 shadow-lg p-4 ">
+                      <div class="text-lg">General Service</div>
+                      <img src="/assets/detail-arrow.png" class="w-6 h-6" />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+
+
+          <!-- THis div will be used as model for packages description-->
+
+        </div>
+
+        <div id="package-modal" class="absolute w-100vw h-100vh top-0 left-0">
+          <div id="package-description">
+            <h2>Package name:</h2>
+            <div>
+              Package items:
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-between mt-4">
+          <button type="button"
+            class="prev-btn bg-gray-300 px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg">Back</button>
+          <button type="button"
+            class="next-btn bg-blue-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg">Next</button>
+        </div>
+      </div>
+
+
+
+
+      <!-- Step 4 -->
+      <div class="step-content hidden">
+        <h2 class="text-xl sm:text-2xl font-semibold mb-4">Pick a Date</h2>
+        <div class="space-y-3 ">
+
+          <div>
+            <h4>Esitimated time of completion: 4:40 hrs</h4>
+          </div>
+
+          <div class="sm:flex sm:gap-6">
+
+            <input type="text" id="datePicker" class="w-full border rounded-lg p-2 sm:p-3" />
+
+            <select class="w-full border rounded-lg p-2 sm:p-3">
+              <option></option>
+              <option>11:00 AM</option>
+              <option>2:00 PM</option>
+              <option>5:00 PM</option>
+            </select>
+          </div>
+          <div class="flex justify-between mt-4 ">
+            <button type="button"
+              class="prev-btn bg-gray-300 px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg">Back</button>
+            <button type="button"
+              class="next-btn bg-blue-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg">Next</button>
+          </div>
+        </div>
+      </div>
+
+        <!-- Step 5 -->
+        <div class="step-content hidden">
+          <h2 class="text-xl sm:text-2xl font-semibold mb-4">Billing</h2>
+
+          <!-- Scrollable services list -->
+          <div class="space-y-3 max-h-60 overflow-y-auto border rounded-lg p-3">
+            <p class="flex justify-between"><span><img src="/assets/minus.png" class="w-5 h-5 inline mr-2"/>Car Wash</span> <span>₹300</span></p>
+            <p class="flex justify-between"><span><img src="/assets/minus.png" class="w-5 h-5 inline mr-2"/>Oil Change</span> <span>₹500</span></p>
+            <p class="flex justify-between"><span><img src="/assets/minus.png" class="w-5 h-5 inline mr-2"/>Engine Check</span> <span>₹700</span></p>
+            <p class="flex justify-between"><span><img src="/assets/minus.png" class="w-5 h-5 inline mr-2"/>Tyre Rotation</span> <span>₹400</span></p>
+            <p class="flex justify-between"><span><img src="/assets/minus.png" class="w-5 h-5 inline mr-2"/>Polishing</span> <span>₹800</span></p>
+            <p class="flex justify-between"><span><img src="/assets/minus.png" class="w-5 h-5 inline mr-2"/>Battery Check</span> <span>₹600</span></p>
+            <p class="flex justify-between"><span><img src="/assets/minus.png" class="w-5 h-5 inline mr-2"/>Interior Cleaning</span> <span>₹450</span></p>
+            <p class="flex justify-between"><span><img src="/assets/minus.png" class="w-5 h-5 inline mr-2"/>Wheel Alignment</span> <span>₹500</span></p>
+          </div>
+
+          <!-- Always visible section -->
+          <div class="mt-4 space-y-3">
+            <p class="flex justify-between font-bold text-lg sm:text-xl">
+              <span>Final:</span> <span>₹4250</span>
+            </p>
+            <select class="w-full border rounded-lg p-2 sm:p-3">
+              <option>Full Payment</option>
+              <option>Advance (20%)</option>
+            </select>
+          </div>
+
+          <div class="flex justify-between mt-4">
+            <button type="button"
+              class="prev-btn bg-gray-300 px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg">Back</button>
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg">Pay
+              Now</button>
+          </div>
+        </div>
+    </form>
+  </div>
+
+  <script>
+    const steps = document.querySelectorAll(".step");
+    const stepContents = document.querySelectorAll(".step-content");
+    const nextBtns = document.querySelectorAll(".next-btn");
+    const prevBtns = document.querySelectorAll(".prev-btn");
+
+    let currentStep = 0;
+
+    function updateSteps() {
+      steps.forEach((s, i) => {
+        if (i <= currentStep) {
+          s.classList.add("bg-blue-600", "text-white", "shadow-xl");
+          s.classList.remove("bg-gray-300", "text-gray-700");
+        } else {
+          s.classList.add("bg-gray-300", "text-gray-700");
+          s.classList.remove("bg-blue-600", "text-white", "shadow-xl");
+        }
+      });
+
+      stepContents.forEach((content, i) => {
+        content.classList.toggle("hidden", i !== currentStep);
+      });
+    }
+
+    nextBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (currentStep < stepContents.length - 1) {
+          currentStep++;
+          updateSteps();
+        }
+      });
+    });
+
+    prevBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (currentStep > 0) {
+          currentStep--;
+          updateSteps();
+        }
+      });
+    });
+
+    updateSteps();
+
+    flatpickr("#datePicker", {
+      minDate: "today",         // disable past dates
+      dateFormat: "d/m/Y",
+      disable: [
+        "2025-09-14",
+        "2025-09-25"
+      ],
+      enableTime: false
+    });
+
+    const pickOption = document.getElementById('pickup-option');
+    const address = document.getElementById('address');
+
+    pickOption.addEventListener('input', () => {
+      address.classList.toggle('hidden', pickOption.value !== 'yes');
+    });
+
+
+    // const packages = document.getElementById('packages');
+
+    // for (let i = 0; i < packages.length; i++) {
+
+    // }
+
+    const package_view_button = document.getElementById('package-view-button');
+    const mobile_package_list = document.getElementById('mobile-package-list');
+    const mobile_package_list_cancel = document.getElementById('mobile-package-list-cancel');
+    package_view_button.addEventListener('click', () => {
+      mobile_package_list.classList.remove('hidden');
+
+    })
+
+    mobile_package_list_cancel.addEventListener('click', () => {
+      mobile_package_list.classList.add('hidden');
+    })
+
+  </script>
+
+</body>
+
+</html>
