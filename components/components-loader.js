@@ -1,160 +1,231 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  async function injectComponent(file, rootId) {
-    const res = await fetch(file);
-    const html = await res.text();
-    document.getElementById(rootId).innerHTML = html;
-  }
+	async function injectComponent(file, rootId) {
+		const res = await fetch(file);
+		const html = await res.text();
+		document.getElementById(rootId).innerHTML = html;
+	}
 
-  await Promise.all([
-    injectComponent('../../../components/sidebar.html', 'sidebar-root'),
-    injectComponent('../../../components/navbar.html', 'navbar-root'),
-  ]);
+	await Promise.all([
+		injectComponent('../../../components/sidebar.html', 'sidebar-root'),
+		injectComponent('../../../components/navbar.html', 'navbar-root'),
+	]);
 
-  document.dispatchEvent(new CustomEvent('navbarLoaded'));
+	document.dispatchEvent(new CustomEvent('navbarLoaded'));
 
-  // Mobile nav logic
-  const hamburger = document.querySelector('.mobile-navbar__hamburger');
-  const mobilePanel = document.querySelector('.mobile-nav-panel');
-  const overlay = document.querySelector('.mobile-nav-overlay');
-  let lastFocusedElement = null;
+	// Mobile nav logic
+	const hamburger = document.querySelector('.mobile-navbar__hamburger');
+	const mobilePanel = document.querySelector('.mobile-nav-panel');
+	const overlay = document.querySelector('.mobile-nav-overlay');
+	let lastFocusedElement = null;
 
-  function openMobileNav() {
-    mobilePanel.classList.add('translate-x-0');
-    mobilePanel.classList.remove('translate-x-full');
-    overlay.classList.add('opacity-100', 'pointer-events-auto');
-    overlay.classList.remove('opacity-0', 'pointer-events-none');
-    mobilePanel.setAttribute('aria-hidden', 'false');
-    overlay.setAttribute('aria-hidden', 'false');
-    hamburger.setAttribute('aria-expanded', 'true');
-    lastFocusedElement = document.activeElement;
-    const firstFocusable = mobilePanel.querySelector(
-      'button,a,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'
-    );
-    if (firstFocusable) firstFocusable.focus();
-    document.body.classList.add('overflow-hidden');
-  }
+	function openMobileNav() {
+		mobilePanel.classList.add('translate-x-0');
+		mobilePanel.classList.remove('translate-x-full');
+		overlay.classList.add('opacity-100', 'pointer-events-auto');
+		overlay.classList.remove('opacity-0', 'pointer-events-none');
+		mobilePanel.setAttribute('aria-hidden', 'false');
+		overlay.setAttribute('aria-hidden', 'false');
+		hamburger.setAttribute('aria-expanded', 'true');
+		lastFocusedElement = document.activeElement;
+		const firstFocusable = mobilePanel.querySelector(
+			'button,a,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'
+		);
+		if (firstFocusable) firstFocusable.focus();
+		document.body.classList.add('overflow-hidden');
+	}
 
-  function closeMobileNav() {
-    mobilePanel.classList.remove('translate-x-0');
-    mobilePanel.classList.add('translate-x-full');
-    overlay.classList.remove('opacity-100', 'pointer-events-auto');
-    overlay.classList.add('opacity-0', 'pointer-events-none');
-    mobilePanel.setAttribute('aria-hidden', 'true');
-    overlay.setAttribute('aria-hidden', 'true');
-    hamburger.setAttribute('aria-expanded', 'false');
-    if (lastFocusedElement) lastFocusedElement.focus();
-    document.body.classList.remove('overflow-hidden');
-  }
+	function closeMobileNav() {
+		mobilePanel.classList.remove('translate-x-0');
+		mobilePanel.classList.add('translate-x-full');
+		overlay.classList.remove('opacity-100', 'pointer-events-auto');
+		overlay.classList.add('opacity-0', 'pointer-events-none');
+		mobilePanel.setAttribute('aria-hidden', 'true');
+		overlay.setAttribute('aria-hidden', 'true');
+		hamburger.setAttribute('aria-expanded', 'false');
+		if (lastFocusedElement) lastFocusedElement.focus();
+		document.body.classList.remove('overflow-hidden');
+	}
 
-  hamburger?.addEventListener('click', () => {
-    if (mobilePanel.classList.contains('translate-x-0')) {
-      closeMobileNav();
-    } else {
-      openMobileNav();
-    }
-  });
+	hamburger?.addEventListener('click', () => {
+		if (mobilePanel.classList.contains('translate-x-0')) {
+			closeMobileNav();
+		} else {
+			openMobileNav();
+		}
+	});
 
-  overlay?.addEventListener('click', closeMobileNav);
+	overlay?.addEventListener('click', closeMobileNav);
 
-  document.addEventListener('keydown', (e) => {
-    if (mobilePanel.classList.contains('translate-x-0') && e.key === 'Escape') {
-      closeMobileNav();
-    }
-    if (mobilePanel.classList.contains('translate-x-0') && e.key === 'Tab') {
-      const focusables = mobilePanel.querySelectorAll(
-        'button,a,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'
-      );
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        last.focus();
-        e.preventDefault();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        first.focus();
-        e.preventDefault();
-      }
-    }
-  });
+	document.addEventListener('keydown', (e) => {
+		if (mobilePanel.classList.contains('translate-x-0') && e.key === 'Escape') {
+			closeMobileNav();
+		}
+		if (mobilePanel.classList.contains('translate-x-0') && e.key === 'Tab') {
+			const focusables = mobilePanel.querySelectorAll(
+				'button,a,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'
+			);
+			const first = focusables[0];
+			const last = focusables[focusables.length - 1];
+			if (e.shiftKey && document.activeElement === first) {
+				last.focus();
+				e.preventDefault();
+			} else if (!e.shiftKey && document.activeElement === last) {
+				first.focus();
+				e.preventDefault();
+			}
+		}
+	});
 
-  // SIDEBAR: User and Service Management - Mutually Exclusive
-  const sidebarUserBtn = document.querySelector('.sidebar-user-btn');
-  const sidebarUserSubmenu = document.getElementById('sidebar-user-submenu');
-  const sidebarServiceBtn = document.querySelector('.sidebar-service-btn');
-  const sidebarServiceSubmenu = document.getElementById('sidebar-service-submenu');
+	// SIDEBAR: User and Service Management - Mutually Exclusive
+	const sidebarUserBtn = document.querySelector('.sidebar-user-btn');
+	const sidebarUserSubmenu = document.getElementById('sidebar-user-submenu');
+	const sidebarServiceBtn = document.querySelector('.sidebar-service-btn');
+	const sidebarServiceSubmenu = document.getElementById('sidebar-service-submenu');
 
-  sidebarUserBtn?.addEventListener('click', () => {
-    const isHidden = sidebarUserSubmenu.classList.contains('hidden');
-    // Close Service Management if open
-    sidebarServiceSubmenu.classList.add('hidden');
-    sidebarServiceSubmenu.classList.remove('block');
-    sidebarServiceBtn.setAttribute('aria-expanded', 'false');
-    if (isHidden) {
-      sidebarUserSubmenu.classList.remove('hidden');
-      sidebarUserSubmenu.classList.add('block');
-      sidebarUserBtn.setAttribute('aria-expanded', 'true');
-    } else {
-      sidebarUserSubmenu.classList.add('hidden');
-      sidebarUserSubmenu.classList.remove('block');
-      sidebarUserBtn.setAttribute('aria-expanded', 'false');
-    }
-  });
+	sidebarUserBtn?.addEventListener('click', () => {
+		const isHidden = sidebarUserSubmenu.classList.contains('hidden');
+		// Close Service Management if open
+		sidebarServiceSubmenu.classList.add('hidden');
+		sidebarServiceSubmenu.classList.remove('block');
+		sidebarServiceBtn.setAttribute('aria-expanded', 'false');
+		if (isHidden) {
+			sidebarUserSubmenu.classList.remove('hidden');
+			sidebarUserSubmenu.classList.add('block');
+			sidebarUserBtn.setAttribute('aria-expanded', 'true');
+		} else {
+			sidebarUserSubmenu.classList.add('hidden');
+			sidebarUserSubmenu.classList.remove('block');
+			sidebarUserBtn.setAttribute('aria-expanded', 'false');
+		}
+	});
 
-  sidebarServiceBtn?.addEventListener('click', () => {
-    const isHidden = sidebarServiceSubmenu.classList.contains('hidden');
-    // Close User Management if open
-    sidebarUserSubmenu.classList.add('hidden');
-    sidebarUserSubmenu.classList.remove('block');
-    sidebarUserBtn.setAttribute('aria-expanded', 'false');
-    if (isHidden) {
-      sidebarServiceSubmenu.classList.remove('hidden');
-      sidebarServiceSubmenu.classList.add('block');
-      sidebarServiceBtn.setAttribute('aria-expanded', 'true');
-    } else {
-      sidebarServiceSubmenu.classList.add('hidden');
-      sidebarServiceSubmenu.classList.remove('block');
-      sidebarServiceBtn.setAttribute('aria-expanded', 'false');
-    }
-  });
+	sidebarServiceBtn?.addEventListener('click', () => {
+		const isHidden = sidebarServiceSubmenu.classList.contains('hidden');
+		// Close User Management if open
+		sidebarUserSubmenu.classList.add('hidden');
+		sidebarUserSubmenu.classList.remove('block');
+		sidebarUserBtn.setAttribute('aria-expanded', 'false');
+		if (isHidden) {
+			sidebarServiceSubmenu.classList.remove('hidden');
+			sidebarServiceSubmenu.classList.add('block');
+			sidebarServiceBtn.setAttribute('aria-expanded', 'true');
+		} else {
+			sidebarServiceSubmenu.classList.add('hidden');
+			sidebarServiceSubmenu.classList.remove('block');
+			sidebarServiceBtn.setAttribute('aria-expanded', 'false');
+		}
+	});
 
-  // MOBILE: User and Service Management - Mutually Exclusive
-  const mobileUserBtn = document.querySelector('.mobile-user-btn');
-  const mobileUserSubmenu = document.getElementById('mobile-user-submenu');
-  const mobileServiceBtn = document.querySelector('.mobile-service-btn');
-  const mobileServiceSubmenu = document.getElementById('mobile-service-submenu');
+	// MOBILE: User and Service Management - Mutually Exclusive
+	const mobileUserBtn = document.querySelector('.mobile-user-btn');
+	const mobileUserSubmenu = document.getElementById('mobile-user-submenu');
+	const mobileServiceBtn = document.querySelector('.mobile-service-btn');
+	const mobileServiceSubmenu = document.getElementById('mobile-service-submenu');
 
-  mobileUserBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isHidden = mobileUserSubmenu.classList.contains('hidden');
-    // Close Service Management if open
-    mobileServiceSubmenu.classList.add('hidden');
-    mobileServiceSubmenu.classList.remove('block');
-    mobileServiceBtn.setAttribute('aria-expanded', 'false');
-    if (isHidden) {
-      mobileUserSubmenu.classList.remove('hidden');
-      mobileUserSubmenu.classList.add('block');
-      mobileUserBtn.setAttribute('aria-expanded', 'true');
-    } else {
-      mobileUserSubmenu.classList.add('hidden');
-      mobileUserSubmenu.classList.remove('block');
-      mobileUserBtn.setAttribute('aria-expanded', 'false');
-    }
-  });
+	mobileUserBtn?.addEventListener('click', (e) => {
+		e.stopPropagation();
+		const isHidden = mobileUserSubmenu.classList.contains('hidden');
+		// Close Service Management if open
+		mobileServiceSubmenu.classList.add('hidden');
+		mobileServiceSubmenu.classList.remove('block');
+		mobileServiceBtn.setAttribute('aria-expanded', 'false');
+		if (isHidden) {
+			mobileUserSubmenu.classList.remove('hidden');
+			mobileUserSubmenu.classList.add('block');
+			mobileUserBtn.setAttribute('aria-expanded', 'true');
+		} else {
+			mobileUserSubmenu.classList.add('hidden');
+			mobileUserSubmenu.classList.remove('block');
+			mobileUserBtn.setAttribute('aria-expanded', 'false');
+		}
+	});
 
-  mobileServiceBtn?.addEventListener('click', () => {
-    const isHidden = mobileServiceSubmenu.classList.contains('hidden');
-    // Close User Management if open
-    mobileUserSubmenu.classList.add('hidden');
-    mobileUserSubmenu.classList.remove('block');
-    mobileUserBtn.setAttribute('aria-expanded', 'false');
-    if (isHidden) {
-      mobileServiceSubmenu.classList.remove('hidden');
-      mobileServiceSubmenu.classList.add('block');
-      mobileServiceBtn.setAttribute('aria-expanded', 'true');
-    } else {
-      mobileServiceSubmenu.classList.add('hidden');
-      mobileServiceSubmenu.classList.remove('block');
-      mobileServiceBtn.setAttribute('aria-expanded', 'false');
-    }
-  });
+	mobileServiceBtn?.addEventListener('click', () => {
+		const isHidden = mobileServiceSubmenu.classList.contains('hidden');
+		// Close User Management if open
+		mobileUserSubmenu.classList.add('hidden');
+		mobileUserSubmenu.classList.remove('block');
+		mobileUserBtn.setAttribute('aria-expanded', 'false');
+		if (isHidden) {
+			mobileServiceSubmenu.classList.remove('hidden');
+			mobileServiceSubmenu.classList.add('block');
+			mobileServiceBtn.setAttribute('aria-expanded', 'true');
+		} else {
+			mobileServiceSubmenu.classList.add('hidden');
+			mobileServiceSubmenu.classList.remove('block');
+			mobileServiceBtn.setAttribute('aria-expanded', 'false');
+		}
+	});
 
 });
+
+document.addEventListener('navbarLoaded', () => {
+
+
+	// so when this gets executed we automatically highlight the current section which the user is currently at
+	const current_page = localStorage.getItem('vms_current_page');
+
+	// every page is mostly single except services and users , so i need to look on to that
+
+	// lets check each element in the side bar with the value we got for current_page
+
+	let pages = ['dashboard', 'customer_management', 'mechanic_management', 'bookings', 'services', 'packages', 'garage',
+		'payments', 'reports', 'issues', 'notifications', 'content_management', 'backup_restore'
+	];
+
+	// lets get all anchor tag with data value
+	const admin_sidebar = document.getElementById('admin_sidebar');
+	// console.log(admin_sidebar.classList)
+
+
+	navBarHighlight(document.getElementById('admin_navbar'), current_page);
+	sideBarHighlight(admin_sidebar, current_page)
+
+
+
+})
+
+
+function sideBarHighlight(admin_sidebar, current_page) {
+	let links = {};
+
+	document.getElementById('admin_sidebar').querySelectorAll('a').forEach(link => {
+		links[link.dataset.value] = link;
+	})
+
+
+	// console.log(links);
+
+
+	// if any link is under a subcategory , i need to click its parent
+	if (current_page == 'customer_management' || current_page == 'mechanic_management') {
+		document.getElementById('sidebar-user-submenu')?.classList.remove('hidden');
+		document.getElementById('mobile-user-submenu')?.classList.remove('hidden');
+	} else if (current_page == 'services' || current_page == 'packages') {
+		document.getElementById('sidebar-service-submenu')?.classList.remove('hidden');
+		document.getElementById('mobile-service-submenu')?.classList.remove('hidden');
+
+	}
+
+	links[current_page].classList.add('bg-blue-700');
+}
+function navBarHighlight(nav_bar, current_page) {
+	console.log("up here")
+	let links = {}
+	nav_bar.querySelector('aside').querySelectorAll('a').forEach(link => {
+		links[link.dataset.value] = link;
+	})
+
+	
+
+	if (current_page == 'customer_management' || current_page == 'mechanic_management') {
+		document.getElementById('sidebar-user-submenu')?.classList.remove('hidden');
+		document.getElementById('mobile-user-submenu')?.classList.remove('hidden');
+	} else if (current_page == 'services' || current_page == 'packages') {
+		document.getElementById('sidebar-service-submenu')?.classList.remove('hidden');
+		document.getElementById('mobile-service-submenu')?.classList.remove('hidden');
+
+	}
+
+	links[current_page].classList.add('bg-blue-700');
+}

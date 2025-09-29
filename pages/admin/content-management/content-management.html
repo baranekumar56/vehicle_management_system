@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Content Management - Auto Care</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#241358' },
+        },
+      },
+    };
+  </script>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+  <div id="sidebar-root"></div>
+  <div id="navbar-root"></div>
+
+  <!-- Main Content -->
+  <main class="bg-gray-100 pt-24 sm:pt-6 px-2 sm:px-4 lg:ml-[250px] transition-all duration-300 min-h-screen overflow-y-auto">
+    <div class="container mx-auto px-4 py-4 flex flex-col sm:flex-row gap-4 sm:gap-10">
+      
+      <!-- Main CMS Content -->
+      <div class="flex-1 bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-2xl font-bold">Content Management</h1>
+        </div>
+
+        <!-- Page Selector -->
+        <div class="flex items-center gap-4 mb-6">
+          <label for="pageSelect" class="font-medium">Choose Page:</label>
+          <select id="pageSelect" class="border rounded px-3 py-2">
+            <option value="Banner">Banner</option>
+            <option value="About">About</option>
+            <option value="Services">Services</option>
+            <option value="Achievements">Achievements</option>
+            <option value="FAQ">FAQ</option>
+          </select>
+        </div>
+
+        <!-- Sections Grid -->
+        <div id="sections" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          <!-- Cards will render here -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Edit Modal -->
+  <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg w-full max-w-md relative max-h-[90vh] overflow-y-auto">
+      <h2 id="modalTitle" class="text-xl font-bold mb-4">Edit Section</h2>
+      <form id="sectionForm" class="space-y-4">
+        <input type="hidden" id="sectionId" />
+        <input type="hidden" id="sectionType" />
+        
+        <!-- Common Fields -->
+        <div id="commonFields">
+          <div>
+            <label for="title" class="block text-sm font-medium">Title</label>
+            <input id="title" type="text" class="w-full border rounded px-3 py-2" placeholder="Enter title" required />
+            <p id="titleError" class="text-xs text-red-600 mt-1 hidden">Title is required.</p>
+          </div>
+          <div>
+            <label for="description" class="block text-sm font-medium">Description</label>
+            <textarea id="description" class="w-full border rounded px-3 py-2" placeholder="Enter description" rows="4"></textarea>
+          </div>
+        </div>
+
+        <!-- FAQ Specific Fields -->
+        <div id="faqFields" class="hidden">
+          <div>
+            <label for="question" class="block text-sm font-medium">Question</label>
+            <input id="question" type="text" class="w-full border rounded px-3 py-2" placeholder="Enter question" />
+          </div>
+          <div>
+            <label for="answer" class="block text-sm font-medium">Answer</label>
+            <textarea id="answer" class="w-full border rounded px-3 py-2" placeholder="Enter answer" rows="4"></textarea>
+          </div>
+        </div>
+
+        <!-- Achievement Specific Fields -->
+        <div id="achievementFields" class="hidden">
+          <div>
+            <label for="statValue" class="block text-sm font-medium">Stat Value</label>
+            <input id="statValue" type="text" class="w-full border rounded px-3 py-2" placeholder="e.g., 95%, 10,000+, etc." />
+          </div>
+          <div>
+            <label for="statDescription" class="block text-sm font-medium">Stat Description</label>
+            <textarea id="statDescription" class="w-full border rounded px-3 py-2" placeholder="Describe what this stat represents" rows="3"></textarea>
+          </div>
+        </div>
+
+        <!-- Image Field -->
+        <div>
+          <label for="image" class="block text-sm font-medium">
+            Image <span class="text-gray-500 font-normal">(max 300 KB, JPEG preferred)</span>
+          </label>
+          <input id="image" type="file" accept="image/*" class="w-full border rounded px-3 py-2" />
+          <div id="imagePreviewWrap" class="mt-3 hidden">
+            <div class="flex items-center justify-between">
+              <p class="text-xs text-gray-500">Preview (compressed):</p>
+              <p id="imageSize" class="text-xs text-gray-500"></p>
+            </div>
+            <img id="imagePreview" src="" alt="Preview" class="w-full h-40 object-cover rounded border" />
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="cancelBtn" class="px-4 py-2 border rounded">Cancel</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Save</button>
+        </div>
+      </form>
+      <button id="closeX" class="absolute top-2 right-3 text-2xl leading-none text-gray-500 hover:text-gray-700" aria-label="Close">&times;</button>
+    </div>
+  </div>
+
+  <!-- Add New FAQ Modal -->
+  <div id="addFaqModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg w-full max-w-md relative">
+      <h2 class="text-xl font-bold mb-4">Add New FAQ</h2>
+      <form id="addFaqForm" class="space-y-4">
+        <div>
+          <label for="newQuestion" class="block text-sm font-medium">Question</label>
+          <input id="newQuestion" type="text" class="w-full border rounded px-3 py-2" placeholder="Enter question" required />
+        </div>
+        <div>
+          <label for="newAnswer" class="block text-sm font-medium">Answer</label>
+          <textarea id="newAnswer" class="w-full border rounded px-3 py-2" placeholder="Enter answer" rows="4" required></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="cancelFaqBtn" class="px-4 py-2 border rounded">Cancel</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Add FAQ</button>
+        </div>
+      </form>
+      <button id="closeFaqX" class="absolute top-2 right-3 text-2xl leading-none text-gray-500 hover:text-gray-700" aria-label="Close">&times;</button>
+    </div>
+  </div>
+
+  <!-- Add New Achievement Modal -->
+  <div id="addAchievementModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg w-full max-w-md relative">
+      <h2 class="text-xl font-bold mb-4">Add New Achievement</h2>
+      <form id="addAchievementForm" class="space-y-4">
+        <div>
+          <label for="newStatValue" class="block text-sm font-medium">Stat Value</label>
+          <input id="newStatValue" type="text" class="w-full border rounded px-3 py-2" placeholder="e.g., 95%, 10,000+, etc." required />
+        </div>
+        <div>
+          <label for="newStatDescription" class="block text-sm font-medium">Stat Description</label>
+          <textarea id="newStatDescription" class="w-full border rounded px-3 py-2" placeholder="Describe what this stat represents" rows="3" required></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" id="cancelAchievementBtn" class="px-4 py-2 border rounded">Cancel</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Add Achievement</button>
+        </div>
+      </form>
+      <button id="closeAchievementX" class="absolute top-2 right-3 text-2xl leading-none text-gray-500 hover:text-gray-700" aria-label="Close">&times;</button>
+    </div>
+  </div>
+
+  <script type="module" src="/components/components-loader.js"></script>
+  <script>
+    localStorage.setItem('vms_current_page', 'content_management');
+    // Content Management System for Auto Care Service
+    (() => {
+      "use strict";
+
+      // Configuration
+      const API_URL = "https://68cb8bbd716562cf5073e4aa.mockapi.io/v1/cms";
+      const IMAGE_LIMIT_BYTES = 100 * 1024; // 100 KB
+      const DEFAULT_MAX_WIDTH = 1000;
+      const MIN_WIDTH = 600;
+      const START_QUALITY = 0.6;
+      const MIN_QUALITY = 0.25;
+      const QUALITY_STEP = 0.07;
+      const WIDTH_STEP = 0.85;
+      const ABSOLUTE_FILE_MAX = 5 * 1024 * 1024;
+
+      // Sample data structure for content sections
+      const contentSections = [
+        { 
+          id: 1, 
+          page: "Banner", 
+          title: "Main Banner", 
+          description: "Life's already rough — at least let your car be smooth.",
+          image: "/assets/main_car_image_2.png",
+          type: "banner"
+        },
+        { 
+          id: 2, 
+          page: "About", 
+          title: "About Auto Care", 
+          description: "Auto Care is a smart vehicle service management system that simplifies service booking and tracking.",
+          image: "/assets/smart-boarded-service.jpg",
+          type: "about"
+        },
+        { 
+          id: 3, 
+          page: "Services", 
+          title: "Vehicle Inspection", 
+          description: "Comprehensive vehicle checks for safety and performance.",
+          image: "/assets/inspection.png",
+          type: "service"
+        },
+        { 
+          id: 4, 
+          page: "Services", 
+          title: "Maintenance", 
+          description: "Scheduled maintenance to keep vehicles running smoothly.",
+          image: "/assets/maintenance.JPG",
+          type: "service"
+        },
+        { 
+          id: 5, 
+          page: "Services", 
+          title: "Customer Support", 
+          description: "Dedicated support for queries and assistance anytime.",
+          image: "/assets/customer-support.png",
+          type: "service"
+        },
+        { 
+          id: 6, 
+          page: "Achievements", 
+          title: "Customer Satisfaction", 
+          description: "95% Customer Satisfaction Rate, ensuring transparency and hassle-free experiences.",
+          statValue: "95%",
+          statDescription: "Customer Satisfaction Rate, ensuring transparency and hassle-free experiences.",
+          type: "achievement"
+        },
+        { 
+          id: 7, 
+          page: "Achievements", 
+          title: "Vehicles Serviced", 
+          description: "10,000+ Vehicles Serviced through the platform with seamless tracking and updates.",
+          statValue: "10,000+",
+          statDescription: "Vehicles Serviced through the platform with seamless tracking and updates.",
+          type: "achievement"
+        },
+        { 
+          id: 8, 
+          page: "Achievements", 
+          title: "Repeat Customers", 
+          description: "80% Repeat Customers due to trust and transparency",
+          statValue: "80%",
+          statDescription: "Repeat Customers due to trust and transparency",
+          type: "achievement"
+        },
+        { 
+          id: 9, 
+          page: "FAQ", 
+          title: "Service Frequency", 
+          description: "How often should I book a regular service?",
+          question: "How often should I book a regular service?",
+          answer: "Most vehicles should be serviced every 12 months or 10,000–15,000 km, depending on make, model, and usage. Always follow your manufacturer's recommendations for optimal performance and longevity.",
+          type: "faq"
+        },
+        { 
+          id: 10, 
+          page: "FAQ", 
+          title: "Service Tracking", 
+          description: "Can I track my vehicle's service status?",
+          question: "Can I track my vehicle's service status?",
+          answer: "Yes, Auto Care lets customers track their service status in real-time through the platform, so updates are always just a click away.",
+          type: "faq"
+        },
+        { 
+          id: 11, 
+          page: "FAQ", 
+          title: "Service History", 
+          description: "Does Auto Care maintain a history of my past services?",
+          question: "Does Auto Care maintain a history of my past services?",
+          answer: "Absolutely! All your past services, repairs, and appointments are available in your Auto Care profile for your convenience and future reference.",
+          type: "faq"
+        }
+      ];
+
+      // Utilities
+      const $ = (sel) => document.querySelector(sel);
+      const show = (el) => el && el.classList.remove("hidden");
+      const hide = (el) => el && el.classList.add("hidden");
+      const setText = (el, text) => { if (el) el.textContent = text; };
+      
+      function dataURLBytes(dataUrl) {
+        if (!dataUrl) return 0;
+        const idx = dataUrl.indexOf("base64,");
+        const b64 = idx >= 0 ? dataUrl.slice(idx + "base64,".length) : dataUrl;
+        return Math.ceil(b64.length * 0.75);
+      }
+      
+      function formatBytes(bytes) {
+        if (!bytes) return "0 B";
+        const k = 1024;
+        const sizes = ["B", "KB", "MB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return (bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1) + " " + sizes[i];
+      }
+
+      function encodeToDataURL(img, width, height, type = "image/webp", quality = START_QUALITY) {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d", { alpha: true });
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        let url = "";
+        try {
+          url = canvas.toDataURL(type, quality);
+        } catch {
+          url = "";
+        }
+        if (!url || !url.startsWith("data:image/")) {
+          url = canvas.toDataURL("image/jpeg", quality);
+        }
+        return url;
+      }
+
+      async function compressIterative(file, {
+        limitBytes = IMAGE_LIMIT_BYTES,
+        startWidth = DEFAULT_MAX_WIDTH,
+        minWidth = MIN_WIDTH,
+        startQuality = START_QUALITY,
+        minQuality = MIN_QUALITY,
+        qualityStep = QUALITY_STEP,
+        widthStep = WIDTH_STEP
+      } = {}) {
+        const img = await new Promise((resolve, reject) => {
+          const image = new Image();
+          const url = URL.createObjectURL(file);
+          image.onload = () => { URL.revokeObjectURL(url); resolve(image); };
+          image.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+          image.src = url;
+        });
+
+        let width = Math.min(startWidth, img.naturalWidth || img.width);
+        let height = Math.round((img.naturalHeight || img.height) * (width / (img.naturalWidth || img.width)));
+        let quality = startQuality;
+        let type = "image/webp";
+
+        let dataUrl = encodeToDataURL(img, width, height, type, quality);
+        let bytes = dataURLBytes(dataUrl);
+
+        let iterations = 0;
+        while (bytes > limitBytes && iterations < 24) {
+          iterations++;
+
+          if (quality > minQuality) {
+            quality = Math.max(minQuality, +(quality - qualityStep).toFixed(2));
+          } else if (width > minWidth) {
+            width = Math.max(minWidth, Math.round(width * widthStep));
+            height = Math.round(height * widthStep);
+            quality = Math.min(startQuality, quality + qualityStep);
+          } else if (type !== "image/jpeg") {
+            type = "image/jpeg";
+            quality = startQuality;
+          } else {
+            break;
+          }
+
+          dataUrl = encodeToDataURL(img, width, height, type, quality);
+          bytes = dataURLBytes(dataUrl);
+        }
+
+        return { dataUrl, bytes, quality, width, height, type, iterations };
+      }
+
+      function buildPayload(obj) {
+        const pruned = {};
+        Object.keys(obj || {}).forEach((k) => {
+          const v = obj[k];
+          if (v !== undefined && v !== null && !(typeof v === "string" && v.trim() === "")) {
+            pruned[k] = v;
+          }
+        });
+        return JSON.stringify(pruned);
+      }
+
+      // Main Application
+      document.addEventListener("DOMContentLoaded", () => {
+        // Elements
+        const modal = $("#modal");
+        const closeX = $("#closeX");
+        const cancelBtn = $("#cancelBtn");
+        const sectionForm = $("#sectionForm");
+        const sectionsContainer = $("#sections");
+        const pageSelect = $("#pageSelect");
+
+        // Form fields
+        const titleInput = $("#title");
+        const titleError = $("#titleError");
+        const descInput = $("#description");
+        const imgInput = $("#image");
+        const imgPreviewWrap = $("#imagePreviewWrap");
+        const imgPreview = $("#imagePreview");
+        const imgSize = $("#imageSize");
+        const modalTitle = $("#modalTitle");
+        const sectionIdHidden = $("#sectionId");
+        const sectionTypeHidden = $("#sectionType");
+
+        // Field groups
+        const commonFields = $("#commonFields");
+        const faqFields = $("#faqFields");
+        const achievementFields = $("#achievementFields");
+
+        // FAQ specific fields
+        const questionInput = $("#question");
+        const answerInput = $("#answer");
+
+        // Achievement specific fields
+        const statValueInput = $("#statValue");
+        const statDescriptionInput = $("#statDescription");
+
+        // Add FAQ Modal
+        const addFaqModal = $("#addFaqModal");
+        const addFaqForm = $("#addFaqForm");
+        const newQuestionInput = $("#newQuestion");
+        const newAnswerInput = $("#newAnswer");
+        const cancelFaqBtn = $("#cancelFaqBtn");
+        const closeFaqX = $("#closeFaqX");
+
+        // Add Achievement Modal
+        const addAchievementModal = $("#addAchievementModal");
+        const addAchievementForm = $("#addAchievementForm");
+        const newStatValueInput = $("#newStatValue");
+        const newStatDescriptionInput = $("#newStatDescription");
+        const cancelAchievementBtn = $("#cancelAchievementBtn");
+        const closeAchievementX = $("#closeAchievementX");
+
+        let editingId = null;
+        let existingImageData = "";
+        let originalFile = null;
+        let compressedDataUrl = "";
+
+        // Modal helpers
+        const openModal = (mode = "edit") => {
+          show(modal);
+          modal.classList.add("flex");
+          modalTitle && (modalTitle.textContent = mode === "edit" ? "Edit Section" : "Add Section");
+        };
+        
+        const closeModal = () => {
+          hide(modal);
+          modal.classList.remove("flex");
+        };
+        
+        function resetForm() {
+          sectionForm && sectionForm.reset();
+          editingId = null;
+          existingImageData = "";
+          originalFile = null;
+          compressedDataUrl = "";
+          if (imgPreview) imgPreview.src = "";
+          if (imgSize) imgSize.textContent = "";
+          imgPreviewWrap && hide(imgPreviewWrap);
+          titleError && hide(titleError);
+          if (sectionIdHidden) sectionIdHidden.value = "";
+          if (sectionTypeHidden) sectionTypeHidden.value = "";
+          
+          // Hide all special fields
+          hide(faqFields);
+          hide(achievementFields);
+          show(commonFields);
+        }
+
+        // Show appropriate fields based on section type
+        function showFieldsForType(type) {
+          hide(faqFields);
+          hide(achievementFields);
+          show(commonFields);
+
+          if (type === "faq") {
+            show(faqFields);
+          } else if (type === "achievement") {
+            show(achievementFields);
+          }
+        }
+
+        // Events: modal open/close
+        cancelBtn && cancelBtn.addEventListener("click", closeModal);
+        closeX && closeX.addEventListener("click", closeModal);
+        modal && modal.addEventListener("click", (e) => {
+          if (e.target === modal) closeModal();
+        });
+        window.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+        });
+
+        // FAQ Modal events
+        cancelFaqBtn && cancelFaqBtn.addEventListener("click", () => hide(addFaqModal));
+        closeFaqX && closeFaqX.addEventListener("click", () => hide(addFaqModal));
+        addFaqModal && addFaqModal.addEventListener("click", (e) => {
+          if (e.target === addFaqModal) hide(addFaqModal);
+        });
+
+        // Achievement Modal events
+        cancelAchievementBtn && cancelAchievementBtn.addEventListener("click", () => hide(addAchievementModal));
+        closeAchievementX && closeAchievementX.addEventListener("click", () => hide(addAchievementModal));
+        addAchievementModal && addAchievementModal.addEventListener("click", (e) => {
+          if (e.target === addAchievementModal) hide(addAchievementModal);
+        });
+
+        // Image selection + compression preview
+        imgInput && imgInput.addEventListener("change", async () => {
+          const file = imgInput.files && imgInput.files[0];
+          originalFile = file || null;
+          compressedDataUrl = "";
+          if (imgSize) imgSize.textContent = "";
+
+          if (!file) {
+            imgPreview && (imgPreview.src = "");
+            imgPreviewWrap && hide(imgPreviewWrap);
+            return;
+          }
+
+          if (file.size > ABSOLUTE_FILE_MAX) {
+            alert("Please choose an image smaller than 5 MB.");
+            imgInput.value = "";
+            return;
+          }
+
+          try {
+            const { dataUrl, bytes, quality, width, height, type } = await compressIterative(file);
+            compressedDataUrl = dataUrl;
+            if (imgPreview) imgPreview.src = dataUrl;
+            if (imgSize) imgSize.textContent = `~${formatBytes(bytes)} (${type.split("/")[1]}, q=${quality}, ${width}x${height})`;
+            imgPreviewWrap && show(imgPreviewWrap);
+
+            if (bytes > IMAGE_LIMIT_BYTES) {
+              alert(`The image is still too large (~${formatBytes(bytes)}). Please pick a smaller image.`);
+            }
+          } catch (err) {
+            console.error("Compression failed:", err);
+            imgPreview && (imgPreview.src = "");
+            imgPreviewWrap && hide(imgPreviewWrap);
+          }
+        });
+
+        // Fetch & render sections
+        async function fetchSections() {
+          if (!sectionsContainer) return;
+          sectionsContainer.innerHTML = `<div class="col-span-full text-gray-500">Loading...</div>`;
+          try {
+            const currentPage = pageSelect ? pageSelect.value : "Banner";
+            const filtered = contentSections.filter((sec) => sec.page === currentPage);
+            renderSections(filtered);
+          } catch (err) {
+            console.error(err);
+            sectionsContainer.innerHTML = `<div class="col-span-full text-red-600">Failed to load sections.</div>`;
+          }
+        }
+
+        function renderSections(sections) {
+          if (!sectionsContainer) return;
+          if (!sections || sections.length === 0) {
+            sectionsContainer.innerHTML = `<p class="text-gray-500 col-span-full">No sections for this page yet.</p>`;
+            return;
+          }
+          sectionsContainer.innerHTML = "";
+          
+          // Add "Add New" buttons for FAQ and Achievements
+          const currentPage = pageSelect ? pageSelect.value : "Banner";
+          if (currentPage === "FAQ") {
+            const addCard = document.createElement("div");
+            addCard.className = "bg-white p-4 rounded shadow border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors flex flex-col items-center justify-center min-h-[200px] cursor-pointer";
+            addCard.innerHTML = `
+              <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              <p class="text-gray-600 font-medium">Add New FAQ</p>
+            `;
+            addCard.addEventListener("click", () => show(addFaqModal));
+            sectionsContainer.appendChild(addCard);
+          } else if (currentPage === "Achievements") {
+            const addCard = document.createElement("div");
+            addCard.className = "bg-white p-4 rounded shadow border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors flex flex-col items-center justify-center min-h-[200px] cursor-pointer";
+            addCard.innerHTML = `
+              <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              <p class="text-gray-600 font-medium">Add New Achievement</p>
+            `;
+            addCard.addEventListener("click", () => show(addAchievementModal));
+            sectionsContainer.appendChild(addCard);
+          }
+
+          sections.forEach((sec) => {
+            const card = document.createElement("div");
+            card.className = "bg-white p-4 rounded shadow border border-gray-200 hover:shadow-md transition-shadow";
+            
+            let cardContent = "";
+            
+            if (sec.type === "faq") {
+              cardContent = `
+                <div class="mb-3">
+                  <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">FAQ</span>
+                </div>
+                <h3 class="text-lg font-bold mb-2">${sec.question || sec.title}</h3>
+                <p class="text-gray-600 text-sm mb-3 line-clamp-2">${sec.answer || sec.description}</p>
+              `;
+            } else if (sec.type === "achievement") {
+              cardContent = `
+                <div class="mb-3">
+                  <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Achievement</span>
+                </div>
+                <div class="text-2xl font-bold text-primary mb-2">${sec.statValue}</div>
+                <h3 class="text-lg font-bold mb-2">${sec.title}</h3>
+                <p class="text-gray-600 text-sm mb-3">${sec.statDescription}</p>
+              `;
+            } else {
+              cardContent = `
+                ${sec.image ? `<img src="${sec.image}" alt="${sec.title || ""}" class="w-full h-40 object-cover rounded mb-3">` : 
+                  `<div class="w-full h-40 bg-gray-100 rounded mb-3 flex items-center justify-center">
+                    <span class="text-gray-400">No Image</span>
+                  </div>`}
+                <h3 class="text-lg font-bold mb-2">${sec.title || ""}</h3>
+                <p class="text-gray-600 text-sm mb-3 line-clamp-2">${sec.description || ""}</p>
+              `;
+            }
+            
+            cardContent += `
+              <p class="text-xs text-blue-500 mb-3">Page: ${sec.page || ""}</p>
+              <div class="flex gap-2">
+                <button class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm" data-action="edit" data-id="${sec.id}">Edit</button>
+                <button class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm" data-action="delete" data-id="${sec.id}">Delete</button>
+              </div>
+            `;
+            
+            card.innerHTML = cardContent;
+            sectionsContainer.appendChild(card);
+          });
+
+          // Wire edit/delete
+          sectionsContainer.querySelectorAll("button[data-action]").forEach((btn) => {
+            btn.addEventListener("click", async () => {
+              const id = parseInt(btn.getAttribute("data-id"));
+              const action = btn.getAttribute("data-action");
+              if (action === "edit") {
+                await editSection(id);
+              } else if (action === "delete") {
+                await deleteSection(id);
+              }
+            });
+          });
+        }
+
+        // Edit workflow
+        async function editSection(id) {
+          try {
+            const sec = contentSections.find(s => s.id === id);
+            if (!sec) throw new Error("Section not found");
+
+            editingId = id;
+            if (sectionIdHidden) sectionIdHidden.value = id;
+            if (sectionTypeHidden) sectionTypeHidden.value = sec.type || "general";
+            
+            // Show appropriate fields
+            showFieldsForType(sec.type);
+            
+            // Set common fields
+            if (titleInput) titleInput.value = sec.title || "";
+            if (descInput) descInput.value = sec.description || "";
+            existingImageData = sec.image || "";
+            originalFile = null;
+            compressedDataUrl = "";
+
+            // Set FAQ fields
+            if (sec.type === "faq") {
+              if (questionInput) questionInput.value = sec.question || "";
+              if (answerInput) answerInput.value = sec.answer || "";
+            }
+            
+            // Set Achievement fields
+            if (sec.type === "achievement") {
+              if (statValueInput) statValueInput.value = sec.statValue || "";
+              if (statDescriptionInput) statDescriptionInput.value = sec.statDescription || "";
+            }
+
+            // Handle image preview
+            if (existingImageData && imgPreview) {
+              imgPreview.src = existingImageData;
+              if (imgSize) {
+                imgSize.textContent = "Existing image";
+              }
+              imgPreviewWrap && show(imgPreviewWrap);
+            } else {
+              imgPreview && (imgPreview.src = "");
+              if (imgSize) imgSize.textContent = "";
+              imgPreviewWrap && hide(imgPreviewWrap);
+            }
+            if (imgInput) imgInput.value = "";
+            openModal("edit");
+          } catch (err) {
+            console.error(err);
+            alert("Failed to load section for editing.");
+          }
+        }
+
+        // Delete workflow
+        async function deleteSection(id) {
+          const ok = confirm("Delete this section? This action cannot be undone.");
+          if (!ok) return;
+          try {
+            const index = contentSections.findIndex(s => s.id === id);
+            if (index !== -1) {
+              contentSections.splice(index, 1);
+            }
+            
+            fetchSections();
+            showStatusMessage("Section deleted successfully!");
+          } catch (err) {
+            console.error(err);
+            alert("Failed to delete section.");
+          }
+        }
+
+        function showStatusMessage(message) {
+          const notification = document.createElement('div');
+          notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+          notification.textContent = message;
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.remove();
+          }, 3000);
+        }
+
+        // Add FAQ form submission
+        addFaqForm && addFaqForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          if (!newQuestionInput.value.trim() || !newAnswerInput.value.trim()) {
+            alert("Please fill in both question and answer.");
+            return;
+          }
+
+          const newFaq = {
+            id: Math.max(...contentSections.map(s => s.id)) + 1,
+            page: "FAQ",
+            title: newQuestionInput.value.trim(),
+            description: newQuestionInput.value.trim(),
+            question: newQuestionInput.value.trim(),
+            answer: newAnswerInput.value.trim(),
+            type: "faq"
+          };
+
+          contentSections.push(newFaq);
+          hide(addFaqModal);
+          addFaqForm.reset();
+          fetchSections();
+          showStatusMessage("FAQ added successfully!");
+        });
+
+        // Add Achievement form submission
+        addAchievementForm && addAchievementForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          if (!newStatValueInput.value.trim() || !newStatDescriptionInput.value.trim()) {
+            alert("Please fill in both stat value and description.");
+            return;
+          }
+
+          const newAchievement = {
+            id: Math.max(...contentSections.map(s => s.id)) + 1,
+            page: "Achievements",
+            title: newStatDescriptionInput.value.trim().substring(0, 30) + "...",
+            description: newStatDescriptionInput.value.trim(),
+            statValue: newStatValueInput.value.trim(),
+            statDescription: newStatDescriptionInput.value.trim(),
+            type: "achievement"
+          };
+
+          contentSections.push(newAchievement);
+          hide(addAchievementModal);
+          addAchievementForm.reset();
+          fetchSections();
+          showStatusMessage("Achievement added successfully!");
+        });
+
+        // Edit form submission
+        sectionForm && sectionForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          if (!titleInput || !titleInput.value.trim()) {
+            titleError && show(titleError);
+            return;
+          }
+          titleError && hide(titleError);
+
+          // Image handling
+          let imageDataToSend = undefined;
+          if (originalFile) {
+            try {
+              if (!compressedDataUrl) {
+                const result = await compressIterative(originalFile);
+                compressedDataUrl = result.dataUrl;
+              }
+              const finalBytes = dataURLBytes(compressedDataUrl);
+              if (finalBytes > IMAGE_LIMIT_BYTES) {
+                alert(`Compressed image is still too large (~${formatBytes(finalBytes)}). Please choose a smaller image.`);
+                return;
+              }
+              imageDataToSend = compressedDataUrl;
+            } catch (err) {
+              console.error("Final compression failed:", err);
+              alert("Image processing failed. Please try again with a smaller image.");
+              return;
+            }
+          } else if (editingId && existingImageData) {
+            imageDataToSend = existingImageData;
+          }
+
+          const sectionType = sectionTypeHidden ? sectionTypeHidden.value : "general";
+          const payload = {
+            title: titleInput.value.trim(),
+            description: descInput && descInput.value ? descInput.value.trim() : undefined,
+            image: imageDataToSend || undefined,
+            page: pageSelect ? pageSelect.value : "Banner",
+            type: sectionType
+          };
+
+          // Add FAQ specific fields
+          if (sectionType === "faq") {
+            payload.question = questionInput && questionInput.value ? questionInput.value.trim() : undefined;
+            payload.answer = answerInput && answerInput.value ? answerInput.value.trim() : undefined;
+          }
+
+          // Add Achievement specific fields
+          if (sectionType === "achievement") {
+            payload.statValue = statValueInput && statValueInput.value ? statValueInput.value.trim() : undefined;
+            payload.statDescription = statDescriptionInput && statDescriptionInput.value ? statDescriptionInput.value.trim() : undefined;
+          }
+
+          try {
+            if (editingId) {
+              const index = contentSections.findIndex(s => s.id === editingId);
+              if (index !== -1) {
+                contentSections[index] = { ...contentSections[index], ...payload };
+              }
+            }
+
+            closeModal();
+            resetForm();
+            fetchSections();
+            showStatusMessage("Section updated successfully!");
+          } catch (err) {
+            console.error(err);
+            alert(err.message || "Saving failed. Please try again.");
+          }
+        });
+
+        // Page change
+        pageSelect && pageSelect.addEventListener("change", fetchSections);
+
+        // Init
+        fetchSections();
+      });
+    })();
+  </script>
+
+  <style>
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</body>
+
+</html>

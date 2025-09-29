@@ -5,7 +5,6 @@
     <meta charset="UTF-8" />
     <title>Service Management - Payment Management</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -15,13 +14,253 @@
                         primary: '#241358',
                     },
                 },
-            },
-        };
+            }
+        }
     </script>
+    </head>
+<style>
+    /* Arrow right icon style */
+
+
+
+    .arrow-button {
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        color: #241358;
+        font-weight: bold;
+        font-size: 1.5rem;
+        user-select: none;
+    }
+
+    .arrow-button:hover {
+        transform: translateX(4px);
+        color: #3b82f6;
+    }
+
+    /* Filter Panel Style - Positioned absolutely below icon */
+    #filterPanelDesktop,
+    #filterPanelMobile {
+        position: absolute;
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        width: 300px;
+        padding: 1.5rem;
+        right: 0;
+        top: 3.5rem;
+        z-index: 9999;
+        transform-origin: top right;
+        transform: scale(1);
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    #filterPanelDesktop.hidden,
+    #filterPanelMobile.hidden {
+        opacity: 0;
+        transform: scale(0.95);
+        pointer-events: none;
+    }
+</style>
 </head>
 
 <body class="bg-gray-50 min-h-screen">
     <div id="sidebar-root"></div>
     <div id="navbar-root"></div>
-    <script src="/components/components-loader.js" type="module"> </script>
+
+    <main
+        class="bg-gray-100  pt-[70px] px-2 mt-8 lg:ml-[250px] sm:px-4 transition-all duration-300 min-h-screen overflow-y-auto"
+        tabindex="0">
+
+        <!-- Desktop Section (with search inside input and filter panel absolute below the icon) -->
+        <section id="desktop-content" class="hidden sm:block pt-10">
+            <h1 class="text-2xl font-bold mb-2 pb-8">Billings</h1>
+
+            <div class="flex justify-between relative">
+                <div>
+                    <!-- <button id="add-payment" class="p-4 outline-none shadow bg-white rounded ml-4">Add Payment</button> -->
+                </div>
+                <div class="flex items-center gap-2 w-full max-w-lg bg-white shadow rounded-lg px-3 py-2 relative">
+                    <input type="text" id="searchInputDesktop"
+                        placeholder="Search by Booking ID, name, forwarded by, date..."
+                        class="flex-grow outline-none border-none focus:ring-0 text-sm px-2" />
+                    <button id="searchBtnDesktop" class="p-2 rounded-md hover:bg-gray-100" aria-label="Search">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+                        </svg>
+                    </button>
+                    <button id="filterBtnDesktop" class="p-2 rounded-md hover:bg-gray-100"
+                        aria-label="Toggle filter panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-5 h-5 text-gray-600">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M6 10h12M9 16h6M11 20h2" />
+                        </svg>
+                    </button>
+
+                    <!-- Desktop Filter Panel -->
+                    <div id="filterPanelDesktop"
+                        class="hidden absolute top-14 right-0 z-50 bg-white rounded-xl shadow-2xl scale-105 animate-bounce-in px-6 py-4 transition-all duration-300 min-w-[300px]">
+                        <h3 class="text-lg font-semibold mb-4">Filters</h3>
+                        <label class="block mb-4">
+                            <span class="text-sm block mb-1">Status</span>
+                            <select id="filterStatusDesktop" class="w-full border rounded px-2 py-1">
+                                <option value="">All</option>
+                                <option value="Pending">Not Billed</option>
+                                <option value="Billed">Billed</option>
+                            </select>
+                        </label>
+                        <label class="block mb-4">
+                            <span class="text-sm block mb-1">Date Range</span>
+                            <input type="date" id="filterDateFromDesktop"
+                                class="w-full border rounded px-2 py-1 mb-2" />
+                            <input type="date" id="filterDateToDesktop" class="w-full border rounded px-2 py-1" />
+                        </label>
+                        <label class="block mb-4">
+                            <span class="text-sm block mb-1">Time Forwarded Range</span>
+                            <input type="time" id="filterTimeFromDesktop"
+                                class="w-full border rounded px-2 py-1 mb-2" />
+                            <input type="time" id="filterTimeToDesktop" class="w-full border rounded px-2 py-1" />
+                        </label>
+                        <button id="applyFilterDesktop"
+                            class="w-full mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Apply
+                            Filter</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center p-10">
+                <div class="overflow-x-auto w-full max-w-7xl">
+                    <h2 class="text-xl font-semibold mb-2">Billing History</h2>
+                    <div class="flex justify-center">
+                        <table
+                            class="min-w-[1000px] w-full table-auto border border-gray-300 bg-white shadow-sm rounded-md">
+                            <thead class="bg-gray-200 text-gray-700 text-sm">
+                                <tr>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Booking Id</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Date</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Time Forwarded</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Forwarded By</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Mechanic</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Status</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentTableBodyDesktop" class="text-sm"></tbody>
+                        </table>
+                    </div>
+
+                    <div
+                        class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-7xl mx-auto px-2 select-none">
+                        <button id="prevPageDesktop" class="disabled:opacity-50" aria-label="Previous page">←
+                            Previous</button>
+                        <span id="pageInfoDesktop"></span>
+                        <button id="nextPageDesktop" class="disabled:opacity-50" aria-label="Next page">Next →</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mobile List Section -->
+        <section class="sm:hidden px-4">
+            <h1 class="text-xl font-bold mb-4">Billing</h1>
+
+            <div class="relative mb-4 px-4 flex items-center gap-2">
+                <div class="flex items-center w-full relative">
+                    <input id="searchInputMobile" type="text"
+                        class="w-full rounded-full px-4 pr-12 shadow-sm outline-none py-3 text-sm"
+                        placeholder="Search by Booking ID, name, forwarded by, date..." aria-label="Search payments" />
+                    <button id="searchBtnMobile"
+                        class="absolute right-2 top-[6px] bg-white rounded-full p-2 shadow hover:bg-gray-100"
+                        aria-label="Search">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex justify-end px-4 relative mb-4">
+                <button id="filterBtnMobile" class="bg-white rounded-full p-2 shadow hover:bg-gray-100"
+                    aria-label="Toggle filter mobile">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-600" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 4h18l-7 8v6l-4 2v-8z" />
+                    </svg>
+                </button>
+                <div id="filterPanelMobile"
+                    class="hidden absolute top-12 right-0 z-50 bg-white rounded-xl shadow-2xl scale-105 animate-bounce-in px-6 py-4 transition-all duration-300 min-w-[300px]">
+                    <h3 class="text-lg font-semibold mb-4">Filters</h3>
+                    <label class="block mb-4">
+                        <span class="text-sm block mb-1">Status</span>
+                        <select id="filterStatusMobile" class="w-full border rounded px-2 py-1">
+                            <option value="">All</option>
+                            <option value="Pending">Not Billed</option>
+                            <option value="Billed">Billed</option>
+                        </select>
+                    </label>
+                    <label class="block mb-4">
+                        <span class="text-sm block mb-1">Date Range</span>
+                        <input type="date" id="filterDateFromMobile" class="w-full border rounded px-2 py-1 mb-2" />
+                        <input type="date" id="filterDateToMobile" class="w-full border rounded px-2 py-1" />
+                    </label>
+                    <label class="block mb-4">
+                        <span class="text-sm block mb-1">Time Forwarded Range</span>
+                        <input type="time" id="filterTimeFromMobile" class="w-full border rounded px-2 py-1 mb-2" />
+                        <input type="time" id="filterTimeToMobile" class="w-full border rounded px-2 py-1" />
+                    </label>
+                    <button id="applyFilterMobile"
+                        class="w-full mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Apply
+                        Filter</button>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-lg font-semibold mb-2 px-4">Billing History</h2>
+                <div id="paymentListMobile" class="p-2 space-y-3"></div>
+                <div
+                    class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-md mx-auto px-4 select-none">
+                    <button id="prevPageMobile" class="disabled:opacity-50" aria-label="Previous page">←
+                        Previous</button>
+                    <span id="pageInfoMobile"></span>
+                    <button id="nextPageMobile" class="disabled:opacity-50" aria-label="Next page">Next →</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mobile List Info Modal -->
+        <div id="mobileListInfoModal"
+            class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center hidden p-4">
+            <div class="relative max-w-md w-full bg-white rounded-xl shadow p-6">
+                <button id="closeMobileListInfoModal"
+                    class="absolute top-3 right-3 p-2 rounded-full bg-gray-200 hover:bg-gray-300"
+                    aria-label="Close">✕</button>
+                <div id="mobileListInfoContent"></div>
+            </div>
+        </div>
+
+        <!-- Common billing modal -->
+        <div id="billingModal"
+            class="fixed inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center hidden transition-all duration-200">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative">
+                <button id="closeBillingModal"
+                    class="absolute top-3 right-3 p-2 rounded-full "
+                    aria-label="Close">✕</button>
+                <div id="modalHeader" class="text-2xl font-bold mb-4"></div>
+                <div id="modalRepairList" class="mb-4 max-h-96 overflow-y-auto"></div>
+                <div id="modalAddRepairSection" class="mb-3 flex flex-col gap-3"></div>
+                <div id="modalEstimatedSection" class="mb-4"></div>
+                <div id="modalFinalAmount" class="mb-4 font-bold text-xl"></div>
+                <div id="modalActionButton"></div>
+            </div>
+        </div>
+    </main>
+    <script type="module" src="/components/components-loader.js"></script>
+
+    <script type="module" src="billings.js"></script>
 </body>
+
+</html>

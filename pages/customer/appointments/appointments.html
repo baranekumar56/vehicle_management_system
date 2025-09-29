@@ -1,790 +1,482 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8" />
-  <title>Appointments — Vehicle Service Management</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        colors: {
-                            primary: '#241358',
-                        },
+    <meta charset="UTF-8" />
+    <title>Service Management - Appointments</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#241358',
                     },
                 },
-            };
-        </script>
-  <style>
+            },
+        };
+    </script>
+    <style>
+        .animate-bounce-in {
+            animation: bounce-in 0.25s ease forwards;
+        }
 
+        @keyframes bounce-in {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
 
-    @keyframes popIn { from { transform: translateY(6px) scale(.995); opacity: 0 } to { transform: translateY(0) scale(1); opacity: 1 } }
-    .anim-pop { animation: popIn .12s ease-out both; }
-    /* modal backdrop handled by Tailwind classes + minimal css */
-    .modal-wrap { display: none; position: fixed; inset: 0; z-index: 60; align-items: center; justify-content: center; background: rgba(0,0,0,.45); padding: 1rem; }
-    .modal-wrap.show { display: flex; }
-  </style>
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .step-content {
+            transition: all 0.3s ease;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        .service-item {
+            transition: all 0.3s ease;
+        }
+        
+        .service-removed {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 text-sm">
-        <div id="sidebar-root"></div>
-        <div id="navbar-root"></div>
 
-  <!-- ===================================================================
-       Shared top-level filter bar (same for desktop + mobile)
-       =================================================================== -->
-  <header class="bg-white shadow-sm sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
-      <div class="flex flex-wrap gap-3 items-center justify-between py-3">
-        <div class="flex items-center gap-3">
-          <h1 class="text-lg font-semibold">Appointments</h1>
-          <span class="text-gray-500 hidden sm:inline"> / Vehicle Service Management</span>
-        </div>
+<body class="bg-gray-50 min-h-screen">
+    <div id="sidebar-root"></div>
+    <div id="navbar-root"></div>
 
-        <!-- Filters trigger on small screens collapses to row; on desktop they remain visible -->
-        <div class="w-full sm:w-auto mt-2 sm:mt-0">
-          <div id="filters" class="bg-white border border-gray-200 rounded flex flex-wrap gap-2 p-2 items-center">
-            <input id="searchInput" class="border rounded px-3 py-2 min-w-[180px] focus:ring-2 focus:ring-blue-400" placeholder="Search booking / vehicle / service..." />
-            <input id="vehicleFilter" class="border rounded px-3 py-2 min-w-[140px]" placeholder="Vehicle no" />
-            <input id="dateFrom" type="date" class="border rounded px-3 py-2" />
-            <input id="dateTo" type="date" class="border rounded px-3 py-2" />
-            <select id="filterStatus" class="border rounded px-3 py-2">
-              <option value="">All Status</option>
-              <option>Booked</option>
-              <option>Ongoing</option>
-              <option>Halted</option>
-              <option>Pending</option>
-              <option>Service Completed</option>
-              <option>Repair Completed</option>
-              <option>canceled</option>
-            </select>
-            <select id="filterPayment" class="border rounded px-3 py-2">
-              <option value="">All Payment</option>
-              <option>booked</option>
-              <option>waiting for billing</option>
-              <option>bill confirmation</option>
-              <option>unpaid</option>
-              <option>pending</option>
-              <option>completed</option>
-              <option>canceled</option>
-            </select>
-            <select id="filterService" class="border rounded px-3 py-2">
-              <option value="">All Types</option>
-              <option>Service</option>
-              <option>Repair</option>
-            </select>
-            <button id="applyFiltersBtn" class="px-3 py-2 bg-blue-600 text-white rounded">Apply</button>
-            <button id="clearFiltersBtn" class="px-3 py-2 bg-gray-100 rounded">Clear</button>
-          </div>
+    <!-- Appointment Details Modal -->
+    <div id="appointment-modal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md max-h-full flex flex-col overflow-hidden relative">
+            <button id="modal-close-btn" aria-label="Close modal"
+                class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+            <div id="modal-content" class="p-6 overflow-auto flex-grow"></div>
         </div>
-      </div>
     </div>
-  </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-    <!-- ===================================================================
-         Desktop Table view
-         (hidden on small screens)
-         =================================================================== -->
-    <section id="desktopSection" class="hidden sm:block">
-      <div class="overflow-x-auto bg-white border border-gray-200 rounded shadow-sm">
-        <table class="min-w-[1000px] w-full table-auto border-collapse">
-          <thead class="bg-gray-50 text-gray-700">
-            <tr>
-              <th class="text-left px-4 py-3 border-b">Booking id</th>
-              <th class="text-left px-4 py-3 border-b">Vehicle no</th>
-              <th class="text-left px-4 py-3 border-b">Date</th>
-              <th class="text-left px-4 py-3 border-b">Time</th>
-              <th class="text-left px-4 py-3 border-b">Service Type</th>
-              <th class="text-left px-4 py-3 border-b">Status</th>
-              <th class="text-left px-4 py-3 border-b">Payment</th>
-              <th class="text-left px-4 py-3 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="desktopTableBody" class="bg-white"></tbody>
-        </table>
-      </div>
+    <!-- Reschedule Modal -->
+    <div id="reschedule-modal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md max-h-full flex flex-col overflow-hidden relative">
+            <button id="reschedule-modal-close-btn" aria-label="Close modal"
+                class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+            <div id="reschedule-modal-content" class="p-6 overflow-auto flex-grow">
+                <div class="step-content active">
+                    <h2 class="text-xl sm:text-2xl font-semibold mb-4">Pick a Date</h2>
+                    <div class="space-y-3 ">
 
-      <div class="flex items-center justify-between mt-4">
-        <div class="text-gray-600" id="desktopPageInfo"></div>
-        <div class="flex gap-2">
-          <button id="desktopPrev" class="px-3 py-1 border rounded disabled:opacity-50">Previous</button>
-          <button id="desktopNext" class="px-3 py-1 border rounded disabled:opacity-50">Next</button>
+                        <div>
+                            <h4>Estimated time of completion: 4:40 hrs</h4>
+                        </div>
+
+                        <div class="sm:flex sm:gap-6">
+
+                            <input type="date" id="datePicker" class="w-full border rounded-lg p-2 sm:p-3" />
+
+                            <select id="timeSlot" class="w-full border rounded-lg p-2 sm:p-3">
+                                <option value="">Select Time</option>
+                                <option value="11:00 AM">11:00 AM</option>
+                                <option value="2:00 PM">2:00 PM</option>
+                                <option value="5:00 PM">5:00 PM</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-between mt-4 ">
+                            <button type="button" id="reschedule-back-btn"
+                                class="bg-gray-300 px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg">Back</button>
+                            <button type="button" id="reschedule-next-btn"
+                                class="bg-blue-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg">Next</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="step-content hidden">
+                    <h2 class="text-xl sm:text-2xl font-semibold mb-4">Confirm Reschedule</h2>
+                    <div class="space-y-4">
+                        <div class="bg-gray-100 p-4 rounded-lg">
+                            <p><strong>New Date:</strong> <span id="confirm-date"></span></p>
+                            <p><strong>New Time:</strong> <span id="confirm-time"></span></p>
+                            <p><strong>Booking ID:</strong> <span id="confirm-booking-id"></span></p>
+                        </div>
+                        <div class="flex justify-between mt-4">
+                            <button type="button" id="confirm-back-btn"
+                                class="bg-gray-300 px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg">Back</button>
+                            <button type="button" id="confirm-reschedule-btn"
+                                class="bg-green-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg shadow-lg">Confirm Reschedule</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </section>
-
-    <!-- ===================================================================
-         Mobile list view (visible on small screens)
-         =================================================================== -->
-    <section id="mobileSection" class="sm:hidden">
-      <div id="mobileList" class="space-y-3"></div>
-
-      <div class="flex items-center justify-between mt-4">
-        <div class="text-gray-600" id="mobilePageInfo"></div>
-        <div class="flex gap-2">
-          <button id="mobilePrev" class="px-3 py-1 border rounded disabled:opacity-50">Previous</button>
-          <button id="mobileNext" class="px-3 py-1 border rounded disabled:opacity-50">Next</button>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- ===================================================================
-       Modals
-       - Desktop: info modal (small) — Pay is available here when allowed
-       - Mobile: full modal (big) — All constraint-specific buttons live here
-       =================================================================== -->
-
-  <!-- Desktop Info Modal -->
-  <div id="infoModal" class="modal-wrap" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-lg anim-pop overflow-hidden">
-      <div class="flex items-center justify-between px-4 py-3 border-b">
-        <h3 class="text-lg font-semibold">Appointment Info</h3>
-        <button id="closeInfo" class="text-gray-500 hover:text-black text-xl">&times;</button>
-      </div>
-      <div class="p-4 space-y-3" id="infoModalContent">
-        <!-- details injected -->
-      </div>
-      <div class="p-4 border-t flex justify-end gap-2" id="infoModalFooter">
-        <!-- Pay or other small actions will be injected here; Pay appears only here on desktop -->
-      </div>
     </div>
-  </div>
 
-  <!-- Mobile View Modal -->
-  <div id="mobileModal" class="modal-wrap" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-md h-[85vh] flex flex-col anim-pop overflow-hidden">
-      <div class="flex items-center justify-between px-4 py-3 border-b">
-        <h3 class="text-lg font-semibold" id="mobileModalTitle">Details</h3>
-        <button id="closeMobile" class="text-gray-500 hover:text-black text-xl">&times;</button>
-      </div>
-
-      <div class="p-4 overflow-y-auto flex-1 space-y-3" id="mobileModalContent">
-        <!-- details + service list and toggles -->
-      </div>
-
-      <div class="p-4 border-t flex gap-2 justify-between">
-        <div class="flex items-center gap-3">
-          <div id="mobileTotal" class="font-medium text-gray-700">Total: ₹0</div>
+    <!-- Billing Confirmation Modal -->
+    <div id="billing-modal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-full flex flex-col overflow-hidden relative">
+            <button id="billing-modal-close-btn" aria-label="Close modal"
+                class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+            <div id="billing-modal-content" class="p-6 overflow-auto flex-grow">
+                <h2 class="text-xl sm:text-2xl font-semibold mb-4">Billing Confirmation</h2>
+                <div class="mb-4">
+                    <p><strong>Booking ID:</strong> <span id="billing-booking-id"></span></p>
+                    <p><strong>Vehicle No:</strong> <span id="billing-vehicle-no"></span></p>
+                </div>
+                
+                <div class="mb-4">
+                    <h3 class="font-semibold mb-2">Services</h3>
+                    <div id="billing-services-list" class="space-y-2"></div>
+                </div>
+                
+                <div class="mt-4 pt-4 border-t">
+                    <div class="flex justify-between items-center">
+                        <span class="font-semibold">Total Amount:</span>
+                        <span id="billing-total-amount" class="text-lg font-bold"></span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-2 mt-6">
+                    <button id="billing-cancel-btn" class="bg-gray-300 px-4 py-2 rounded-lg">Cancel</button>
+                    <button id="billing-confirm-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Confirm Billing</button>
+                </div>
+            </div>
         </div>
-        <div class="flex gap-2">
-          <!-- Buttons injected dynamically depending on state -->
-        </div>
-      </div>
     </div>
-  </div>
 
-  <!-- ===================================================================
-       Script: Data + rendering + interactions
-       =================================================================== -->
-  <script type="module" src="../../../components/user-components-loader.js"></script>
-
-  <script>
-    // ------------------------
-    // Sample data (can be replaced by backend fetch)
-    // ------------------------
-    const appointments = [
-      {
-        bookingId: 48898,
-        vehicleNo: "TN 01 AB 1234",
-        date: "2025-09-13",
-        time: "11:00AM",
-        serviceType: "Service",
-        status: "Ongoing",
-        paymentStatus: "pending",
-        services: [
-          { id: 1, name: "Oil Change", amount: 1200, required: true, active: true },
-          { id: 2, name: "Wheel Alignment", amount: 3000, required: false, active: true },
-          { id: 3, name: "Brake Check", amount: 500, required: false, active: true }
-        ]
-      },
-      {
-        bookingId: 545688,
-        vehicleNo: "TN 01 BC 1234",
-        date: "2025-09-19",
-        time: "03:00PM",
-        serviceType: "Repair",
-        status: "Booked",
-        paymentStatus: "bill confirmation",
-        services: [
-          { id: 10, name: "Engine Repair", amount: 12000, required: true, active: true },
-          { id: 11, name: "Battery Check", amount: 2000, required: false, active: true }
-        ]
-      },
-      {
-        bookingId: 123456,
-        vehicleNo: "TN 99 XY 9876",
-        date: "2025-09-25",
-        time: "09:00AM",
-        serviceType: "Service",
-        status: "Service Completed",
-        paymentStatus: "completed",
-        services: [
-          { id: 20, name: "General Service", amount: 3500, required: true, active: true }
-        ]
-      }
-    ];
-
-    // simulate backend-provided time slots for rescheduling
-    const availableTimeSlots = ["08:00AM","09:00AM","10:00AM","11:00AM","01:00PM","02:00PM","03:00PM","04:00PM"];
-
-    // ------------------------
-    // State variables
-    // ------------------------
-    let filtered = [...appointments];
-    let currentDesktopPage = 1;
-    const desktopRows = 10;
-    let currentMobilePage = 1;
-    const mobileRows = 5;
-
-    let focusedAppointment = null; // used by modals
-
-    // ------------------------
-    // Utilities
-    // ------------------------
-    function formatDate(iso) { return iso ? iso.split("-").reverse().join("/") : ""; }
-    function currency(n) { return "₹" + Number(n).toLocaleString("en-IN"); }
-    function safeLower(v) { return (v || "").toString().toLowerCase(); }
-
-    // ------------------------
-    // Filtering logic (shared)
-    // ------------------------
-    function collectFilterValues() {
-      return {
-        search: document.getElementById("searchInput").value.trim().toLowerCase(),
-        vehicle: document.getElementById("vehicleFilter").value.trim().toLowerCase(),
-        dateFrom: document.getElementById("dateFrom").value || "",
-        dateTo: document.getElementById("dateTo").value || "",
-        status: (document.getElementById("filterStatus").value || "").toLowerCase(),
-        payment: (document.getElementById("filterPayment").value || "").toLowerCase(),
-        service: (document.getElementById("filterService").value || "").toLowerCase()
-      };
-    }
-
-    function applyFilters() {
-      const f = collectFilterValues();
-      filtered = appointments.filter(a => {
-        const lower = {
-          vehicle: safeLower(a.vehicleNo),
-          payment: safeLower(a.paymentStatus),
-          status: safeLower(a.status),
-          serviceType: safeLower(a.serviceType),
-          booking: String(a.bookingId),
-          time: safeLower(a.time)
-        };
-
-        // search across booking, vehicle, service names, status, payment, time
-        const matchesSearch = !f.search || (
-          lower.booking.includes(f.search) ||
-          lower.vehicle.includes(f.search) ||
-          lower.status.includes(f.search) ||
-          lower.payment.includes(f.search) ||
-          lower.time.includes(f.search) ||
-          a.services.some(s => safeLower(s.name).includes(f.search))
-        );
-
-        const matchesVehicle = !f.vehicle || lower.vehicle.includes(f.vehicle);
-        const matchesStatus = !f.status || lower.status === f.status;
-        const matchesPayment = !f.payment || lower.payment === f.payment;
-        const matchesService = !f.service || lower.serviceType === f.service;
-        let matchesDate = true;
-        if (f.dateFrom) matchesDate = matchesDate && (a.date >= f.dateFrom);
-        if (f.dateTo) matchesDate = matchesDate && (a.date <= f.dateTo);
-
-        return matchesSearch && matchesVehicle && matchesStatus && matchesPayment && matchesService && matchesDate;
-      });
-
-      currentDesktopPage = 1;
-      currentMobilePage = 1;
-      renderDesktop();
-      renderMobile();
-    }
-
-    function clearFilters() {
-      document.getElementById("searchInput").value = "";
-      document.getElementById("vehicleFilter").value = "";
-      document.getElementById("dateFrom").value = "";
-      document.getElementById("dateTo").value = "";
-      document.getElementById("filterStatus").value = "";
-      document.getElementById("filterPayment").value = "";
-      document.getElementById("filterService").value = "";
-      applyFilters();
-    }
-
-    // ------------------------
-    // Desktop rendering (table)
-    // Note: Desktop rows DO NOT show Pay; Pay is shown inside the Info modal only
-    // ------------------------
-    function renderDesktop() {
-      const tbody = document.getElementById("desktopTableBody");
-      tbody.innerHTML = "";
-      const start = (currentDesktopPage - 1) * desktopRows;
-      const page = filtered.slice(start, start + desktopRows);
-      page.forEach(a => {
-        const tr = document.createElement("tr");
-        tr.className = "hover:bg-gray-50";
-
-        const actions = [];
-        // View / Info (desktop) - opens small info modal; pay shown inside modal
-        actions.push(`<button class="px-2 py-1 rounded bg-gray-600 text-white hover:bg-gray-700" onclick="openInfoModal(${a.bookingId})">View</button>`);
-
-        // Reschedule only if not Repair
-        if (safeLower(a.serviceType) !== "repair") {
-          actions.push(`<button class="px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700" onclick="openReschedule(${a.bookingId})">Reschedule</button>`);
-        }
-
-        actions.push(`<button class="px-2 py-1 rounded bg-red-600 text-white hover:bg-red-700" onclick="cancelAppointment(${a.bookingId})">Cancel</button>`);
-
-        tr.innerHTML = `
-          <td class="px-4 py-3 border-b">${a.bookingId}</td>
-          <td class="px-4 py-3 border-b">${a.vehicleNo}</td>
-          <td class="px-4 py-3 border-b">${formatDate(a.date)}</td>
-          <td class="px-4 py-3 border-b">${a.time}</td>
-          <td class="px-4 py-3 border-b">${a.serviceType}</td>
-          <td class="px-4 py-3 border-b">${a.status}</td>
-          <td class="px-4 py-3 border-b">${a.paymentStatus}</td>
-          <td class="px-4 py-3 border-b space-x-1">${actions.join("")}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      // pagination info
-      const totalPages = Math.max(1, Math.ceil(filtered.length / desktopRows));
-      document.getElementById("desktopPageInfo").textContent = `Page ${currentDesktopPage} of ${totalPages} (${filtered.length} results)`;
-      document.getElementById("desktopPrev").disabled = currentDesktopPage === 1;
-      document.getElementById("desktopNext").disabled = currentDesktopPage === totalPages;
-    }
-
-    // ------------------------
-    // Mobile rendering (list)
-    // Mobile: clicking view icon opens the big modal with all actionable buttons
-    // ------------------------
-    function renderMobile() {
-      const wrap = document.getElementById("mobileList");
-      wrap.innerHTML = "";
-      const start = (currentMobilePage - 1) * mobileRows;
-      const page = filtered.slice(start, start + mobileRows);
-
-      page.forEach(a => {
-        const card = document.createElement("div");
-        card.className = "bg-white p-3 rounded shadow-sm flex items-start justify-between";
-        const left = document.createElement("div");
-        left.innerHTML = `<div class="font-medium">#${a.bookingId} — ${a.vehicleNo}</div>
-                          <div class="text-gray-500">${formatDate(a.date)} | ${a.time} | ${a.serviceType}</div>
-                          <div class="text-gray-500">Status: ${a.status} • Payment: ${a.paymentStatus}</div>`;
-
-        const right = document.createElement("div");
-        right.className = "flex flex-col items-end gap-2";
-
-        // view icon (always opens full modal)
-        const viewBtn = document.createElement("button");
-        viewBtn.className = "text-blue-600 hover:underline";
-        viewBtn.innerHTML = "👁 View";
-        viewBtn.onclick = () => openMobileModal(a.bookingId);
-        right.appendChild(viewBtn);
-
-        // If payment state is bill confirmation, show a small badge so user sees it in list
-        if (safeLower(a.paymentStatus) === "bill confirmation") {
-          const badge = document.createElement("div");
-          badge.className = "mt-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded text-xs";
-          badge.textContent = "Bill confirmation";
-          right.appendChild(badge);
-        }
-
-        card.appendChild(left);
-        card.appendChild(right);
-        wrap.appendChild(card);
-      });
-
-      const totalPages = Math.max(1, Math.ceil(filtered.length / mobileRows));
-      document.getElementById("mobilePageInfo").textContent = `Page ${currentMobilePage} of ${totalPages} (${filtered.length})`;
-      document.getElementById("mobilePrev").disabled = currentMobilePage === 1;
-      document.getElementById("mobileNext").disabled = currentMobilePage === totalPages;
-    }
-
-    // ------------------------
-    // Modal: Desktop Info
-    // Pay must appear here only for unpaid/pending (and not waiting for billing)
-    // ------------------------
-    const infoModalEl = document.getElementById("infoModal");
-    const infoContent = document.getElementById("infoModalContent");
-    const infoFooter = document.getElementById("infoModalFooter");
-
-    function openInfoModal(bookingId) {
-      const a = appointments.find(x => x.bookingId === bookingId);
-      if (!a) return;
-      focusedAppointment = a;
-
-      // build content
-      infoContent.innerHTML = `
-        <div class="grid grid-cols-2 gap-2">
-          <div><strong>Booking:</strong> ${a.bookingId}</div>
-          <div><strong>Vehicle:</strong> ${a.vehicleNo}</div>
-          <div><strong>Date:</strong> ${formatDate(a.date)}</div>
-          <div><strong>Time:</strong> ${a.time}</div>
-          <div><strong>Service Type:</strong> ${a.serviceType}</div>
-          <div><strong>Status:</strong> ${a.status}</div>
-          <div><strong>Payment:</strong> ${a.paymentStatus}</div>
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md max-h-full flex flex-col overflow-hidden relative">
+            <button id="payment-modal-close-btn" aria-label="Close modal"
+                class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+            <div id="payment-modal-content" class="p-6 overflow-auto flex-grow">
+                <h2 class="text-xl sm:text-2xl font-semibold mb-4">Payment</h2>
+                <div class="mb-4">
+                    <p><strong>Booking ID:</strong> <span id="payment-booking-id"></span></p>
+                    <p><strong>Vehicle No:</strong> <span id="payment-vehicle-no"></span></p>
+                </div>
+                
+                <div class="mb-4">
+                    <h3 class="font-semibold mb-2">Services</h3>
+                    <div id="payment-services-list" class="space-y-2 mb-4"></div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Payment Type</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="payment-type" value="full" class="mr-2" checked>
+                            <span>Full Payment</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="payment-type" value="advance" class="mr-2">
+                            <span>Advance Payment (50%)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mt-4 pt-4 border-t">
+                    <div class="flex justify-between items-center mb-2">
+                        <span>Total Amount:</span>
+                        <span id="payment-total-amount" class="font-semibold"></span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span>Advance Paid:</span>
+                        <span id="payment-advance-paid" class="font-semibold"></span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span>Balance Due:</span>
+                        <span id="payment-balance-due" class="font-semibold"></span>
+                    </div>
+                    <div class="flex justify-between items-center mt-2 pt-2 border-t">
+                        <span class="font-bold">Amount to Pay:</span>
+                        <span id="payment-amount-to-pay" class="text-lg font-bold text-blue-600"></span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-2 mt-6">
+                    <button id="payment-cancel-btn" class="bg-gray-300 px-4 py-2 rounded-lg">Cancel</button>
+                    <button id="payment-pay-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg">Pay Now</button>
+                </div>
+            </div>
         </div>
-        <hr class="my-3" />
-        <div>
-          <h4 class="font-semibold mb-2">Services</h4>
-          <div id="infoServicesList" class="space-y-1"></div>
+    </div>
+
+    <!-- Processing Modal -->
+    <div id="processing-modal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-sm max-h-full flex flex-col overflow-hidden relative p-6">
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">Processing</h3>
+                <p class="text-gray-600 mb-4">Please wait while we process your request...</p>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                    <div class="bg-blue-600 h-2.5 rounded-full animate-pulse w-3/4"></div>
+                </div>
+            </div>
         </div>
-      `;
+    </div>
 
-      // render services list (read-only view in desktop info modal)
-      const listWrap = document.getElementById("infoServicesList");
-      listWrap.innerHTML = "";
-      a.services.forEach(s => {
-        const d = document.createElement("div");
-        d.className = "flex justify-between items-center border p-2 rounded";
-        d.innerHTML = `<div><span class="${s.active ? 'text-gray-900' : 'text-gray-400 line-through'} font-medium">${s.name}</span> ${s.required ? '<span class="text-red-500 ml-1">*</span>' : ''}</div>
-                       <div class="${s.active ? 'text-gray-900' : 'text-gray-400 line-through'}">${currency(s.amount)}</div>`;
-        listWrap.appendChild(d);
-      });
+    <!-- Toast Notification -->
+    <div id="toast" role="alert" aria-live="assertive"
+        class="fixed bottom-6 right-6 bg-green-600 text-white px-5 py-3 rounded opacity-0 pointer-events-none transition-opacity z-50">
+    </div>
 
-      // footer actions: clear then append as needed
-      infoFooter.innerHTML = "";
+    <!-- Main Content -->
+    <main class="bg-gray-100 pt-[50px] lg:pt-0 px-2 lg:ml-[250px] sm:px-4 transition-all duration-300 min-h-screen overflow-y-auto" tabindex="0">
 
-      const paymentLower = safeLower(a.paymentStatus);
-      // show "Confirm Booking" if in bill confirmation (desktop as well? yes — previous requirement: clicking View shows list for service confirmation)
-      if (paymentLower === "bill confirmation") {
-        const confirmBtn = document.createElement("button");
-        confirmBtn.className = "px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700";
-        confirmBtn.textContent = "Confirm Booking (set to unpaid)";
-        confirmBtn.onclick = () => {
-          // open a modal-like confirm in this small desktop flow — but we should still provide toggles to change services
-          // We'll reuse the info modal but transform services list into toggles (simulate same behavior as mobile)
-          openDesktopBillConfirmation(a);
-        };
-        infoFooter.appendChild(confirmBtn);
-      } else {
-        // Pay available for "unpaid" and "pending" only and not "waiting for billing"
-        if ((paymentLower === "unpaid" || paymentLower === "pending")) {
-          // pay button
-          const payBtn = document.createElement("button");
-          payBtn.className = "px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700";
-          payBtn.textContent = "Pay";
-          payBtn.onclick = () => {
-            payAppointment(a.bookingId);
-            closeInfoModal();
-          };
-          infoFooter.appendChild(payBtn);
-        }
-      }
+        <!-- Desktop View -->
+        <section id="desktop-content" class="hidden sm:block">
+            <h1 class="text-2xl font-bold mb-2 pb-8">My Appointments</h1>
+            
+            <div class="flex justify-between relative">
+                <div class="flex items-center gap-2 w-full max-w-lg bg-white shadow rounded-lg px-3 py-2 relative">
+                    <input type="text" id="searchInputDesktop" placeholder="Search by booking ID, vehicle no, status..."
+                        class="flex-grow outline-none border-none focus:ring-0 text-sm px-2" />
+                    <button id="searchBtnDesktop" class="p-2 rounded-md hover:bg-gray-100" aria-label="Search">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+                        </svg>
+                    </button>
+                    <button id="filterBtnDesktop" class="p-2 rounded-md hover:bg-gray-100"
+                        aria-label="Toggle filter panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-5 h-5 text-gray-600">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M6 10h12M9 16h6M11 20h2" />
+                        </svg>
+                    </button>
 
-      showModal(infoModalEl);
-    }
+                    <!-- Desktop Filter Panel -->
+                    <div id="filterPanelDesktop"
+                        class="hidden absolute top-14 right-0 z-50 bg-white rounded-xl shadow-2xl scale-105 animate-bounce-in px-6 py-4 transition-all duration-300 min-w-[300px]">
+                        <h3 class="text-lg font-semibold mb-4">Filters</h3>
+                        <label class="block mb-4">
+                            <span class="text-sm block mb-1">Status</span>
+                            <select id="filterStatusDesktop" class="w-full border rounded px-2 py-1">
+                                <option value="">All Status</option>
+                                <option value="Booked">Booked</option>
+                                <option value="Ongoing">Ongoing</option>
+                                <option value="Halted">Halted</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Service Completed">Service Completed</option>
+                                <option value="Repair Completed">Repair Completed</option>
+                                <option value="canceled">Canceled</option>
+                            </select>
+                        </label>
+                        <label class="block mb-4">
+                            <span class="text-sm block mb-1">Payment Status</span>
+                            <select id="filterPaymentDesktop" class="w-full border rounded px-2 py-1">
+                                <option value="">All Payment</option>
+                                <option value="booked">Booked</option>
+                                <option value="waiting for billing">Waiting for Billing</option>
+                                <option value="bill confirmation">Bill Confirmation</option>
+                                <option value="unpaid">Unpaid</option>
+                                <option value="pending">Pending</option>
+                                <option value="completed">Completed</option>
+                                <option value="canceled">Canceled</option>
+                            </select>
+                        </label>
+                        <label class="block mb-4">
+                            <span class="text-sm block mb-1">Service Type</span>
+                            <select id="filterServiceDesktop" class="w-full border rounded px-2 py-1">
+                                <option value="">All Types</option>
+                                <option value="Service">Service</option>
+                                <option value="Repair">Repair</option>
+                            </select>
+                        </label>
+                        <label class="block mb-4">
+                            <span class="text-sm block mb-1">Date Range</span>
+                            <input type="date" id="filterDateFromDesktop" class="w-full border rounded px-2 py-1 mb-2">
+                            <input type="date" id="filterDateToDesktop" class="w-full border rounded px-2 py-1">
+                        </label>
+                        <label class="block mb-4">
+                            <span class="text-sm block mb-1">Vehicle Number</span>
+                            <input type="text" id="filterVehicleDesktop" placeholder="Vehicle no" class="w-full border rounded px-2 py-1">
+                        </label>
+                        <button id="applyFilterDesktop"
+                            class="w-full mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Apply
+                            Filter</button>
+                        <button id="clearFilterDesktop"
+                            class="w-full mt-2 px-3 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">Clear
+                            Filters</button>
+                    </div>
+                </div>
+            </div>
 
-    // Desktop's bill confirmation: allow toggles inside info modal (we'll replace services area with interactive toggles,
-    // but keep the confirm button always present)
-    function openDesktopBillConfirmation(a) {
-      focusedAppointment = a;
-      const listWrap = document.getElementById("infoServicesList");
-      listWrap.innerHTML = "";
+            <div class="flex justify-center p-10">
+                <div class="overflow-x-auto w-full max-w-7xl">
+                    <h2 class="text-xl font-semibold mb-2">Appointments </h2>
+                    <div class="flex justify-center">
+                        <table
+                            class="min-w-[1000px] w-full table-auto border border-gray-300 bg-white shadow-sm rounded-md">
+                            <thead class="bg-gray-200 text-gray-700 text-sm">
+                                <tr>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Booking ID</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Vehicle No</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Date</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Time</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Service Type</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Status</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Payment</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointmentTableBodyDesktop" class="text-sm"></tbody>
+                        </table>
+                    </div>
 
-      // Title re-affirm
-      const title = document.createElement("div");
-      title.className = "text-sm text-gray-600 mb-1";
-      title.textContent = "Select/Unselect services to confirm. Required items can't be removed.";
-      listWrap.appendChild(title);
+                    <div
+                        class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-7xl mx-auto px-2 select-none">
+                        <button id="prevPageDesktop" class="disabled:opacity-50 px-3 py-1 rounded border border-gray-300 hover:bg-gray-100" aria-label="Previous page">← Previous</button>
+                        <span id="pageInfoDesktop"></span>
+                        <button id="nextPageDesktop" class="disabled:opacity-50 px-3 py-1 rounded border border-gray-300 hover:bg-gray-100" aria-label="Next page">Next →</button>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-      // controls list
-      a.services.forEach((s, idx) => {
-        const row = document.createElement("div");
-        row.className = "flex items-center justify-between border p-2 rounded mb-1";
-        const label = document.createElement("div");
-        label.innerHTML = `<div class="${s.active ? 'text-gray-900' : 'text-gray-400 line-through'} font-medium">${s.name} ${s.required ? '<span class="text-red-500 ml-1">*</span>' : ''}</div>
-                           <div class="text-xs ${s.active ? 'text-gray-600' : 'text-gray-400'}">₹${s.amount}</div>`;
-        const toggle = document.createElement("button");
-        toggle.className = "px-2 py-1 font-bold rounded hover:bg-gray-100";
-        toggle.textContent = s.active ? "-" : "+";
-        toggle.onclick = (ev) => {
-          ev.stopPropagation();
-          if (s.required) return;
-          s.active = !s.active;
-          // re-render this desktop bill confirmation UI (to keep logic simple)
-          openDesktopBillConfirmation(a);
-        };
-        row.appendChild(label);
-        row.appendChild(toggle);
-        listWrap.appendChild(row);
-      });
+        <!-- Mobile View -->
+        <section class="sm:hidden">
+            <h1 class="text-xl font-bold mb-4 px-4 mt-10">My Appointments </h1>
 
-      // add confirm button below services (always present)
-      infoFooter.innerHTML = "";
-      const confirmBtn = document.createElement("button");
-      confirmBtn.className = "px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700";
-      confirmBtn.textContent = "Confirm Booking (set to unpaid)";
-      confirmBtn.onclick = () => {
-        a.paymentStatus = "unpaid";
-        alert(`Booking #${a.bookingId} confirmed. Payment status set to unpaid.`);
-        applyFilters();
-        closeInfoModal();
-      };
-      infoFooter.appendChild(confirmBtn);
-    }
+            <div class="relative mb-4 px-4 flex items-center gap-2">
+                <div class="flex items-center w-full relative">
+                    <input type="text" id="searchInputMobile"
+                        class="w-full rounded-full px-4 pr-12 shadow-sm outline-none py-3"
+                        placeholder="Search by booking ID, vehicle no, status..." aria-label="Search appointments" />
+                    <button id="searchBtnMobile"
+                        class="absolute right-2 top-[6px] bg-white rounded-full p-2 shadow hover:bg-gray-100"
+                        aria-label="Search">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
 
-    function closeInfoModal() { hideModal(infoModalEl); focusedAppointment = null; }
-    document.getElementById("closeInfo").onclick = closeInfoModal;
+            <div class="flex justify-end px-4 relative mb-4">
+                <button id="filterBtnMobile" class="bg-white rounded-full p-2 shadow hover:bg-gray-100"
+                    aria-label="Toggle filter mobile">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-600" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 4h18l-7 8v6l-4 2v-8z" />
+                    </svg>
+                </button>
+                <div id="filterPanelMobile"
+                    class="hidden absolute top-12 right-0 z-50 bg-white rounded-xl shadow-2xl scale-105 animate-bounce-in px-6 py-4 transition-all duration-300 min-w-[300px]">
+                    <h3 class="text-lg font-semibold mb-4">Filters</h3>
+                    <label class="block mb-4">
+                        <span class="text-sm block mb-1">Status</span>
+                        <select id="filterStatusMobile" class="w-full border rounded px-2 py-1">
+                            <option value="">All Status</option>
+                            <option value="Booked">Booked</option>
+                            <option value="Ongoing">Ongoing</option>
+                            <option value="Halted">Halted</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Service Completed">Service Completed</option>
+                            <option value="Repair Completed">Repair Completed</option>
+                            <option value="canceled">Canceled</option>
+                        </select>
+                    </label>
+                    <label class="block mb-4">
+                        <span class="text-sm block mb-1">Payment Status</span>
+                        <select id="filterPaymentMobile" class="w-full border rounded px-2 py-1">
+                            <option value="">All Payment</option>
+                            <option value="booked">Booked</option>
+                            <option value="waiting for billing">Waiting for Billing</option>
+                            <option value="bill confirmation">Bill Confirmation</option>
+                            <option value="unpaid">Unpaid</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                            <option value="canceled">Canceled</option>
+                        </select>
+                    </label>
+                    <label class="block mb-4">
+                        <span class="text-sm block mb-1">Service Type</span>
+                        <select id="filterServiceMobile" class="w-full border rounded px-2 py-1">
+                            <option value="">All Types</option>
+                            <option value="Service">Service</option>
+                            <option value="Repair">Repair</option>
+                        </select>
+                    </label>
+                    <label class="block mb-4">
+                        <span class="text-sm block mb-1">Date Range</span>
+                        <input type="date" id="filterDateFromMobile" class="w-full border rounded px-2 py-1 mb-2">
+                        <input type="date" id="filterDateToMobile" class="w-full border rounded px-2 py-1">
+                    </label>
+                    <label class="block mb-4">
+                        <span class="text-sm block mb-1">Vehicle Number</span>
+                        <input type="text" id="filterVehicleMobile" placeholder="Vehicle no" class="w-full border rounded px-2 py-1">
+                    </label>
+                    <button id="applyFilterMobile"
+                        class="w-full mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Apply
+                        Filter</button>
+                    <button id="clearFilterMobile"
+                        class="w-full mt-2 px-3 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">Clear
+                        Filters</button>
+                </div>
+            </div>
 
-    // ------------------------
-    // Modal: Mobile (full)
-    // mobile modal must show details + interactive list + all buttons (confirm, pay, remove, reschedule if allowed)
-    // ------------------------
-    const mobileModalEl = document.getElementById("mobileModal");
-    const mobileContent = document.getElementById("mobileModalContent");
-    const mobileTitle = document.getElementById("mobileModalTitle");
+            <div>
+                <h2 class="text-lg font-semibold mb-2 px-4">Appointments</h2>
+                <div id="appointmentListMobile" class="p-2 space-y-3"></div>
+                <div
+                    class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-md mx-auto px-4 select-none">
+                    <button id="prevPageMobile" class="disabled:opacity-50 px-3 py-1 rounded border border-gray-300 hover:bg-gray-100" aria-label="Previous page">← Previous</button>
+                    <span id="pageInfoMobile"></span>
+                    <button id="nextPageMobile" class="disabled:opacity-50 px-3 py-1 rounded border border-gray-300 hover:bg-gray-100" aria-label="Next page">Next →</button>
+                </div>
+            </div>
+        </section>
 
-    function openMobileModal(bookingId) {
-      const a = appointments.find(x => x.bookingId === bookingId);
-      if (!a) return;
-      focusedAppointment = a;
-      mobileTitle.textContent = `Booking #${a.bookingId}`;
-      renderMobileModalContent(a);
-      showModal(mobileModalEl);
-    }
+    </main>
+    <script type="module" src="/components/user-components-loader.js"></script>
+    <script type="module" src="appointments.js" ></script>
 
-    function renderMobileModalContent(a) {
-      mobileContent.innerHTML = "";
-
-      // Basic info
-      const infoBox = document.createElement("div");
-      infoBox.className = "grid grid-cols-2 gap-2";
-      infoBox.innerHTML = `
-        <div><strong>Vehicle</strong><div class="text-gray-700">${a.vehicleNo}</div></div>
-        <div><strong>Date</strong><div class="text-gray-700">${formatDate(a.date)}</div></div>
-        <div><strong>Time</strong><div class="text-gray-700">${a.time}</div></div>
-        <div><strong>Type</strong><div class="text-gray-700">${a.serviceType}</div></div>
-        <div><strong>Status</strong><div class="text-gray-700">${a.status}</div></div>
-        <div><strong>Payment</strong><div class="text-gray-700">${a.paymentStatus}</div></div>
-      `;
-      mobileContent.appendChild(infoBox);
-
-      // Services controls area (for bill confirmation or general view)
-      const servicesWrap = document.createElement("div");
-      servicesWrap.className = "mt-3";
-      mobileContent.appendChild(servicesWrap);
-
-      // Helper to compute totals
-      function computeTotal() {
-        return a.services.filter(s => s.active).reduce((acc, s) => acc + (s.amount||0), 0);
-      }
-
-      // If paymentStatus is 'bill confirmation', show toggles with Confirm Booking at bottom
-      // else show read-only services and allow pay/remove/reschedule buttons depending on state
-      const paymentLower = safeLower(a.paymentStatus);
-
-      const serviceList = document.createElement("div");
-      serviceList.className = "space-y-2";
-      a.services.forEach((s, idx) => {
-        const row = document.createElement("div");
-        row.className = "flex items-center justify-between border p-2 rounded";
-        row.innerHTML = `<div>
-                          <div class="${s.active ? 'text-gray-900' : 'text-gray-400 line-through'} font-medium">${s.name} ${s.required ? '<span class="text-red-500 ml-1">*</span>' : ''}</div>
-                          <div class="text-xs ${s.active ? 'text-gray-600' : 'text-gray-400'}">₹${s.amount}</div>
-                         </div>`;
-        const btn = document.createElement("button");
-        btn.className = "px-3 py-1 font-bold rounded hover:bg-gray-100";
-        btn.textContent = s.active ? "-" : "+";
-        if (s.required) {
-          btn.disabled = true;
-          btn.classList.add("opacity-40", "cursor-not-allowed");
-        } else {
-          btn.onclick = () => {
-            s.active = !s.active;
-            // re-render the mobile modal content to reflect changes, but ensure Confirm remains
-            renderMobileModalContent(a);
-            // keep modal open
-            showModal(mobileModalEl);
-          };
-        }
-        row.appendChild(btn);
-        serviceList.appendChild(row);
-      });
-      servicesWrap.appendChild(serviceList);
-
-      // update total area
-      const totalEl = document.getElementById("mobileTotal");
-      if (totalEl) totalEl.textContent = `Total: ${currency(computeTotal())}`;
-
-      // footer buttons area (we will populate the footer's right-side buttons)
-      const footerBtnsContainer = mobileModalEl.querySelector('.p-4.border-t .flex:last-child') || mobileModalEl.querySelector('.p-4.border-t > div:last-child > .flex');
-
-      // Clear previous footer button placeholders
-      const footerRight = mobileModalEl.querySelector('.p-4.border-t').querySelectorAll('div')[1];
-      // We'll remove all children in that right-side area and append new ones
-      // To find the right side element reliably:
-      const footerSegments = mobileModalEl.querySelectorAll('.p-4.border-t > div');
-      // Last child of the p-4.border-t is the right-side flex container
-      const rightFlex = mobileModalEl.querySelector('.p-4.border-t > div:last-child');
-
-      // Clear right side
-      rightFlex.innerHTML = '';
-
-      // Buttons:
-      // - Confirm Booking (if bill confirmation)
-      // - Reschedule (if not repair)
-      // - Pay (if unpaid/pending and not waiting for billing)
-      // - Remove (always available maybe; but in UI we keep it)
-      if (paymentLower === "bill confirmation") {
-        const confirmBtn = document.createElement("button");
-        confirmBtn.className = "px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700";
-        confirmBtn.textContent = "Confirm Booking";
-        confirmBtn.onclick = () => {
-          a.paymentStatus = "unpaid";
-          alert(`Booking #${a.bookingId} confirmed — paymentStatus set to unpaid`);
-          applyFilters();
-          hideModal(mobileModalEl);
-        };
-        rightFlex.appendChild(confirmBtn);
-      }
-
-      // Reschedule (only for non-repair)
-      if (safeLower(a.serviceType) !== "repair") {
-        const resBtn = document.createElement("button");
-        resBtn.className = "px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700";
-        resBtn.textContent = "Reschedule";
-        resBtn.onclick = () => openReschedule(a.bookingId);
-        rightFlex.appendChild(resBtn);
-      }
-
-      // Pay (only for unpaid or pending and not waiting for billing)
-      if ((paymentLower === "unpaid" || paymentLower === "pending")) {
-        const payBtn = document.createElement("button");
-        payBtn.className = "px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700";
-        payBtn.textContent = "Pay";
-        payBtn.onclick = () => {
-          payAppointment(a.bookingId);
-          hideModal(mobileModalEl);
-        };
-        rightFlex.appendChild(payBtn);
-      } else if (paymentLower === "waiting for billing") {
-        // nothing to add; pay not allowed
-      }
-
-      // always allow Cancel/Remove
-      const removeBtn = document.createElement("button");
-      removeBtn.className = "px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600";
-      removeBtn.textContent = "Cancel Booking";
-      removeBtn.onclick = () => {
-        if (confirm(`Cancel booking #${a.bookingId}?`)) {
-          a.status = "canceled";
-          a.paymentStatus = "canceled";
-          applyFilters();
-          hideModal(mobileModalEl);
-        }
-      };
-      rightFlex.appendChild(removeBtn);
-
-      // Update total visible inside modal
-      const mobileTotal = document.getElementById("mobileTotal");
-      if (mobileTotal) mobileTotal.textContent = `Total: ${currency(computeTotal())}`;
-    }
-
-    document.getElementById("closeMobile").onclick = () => hideModal(mobileModalEl);
-
-    // ------------------------
-    // Reschedule flow (simple modal prompt for demo; can be replaced by proper modal)
-    // ------------------------
-    function openReschedule(bookingId) {
-      const a = appointments.find(x => x.bookingId === bookingId);
-      if (!a) return;
-      if (safeLower(a.serviceType) === "repair") return;
-
-      // show a minimal UI using prompt for simplicity (this keeps file small). In real app replace with a proper modal.
-      const newDate = prompt("Enter new date (YYYY-MM-DD):", a.date);
-      if (!newDate) return;
-      // choose time slot from availableTimeSlots
-      const ts = prompt("Choose time slot (type exactly):\n" + availableTimeSlots.join(", "), a.time);
-      if (!ts) return;
-      a.date = newDate;
-      a.time = ts;
-      alert(`Appointment #${a.bookingId} rescheduled to ${formatDate(a.date)} at ${a.time}`);
-      applyFilters();
-    }
-
-    // ------------------------
-    // Payment / cancel actions
-    // ------------------------
-    function payAppointment(bookingId) {
-      const a = appointments.find(x => x.bookingId === bookingId);
-      if (!a) return;
-      if (safeLower(a.paymentStatus) === "waiting for billing") { alert("Cannot pay while waiting for billing"); return; }
-      a.paymentStatus = "completed";
-      applyFilters();
-      alert(`Payment completed for booking #${bookingId}`);
-    }
-
-    function cancelAppointment(bookingId) {
-      if (!confirm(`Are you sure you want to cancel booking #${bookingId}?`)) return;
-      const a = appointments.find(x => x.bookingId === bookingId);
-      if (!a) return;
-      a.status = "canceled";
-      a.paymentStatus = "canceled";
-      applyFilters();
-    }
-
-    // ------------------------
-    // Modal helpers (show/hide, backdrop clicks, ESC close)
-    // ------------------------
-    function showModal(el) {
-      el.classList.add("show");
-      el.setAttribute("aria-hidden", "false");
-    }
-    function hideModal(el) {
-      el.classList.remove("show");
-      el.setAttribute("aria-hidden", "true");
-      // clear focusedAppointment
-      focusedAppointment = null;
-    }
-    // close on backdrop click
-    document.querySelectorAll('.modal-wrap').forEach(mwrap => {
-      mwrap.addEventListener('click', (e) => {
-        if (e.target === mwrap) hideModal(mwrap);
-      });
-    });
-    // close on ESC
-    window.addEventListener('keydown', (e) => {
-      if (e.key === "Escape") {
-        document.querySelectorAll('.modal-wrap.show').forEach(m => hideModal(m));
-      }
-    });
-
-    // ------------------------
-    // Pagination handlers
-    // ------------------------
-    document.getElementById("desktopPrev").onclick = () => { if (currentDesktopPage>1) { currentDesktopPage--; renderDesktop(); } };
-    document.getElementById("desktopNext").onclick = () => { const tp = Math.ceil(filtered.length / desktopRows) || 1; if (currentDesktopPage < tp) { currentDesktopPage++; renderDesktop(); } };
-    document.getElementById("mobilePrev").onclick = () => { if (currentMobilePage>1) { currentMobilePage--; renderMobile(); } };
-    document.getElementById("mobileNext").onclick = () => { const tp = Math.ceil(filtered.length / mobileRows) || 1; if (currentMobilePage < tp) { currentMobilePage++; renderMobile(); } };
-
-    // ------------------------
-    // Wiring: filters + buttons
-    // ------------------------
-    document.getElementById("applyFiltersBtn").onclick = applyFilters;
-    document.getElementById("clearFiltersBtn").onclick = clearFilters;
-    // allow Enter in search to apply
-    document.getElementById("searchInput").addEventListener('keydown', (e) => { if (e.key === 'Enter') applyFilters(); });
-
-    // ------------------------
-    // Initial render
-    // ------------------------
-    applyFilters();
-
-    // ------------------------
-    // Expose a couple of functions globally used by inline onclicks in desktop table rows
-    // (openInfoModal, openReschedule, cancelAppointment are used above)
-    // ------------------------
-    window.openInfoModal = openInfoModal;
-    window.openReschedule = openReschedule;
-    window.cancelAppointment = cancelAppointment;
-    window.payAppointment = payAppointment;
-    window.openMobileModal = openMobileModal;
-
-    // End of script
-  </script>
 </body>
+
 </html>

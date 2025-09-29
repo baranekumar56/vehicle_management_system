@@ -1,135 +1,379 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Vehicle Management System | Premium Fleet Care</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <style>
-    /* Custom dark navy primary color */
-    :root {
-      --dark-navy: #0a1e3f;
-      --primary-gradient: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+    .primary {
+      background-color: #241358;
     }
-    body {
-      background-color: var(--dark-navy);
-      color: #e0e7ff;
-      font-family: 'Inter', sans-serif;
-    }
-    .btn-primary {
-      background: var(--primary-gradient);
-    }
-    .btn-primary:hover {
-      background: #2563eb;
+
+    .primary-text {
+      color: #241358;
     }
   </style>
+  <title>Auto Care Service</title>
 </head>
-<body class="min-h-screen flex flex-col">
 
-  <!-- Hero Section -->
-  <header class="relative flex flex-col items-center justify-center text-center px-6 py-28 lg:py-40">
-    <div class="max-w-4xl">
-      <h1 class="text-5xl font-extrabold mb-6 leading-tight tracking-tight max-w-3xl mx-auto text-white drop-shadow-lg">
-        Manage Your Fleet Like a Pro <br />
-        <span class="text-indigo-400">Smart. Efficient. Reliable.</span>
-      </h1>
-      <p class="text-lg text-indigo-200 mb-10 max-w-xl mx-auto drop-shadow-sm">
-        Ultimate vehicle management system optimized for fleet owners to boost productivity and reduce costs.
+<body>
+  <div class="flex flex-col">
+    <!-- Nav Bar-->
+    <div class="w-vw sticky top-0 ">
+      <div class="flex text-white primary sticky top-0 z-69 w-full">
+        <div class="inline ">
+          <img src="/assets/logo.png" width="100px" height="40px" alt="auto care logo" />
+        </div>
+        <div class="sm:hidden w-full flex justify-end">
+          <button id="menu-btn" class="focus:outline-none p-4">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+        <div class="hidden sm:flex w-full justify-end p-4 ">
+          <div class="link p-4">About</div>
+          <div class="link p-4">Achievements</div>
+          <div class="link p-4">FAQ</div>
+          <div class="link p-4">Book</div>
+          <div class="link p-4">Login / Signup</div>
+        </div>
+      </div>
+      <div id="mobile-menu"
+        class="primary max-h-0 sm:hidden overflow-hidden flex flex-col space-y-2 px-2 pb-4 justify-end text-white items-end pr-5 transition-all duration-500 ease-in">
+        <a>About</a>
+        <a>Achievements</a>
+        <a>FAQ</a>
+        <a>Book</a>
+        <a>Login / SignUp</a>
+      </div>
+    </div>
+
+    <!-- Div to show image and slogan -->
+    <section class="flex flex-col sm:flex-row primary h-screen -mt-16">
+      <div class="flex-1 flex justify-center items-center ">
+        <img src="/assets/main_car_image_2.png"
+          class="w-full h-auto max-w-full sm:max-w-md md:max-w-lg lg:max-w-3xl mt-50 sm:mt-0" alt="Car Image" />
+      </div>
+      <div class="flex-1 flex justify-center items-center">
+        <span class="text-white font-bold text-4xl sm:text-4xl md:text-6xl lg:text-6xl m-0 pl-4 pr-4">
+          Life’s already rough — at least let your car be smooth.
+        </span>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="primary text-white mt-30">
+      <div class="w-full flex justify-center p-4 text text-3xl">
+        <div>About</div>
+      </div>
+      <div class="flex flex-col sm:flex-row-reverse items-center justify-center mx-auto max-w-5xl p-6 gap-6 ">
+        <div class="flex-1 flex justify-center">
+          <img src="/assets/smart-boarded-service.jpg" alt="touch panel display having mechanic"
+            class="rounded-lg max-w-sm sm:max-w-md" />
+        </div>
+        <div class="flex-1 text-xl leading-relaxed max-w-lg">
+          Auto Care is a smart vehicle service management system
+          that simplifies service booking and tracking. It helps
+          customers schedule appointments, view history, and
+          stay updated with ease.
+          With Auto Care, vehicle servicing becomes
+          faster, transparent, and hassle-free.
+        </div>
+      </div>
+    </section>
+
+    <!-- Achievements -->
+    <section>
+      <div class="flex justify-center text-3xl mt-30 text-white">
+          <div class="text-3xl text-center mb-10 primary-text font-bold">Achievements</div>
+
+      </div>
+      <div class="flex flex-col sm:flex-row p-6 gap-6 ">
+        <div class="flex-1 primary text-white flex flex-col items-center p-4 shadow-2xl">
+          <div class="text-7xl p-4">
+            95%
+          </div>
+          <div class="invisible">ererr</div>
+          <div class="invisible">ererr</div>
+          <div class="text-xl p-6 text-center">
+            Customer Satisfaction Rate, ensuring transparency and hassle-free experiences.
+          </div>
+        </div>
+        <div class="flex-1 primary text-white flex flex-col items-center p-4 shadow-2xl sm:scale-115">
+          <div class="text-7xl p-4">
+            10,000+
+          </div>
+          <div class="invisible">ererr</div>
+          <div class="invisible">ererr</div>
+          <div class="text-xl p-6 text-center">
+            Vehicles Serviced through the platform with seamless tracking and updates.
+          </div>
+        </div>
+        <div class="flex-1 primary text-white flex flex-col items-center p-4 shadow-2xl">
+          <div class="text-7xl p-4">
+            80%
+          </div>
+          <div class="invisible">ererr</div>
+          <div class="invisible">ererr</div>
+          <div class="text-xl p-6 text-center">
+            Repeat Customers due to trust and transparency
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- What We Do Cards Section -->
+    <section class="mt-20 px-6">
+      <div class="text-3xl text-center mb-10 primary-text font-bold">What We Do</div>
+      <div class="flex flex-col sm:flex-row gap-6 max-w-6xl mx-auto justify-center">
+        <div class="flex-1 bg-white rounded-lg shadow-lg p-6 text-center">
+          <img src="/assets/inspection.png" alt="Inspection" class="mx-auto mb-4 h-60 w-60 object-cover" />
+          <h3 class="text-xl font-semibold mb-2 primary-text">Vehicle Inspection</h3>
+          <p>Comprehensive vehicle checks for safety and performance.</p>
+        </div>
+        <div class="flex-1 bg-white rounded-lg shadow-lg p-6 text-center">
+          <img src="/assets/maintenance.JPG" alt="Maintenance" class="mx-auto mb-4 h-60 w-60 object-cover" />
+          <h3 class="text-xl font-semibold mb-2 primary-text">Maintenance</h3>
+          <p>Scheduled maintenance to keep vehicles running smoothly.</p>
+        </div>
+        <div class="flex-1 bg-white rounded-lg shadow-lg p-6 text-center">
+          <img src="/assets/customer-support.png" alt="Support" class="mx-auto mb-4 h-60 w-60 object-cover" />
+          <h3 class="text-xl font-semibold mb-2 primary-text">Customer Support</h3>
+          <p>Dedicated support for queries and assistance anytime.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pickup Service Info Section -->
+
+
+    <!-- Testimonials Section -->
+    <section class="mt-20 px-6">
+      <div class="text-3xl text-center mb-10 primary-text font-bold">Testimonials</div>
+      <div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="bg-white rounded-lg p-6 shadow-lg">
+          <p class="italic mb-4">"Excellent service! My car was serviced quickly and the staff was very professional."
+          </p>
+          <div class="font-semibold">- John D.</div>
+        </div>
+        <div class="bg-white rounded-lg p-6 shadow-lg">
+          <p class="italic mb-4">"Booking was easy and transparent. I appreciated the updates throughout the process."
+          </p>
+          <div class="font-semibold">- Maria K.</div>
+        </div>
+        <div class="bg-white rounded-lg p-6 shadow-lg">
+          <p class="italic mb-4">"Reliable and trustworthy service center. Highly recommend to everyone!"</p>
+          <div class="font-semibold">- Anil S.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Book Section -->
+    <section>
+      <div class="flex justify-center text-3xl mt-30 text-white">
+        <h2 class="justify-center text-black">Make an Appointment</h2>
+      </div>
+      <div class="flex flex-col sm:flex-row justify-center items-center gap-15 p-6">
+        <div class="primary text-white flex flex-col items-center p-4 shadow-2xl max-w-sm w-full">
+          <div>
+            <div class=" text-2xl">Service</div>
+          </div>
+          <div class="text-7xl p-4">
+            <img src="/assets/Oil-Change.webp" class="w-full h-auto max-w-xs sm:max-w-sm" alt="Oil-Change image" />
+          </div>
+          <div class="text-xl p-6 text-center">
+            Book oil changes, tire checks, and full service packages with ease.
+          </div>
+          <div class="flex justify-end w-full ">
+            <button class="bg-white primary-text p-2 font-bold hover:scale-115 transistion-all duration-300">Book
+              Now</button>
+          </div>
+        </div>
+        <div class="primary text-white flex flex-col items-center p-4 shadow-2xl max-w-sm w-full">
+          <div>
+            <div class=" text-2xl">Repair</div>
+          </div>
+          <div class="text-7xl p-4">
+            <img src="/assets/repair.jpg" class="w-full h-auto max-w-xs sm:max-w-sm" alt="repair image" />
+          </div>
+          <div class="text-xl p-6 text-center ">
+            Fix issues quickly with expert diagnostics and repair.
+          </div>
+          <div class="flex justify-end w-full ">
+            <button class="bg-white primary-text p-2 font-bold hover:scale-115 transistion-all duration-300">Book
+              Now</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-20 px-6 text-center max-w-4xl mx-auto">
+      <p class="text-xl primary-text font-semibold mb-4">
+        We offer pickup services within a 20 km radius around our shop.
       </p>
-      <div class="flex justify-center gap-6">
-        <a href="#features" class="btn-primary px-10 py-3 rounded-full font-semibold text-white shadow-lg transition hover:shadow-xl">
-          Get Started
-        </a>
-        <a href="#contact" class="px-10 py-3 rounded-full border-2 border-indigo-500 text-indigo-400 hover:bg-indigo-700 hover:text-white transition font-semibold shadow-sm">
-          Request Demo
-        </a>
-      </div>
-    </div>
-    <div class="absolute inset-0 -z-10 opacity-20 bg-gradient-to-br from-indigo-900 via-blue-900 to-black"></div>
-  </header>
+    </section>
 
-  <!-- Features Section -->
-  <section id="features" class="bg-gradient-to-t from-indigo-900 via-indigo-800 to-indigo-900 py-20 px-6">
-    <div class="max-w-7xl mx-auto text-center mb-16">
-      <h2 class="text-4xl font-bold text-white mb-4 drop-shadow-md">Comprehensive Features</h2>
-      <p class="text-indigo-200 max-w-3xl mx-auto text-lg drop-shadow-sm">
-        Everything you need in one powerful, easy-to-use platform.
+    <!-- Map Section -->
+    <section class="mt-20 px-6 max-w-6xl mx-auto rounded-lg overflow-hidden shadow-lg">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.019597550426!2d-122.41941508468109!3d37.774929779759734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8085809c7c2e0dff%3A0x5069c5fd2f4e9900!2sSan+Francisco%2C+CA!5e0!3m2!1sen!2sus!4v1695649422568!5m2!1sen!2sus"
+        width="100%" height="350" styl
+        
+        
+        e="border:0;" allowfullscreen="" loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </section>
+
+
+    
+    <!-- FAQ's -->
+    <section class="transistion-all duration-300">
+      <div class="flex justify-center text-3xl mt-10 text-white">
+        <h2 class="justify-center text-black">FAQ's</h2>
+      </div>
+      <div id="faqs" class="flex flex-col gap-6 justify-center items-center transition-all duration-300 w-full">
+
+
+        <!-- Example 1 -->
+        <div
+          class="primary text-white p-4 rounded-lg w-3/4 shadow-lg cursor-pointer transition-all duration-300 hover:bg-indigo-900">
+          <div class="flex items-center">
+            <span class="font-semibold text-xl mr-2">+</span>
+            <span class="font-semibold text-xl">How often should I book a regular service?</span>
+          </div>
+          <div class="faq-answer hidden mt-2 bg-indigo-800 bg-opacity-85 rounded p-4 text-base font-light">
+            Most vehicles should be serviced every 12 months or 10,000–15,000 km, depending on make, model, and usage.
+            Always follow your manufacturer's recommendations for optimal performance and longevity.
+          </div>
+        </div>
+        <!-- Example 2 -->
+        <div
+          class="primary text-white p-4 rounded-lg w-3/4 shadow-lg cursor-pointer transition-all duration-300 hover:bg-indigo-900">
+          <div class="flex items-center">
+            <span class="font-semibold text-xl mr-2">+</span>
+            <span class="font-semibold text-xl">Can I track my vehicle’s service status?</span>
+          </div>
+          <div class="faq-answer hidden mt-2 bg-indigo-800 bg-opacity-85 rounded p-4 text-base font-light">
+            Yes, Auto Care lets customers track their service status in real-time through the platform, so updates are
+            always just a click away.
+          </div>
+        </div>
+        <!-- Example 3 -->
+        <div
+          class="primary text-white p-4 rounded-lg w-3/4 shadow-lg cursor-pointer transition-all duration-300 hover:bg-indigo-900">
+          <div class="flex items-center">
+            <span class="font-semibold text-xl mr-2">+</span>
+            <span class="font-semibold text-xl">Does Auto Care maintain a history of my past services?</span>
+          </div>
+          <div class="faq-answer hidden mt-2 bg-indigo-800 bg-opacity-85 rounded p-4 text-base font-light">
+            Absolutely! All your past services, repairs, and appointments are available in your Auto Care profile for
+            your convenience and future reference.
+          </div>
+        </div>
+        <!-- Example 4 -->
+        <div
+          class="primary text-white p-4 rounded-lg w-3/4 shadow-lg cursor-pointer transition-all duration-300 hover:bg-indigo-900">
+          <div class="flex items-center">
+            <span class="font-semibold text-xl mr-2">+</span>
+            <span class="font-semibold text-xl">Can I reschedule or cancel a service appointment?</span>
+          </div>
+          <div class="faq-answer hidden mt-2 bg-indigo-800 bg-opacity-85 rounded p-4 text-base font-light">
+            Yes, appointments can be rescheduled or canceled right from your dashboard, as long as it is prior to the
+            scheduled service time.
+          </div>
+        </div>
+        <!-- Example 5 -->
+        <div
+          class="primary text-white p-4 rounded-lg w-3/4 shadow-lg cursor-pointer transition-all duration-300 hover:bg-indigo-900">
+          <div class="flex items-center">
+            <span class="font-semibold text-xl mr-2">+</span>
+            <span class="font-semibold text-xl">Are the prices fixed or only given as estimates?</span>
+          </div>
+          <div class="faq-answer hidden mt-2 bg-indigo-800 bg-opacity-85 rounded p-4 text-base font-light">
+            Auto Care provides a clear estimate before booking; most routine services have fixed prices, but some
+            repairs may require a physical inspection for an accurate quote.
+          </div>
+        </div>
+        <!-- Example 6 -->
+        <div
+          class="primary text-white p-4 rounded-lg w-3/4 shadow-lg cursor-pointer transition-all duration-300 hover:bg-indigo-900">
+          <div class="flex items-center">
+            <span class="font-semibold text-xl mr-2">+</span>
+            <span class="font-semibold text-xl">Will my warranty be affected if I use Auto Care?</span>
+          </div>
+          <div class="faq-answer hidden mt-2 bg-indigo-800 bg-opacity-85 rounded p-4 text-base font-light">
+            All services and repairs at Auto Care adhere to manufacturer guidelines, so your car’s warranty is protected
+            as long as services are done on schedule.
+          </div>
+        </div>
+        <!-- Example 7 -->
+        <div
+          class="primary text-white p-4 rounded-lg w-3/4 shadow-lg cursor-pointer transition-all duration-300 hover:bg-indigo-900">
+          <div class="flex items-center">
+            <span class="font-semibold text-xl mr-2">+</span>
+            <span class="font-semibold text-xl">What if I need to drop off or pick up my car after hours?</span>
+          </div>
+          <div class="faq-answer hidden mt-2 bg-indigo-800 bg-opacity-85 rounded p-4 text-base font-light">
+            Auto Care offers after-hours drop-off and pick-up arrangements for customers with busy schedules—just
+            contact support to coordinate convenient timings.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="w-vw flex justify-center">
+      <section class="mt-10 w-[100%] flex justify-center ">
+        <div class="primary text-white p-4 flex flex-col items-center gap-4 rounded-lg shadow-2xl w-[90%] sm:w-[70%] md:w-[60%] lg:w-[50%]">
+          <h2 class="text-3xl mb-6 text-white">Enquiry</h2>
+          <form class="w-full flex flex-col gap-4">
+            <input type="text" class="p-2 rounded outline outline-gray-200" placeholder="Your Name" required />
+            <input type="email" class="p-2 rounded outline outline-gray-200" placeholder="Your Email" required />
+            <textarea class="p-2 rounded outline outline-gray-200" placeholder="Your Query" rows="4" required></textarea>
+            <div class="flex justify-center w-full">
+            <button type="submit"
+              class="bg-white primary-text p-2 font-bold hover:scale-115 transition-all duration-300 w-fit ">
+              Submit
+            </button>
+            </div>
+          </form>
+        </div>
+
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="primary text-white text-center p-6 mt-20">
+      <p class="text-sm max-w-4xl mx-auto leading-relaxed">
+        &copy; 2025 Auto Care Service. All rights reserved. | <a href="/terms.html"
+          class="underline hover:text-indigo-400">Terms and Conditions</a>
       </p>
-    </div>
-    <div class="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto">
-      <div class="bg-indigo-700 bg-opacity-30 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
-        <div class="w-16 h-16 mb-6 mx-auto p-4 bg-indigo-600 rounded-full flex items-center justify-center shadow-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6h6v6m-3-3v3m4 4H9m11-7l-5 5-5-5" />
-          </svg>
-        </div>
-        <h3 class="text-xl font-semibold text-white mb-2">Real-Time GPS Tracking</h3>
-        <p class="text-indigo-300 leading-relaxed">
-          Track your vehicles with pinpoint accuracy 24/7, improving operational oversight.
-        </p>
-      </div>
+    </footer>
+  </div>
 
-      <div class="bg-indigo-700 bg-opacity-30 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
-        <div class="w-16 h-16 mb-6 mx-auto p-4 bg-indigo-600 rounded-full flex items-center justify-center shadow-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6h6v6M12 9h3a2 2 0 012 2v7H7v-7a2 2 0 012-2h3z" />
-          </svg>
-        </div>
-        <h3 class="text-xl font-semibold text-white mb-2">Maintenance & Alerts</h3>
-        <p class="text-indigo-300 leading-relaxed">
-          Automate service scheduling and receive timely reminders to avoid costly breakdowns.
-        </p>
-      </div>
+  <script>
+    const menu_btn = document.getElementById('menu-btn');
+    const mobile_menu = document.getElementById('mobile-menu');
+    menu_btn.addEventListener('click', () => {
+      mobile_menu.classList.toggle('max-h-0');
+      mobile_menu.classList.toggle('max-h-96');
+    });
 
-      <div class="bg-indigo-700 bg-opacity-30 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1">
-        <div class="w-16 h-16 mb-6 mx-auto p-4 bg-indigo-600 rounded-full flex items-center justify-center shadow-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m4 0h-1v4h-1M12 9v3m-6-1a9 9 0 0112 0v5H6v-5z" />
-          </svg>
-        </div>
-        <h3 class="text-xl font-semibold text-white mb-2">Fuel & Expense Reports</h3>
-        <p class="text-indigo-300 leading-relaxed">
-          Keep track of fuel consumption and expenses with detailed reports for smarter budgets.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Testimonials -->
-  <section class="py-20 px-6 bg-gradient-to-tr from-indigo-800 via-indigo-700 to-indigo-800">
-    <div class="max-w-5xl mx-auto space-y-12 text-center">
-      <h2 class="text-4xl font-bold text-white mb-10 drop-shadow-lg">Trusted by Fleet Professionals</h2>
-      <div class="grid md:grid-cols-3 gap-10">
-        <blockquote class="bg-indigo-900 bg-opacity-50 rounded-xl p-6 shadow-lg">
-          <p class="text-indigo-300 italic mb-4">"This system transformed how we monitor our fleet. The real-time tracking and maintenance alerts save us time and money."</p>
-          <cite class="block font-semibold text-indigo-200">- Rajesh Kumar, Fleet Manager</cite>
-        </blockquote>
-        <blockquote class="bg-indigo-900 bg-opacity-50 rounded-xl p-6 shadow-lg">
-          <p class="text-indigo-300 italic mb-4">"Excellent platform with a clean interface and powerful features. Our operations are now more efficient than ever before."</p>
-          <cite class="block font-semibold text-indigo-200">- Anjali Mehta, Logistics Head</cite>
-        </blockquote>
-        <blockquote class="bg-indigo-900 bg-opacity-50 rounded-xl p-6 shadow-lg">
-          <p class="text-indigo-300 italic mb-4">"The fuel expense reports helped us cut costs significantly. Great customer support too!"</p>
-          <cite class="block font-semibold text-indigo-200">- Vikram Singh, Business Owner</cite>
-        </blockquote>
-      </div>
-    </div>
-  </section>
-
-  <!-- Call to Action -->
-  <section id="contact" class="py-16 px-6 text-center bg-indigo-600 bg-opacity-90 rounded-t-3xl mt-12">
-    <h2 class="text-3xl font-extrabold mb-6 text-white drop-shadow-md">Get Started Today</h2>
-    <p class="text-indigo-200 max-w-lg mx-auto mb-8 drop-shadow-sm">
-      Book a demo or contact us to learn more about how we can help optimize your fleet management.
-    </p>
-    <a href="#" class="btn-primary px-12 py-4 rounded-full text-white font-semibold shadow-lg hover:shadow-xl transition">
-      Request a Demo
-    </a>
-  </section>
-
-  <footer class="text-indigo-400 text-center py-8 mt-auto border-t border-indigo-700">
-    &copy; 2025 Vehicle Management System • All rights reserved
-  </footer>
-
+    const question_pairs = document.getElementById('faqs').children;
+    for (let index = 0; index < question_pairs.length; index++) {
+      question_pairs[index].addEventListener('click', () => {
+        for (let i = 0; i < question_pairs.length; i++) {
+          const answer = question_pairs[index].querySelector('.faq-answer');
+          answer.classList.toggle('hidden');
+          if (index != i) {
+            const other_answer = question_pairs[i].querySelector('.faq-answer');
+            other_answer.classList.add('hidden');
+          }
+        }
+      });
+    }
+  </script>
 </body>
+
 </html>

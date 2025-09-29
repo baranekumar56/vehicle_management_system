@@ -48,6 +48,17 @@
       "password": "12345678",
       "deleted": false,
       "role": "mechanic"
+    },
+    {
+      "id": "ff85",
+      "email": "fgh@h.com",
+      "name": "rgrh",
+      "phone": "34534534534",
+      "exp": "22",
+      "startDate": "2025-09-19",
+      "password": "retgrtrgrgr",
+      "deleted": false,
+      "role": "mechanic"
     }
   ],
   "appointments": [],
@@ -55,5 +66,8 @@
   "services": [],
   "vehicleservices": [],
   "bookedservices": [],
-  "bookedrepairs": []
+  "bookedrepairs": [],
+  "issues":[],
+  "notifications":[],
+  "payments":[]
 }

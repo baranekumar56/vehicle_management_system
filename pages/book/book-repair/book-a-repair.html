@@ -58,8 +58,11 @@
 
       <!-- Step 1 -->
       <div id="step1" class="step-content flex-grow flex flex-col">
-        <h2 class="text-xl sm:text-2xl font-semibold mb-4 primary-text">Professional Details</h2>
+        <h2 class="text-xl sm:text-2xl font-semibold mb-4 primary-text">Personal Details</h2>
         <div class="space-y-3 flex-grow">
+          <div class=" flex justify-end text-blue-500 cursor-pointer">
+            <div>Auto fill</div>
+          </div>
           <input type="text" name="name" placeholder="Name" class="w-full border rounded-lg p-3" required />
           <input type="email" name="email" placeholder="Email" class="w-full border rounded-lg p-3" required />
           <input type="tel" name="phone" placeholder="Phone" class="w-full border rounded-lg p-3" required />
@@ -83,12 +86,16 @@
       <div id="step2" class="step-content hidden flex-grow flex flex-col">
         <h2 class="text-xl sm:text-2xl font-semibold mb-4 primary-text">Vehicle Details</h2>
         <div class="space-y-3 flex-grow">
+          <div class=" flex justify-end text-blue-500 cursor-pointer">
+            <div>Auto fill</div>
+          </div>
           <input type="text" name="vehicleNo" placeholder="Vehicle No" class="w-full border rounded-lg p-3" required />
           <input type="text" name="brand" placeholder="Brand" class="w-full border rounded-lg p-3" required />
           <input type="text" name="model" placeholder="Model" class="w-full border rounded-lg p-3" required />
           <input type="text" name="vehicleType" placeholder="Vehicle Type" class="w-full border rounded-lg p-3" required />
           <input type="text" name="fuelType" placeholder="Fuel Type" class="w-full border rounded-lg p-3" required />
-          <input type="file" name="rcBook" class="w-full border rounded-lg p-3" />
+          RC Book
+          <input type="file" name="rcBook" class="w-full border rounded-lg p-3" placeholder="RC Book"/>
         </div>
         <div class="flex justify-between mt-4">
           <button type="button" id="prevBtn2"

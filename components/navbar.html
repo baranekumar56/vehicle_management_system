@@ -1,4 +1,4 @@
-<nav class="block lg:hidden bg-primary w-full fixed top-0 left-0 z-50" aria-label="Mobile Navigation">
+<nav class="block lg:hidden bg-primary w-full fixed top-0 left-0 z-50" aria-label="Mobile Navigation" id="admin_navbar">
   <div class="flex items-center justify-between px-4  w-full">
     <span class="flex items-center ">
       <div class="inline flex justify-center w-full">
@@ -33,7 +33,7 @@
     <nav class="mt-6">
       <ul class="space-y-2 px-4">
         <li>
-          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+          <a data-value="dashboard" href="/pages/admin/dashboard/dashboard.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
             Dashboard
           </a>
         </li>
@@ -44,21 +44,21 @@
             User Management
           </button>
           <div id="mobile-user-submenu" class="pl-8 mt-1 space-y-1 hidden">
-            <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">
+            <a data-value="customer_management" href="/pages/admin/customer-management/customer-management.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">
               Customer Management
             </a>
-            <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">
+            <a data-value="mechanic_management" href="/pages/admin/mechanic-management/mechanic-management.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">
               Mechanic Management
             </a>
           </div>
         </li>
         <li>
-          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+          <a data-value="bookings" href="/pages/admin/bookings/bookings.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
             Bookings
           </a>
         </li>
         <li>
-          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+          <a data-value="garage" href="/pages/admin/garage-management/garage-management.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
             Garage Management
           </a>
         </li>
@@ -69,33 +69,38 @@
             Service Management
           </button>
           <div id="mobile-service-submenu" class="pl-8 mt-1 space-y-1 hidden">
-            <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">Services</a>
-            <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">Packages</a>
+            <a data-value="services" href="/pages/admin/service-management/service-management.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">Services</a>
+            <a data-value="packages" href="/pages/admin/service-management/packages.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">Packages</a>
           </div>
         </li>
         <li>
-          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+          <a data-value="payments" href="/pages/admin/payments/payments.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
             Payments & Billings
           </a>
         </li>
         <li>
-          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+          <a data-value="reports" href="/pages/admin/reports/reports.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
             Reports
           </a>
         </li>
         <li>
-          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+          <a data-value="issues" href="/pages/admin/issues/issues.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
             Issues & Tickets
           </a>
         </li>
         <li>
-          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+          <a data-value="notifications" href="/pages/admin/notifications/notifications.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
             Notifications
           </a>
         </li>
         <li>
-          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+          <a data-value="content_management" href="/pages/admin/content-management/content-management.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
             Content Management
+          </a>
+        </li>
+        <li>
+          <a data-value="backup_restore" href="/pages/admin/backup-restore/backup-restore.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+            Backup & Restore
           </a>
         </li>
         <li>

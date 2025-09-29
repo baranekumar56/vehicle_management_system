@@ -2,193 +2,632 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <title>Service Management - Booking Management</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#241358',
-                    },
-                },
-            },
-        };
-    </script>
+  <meta charset="UTF-8" />
+  <title>Service Management - Booking Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js for analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#241358',
+          },
+        },
+      },
+    };
+  </script>
 </head>
 
 <body class="bg-gray-50 min-h-screen">
-    <div id="sidebar-root"></div>
-    <div id="navbar-root"></div>
-    <!-- Common Modal - Outside sections so it can be accessed from both desktop and mobile -->
-    <div id="booking-modal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-md max-h-full flex flex-col overflow-hidden relative"
-            style="height: 100vh;">
-            <button id="modal-close-btn" aria-label="Close modal"
-                class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none z-10">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-            </button>
-            <div id="modal-content" class="p-6 overflow-auto flex-grow"></div>
-        </div>
+  <div id="sidebar-root"></div>
+  <div id="navbar-root"></div>
+
+  <!-- Common Modal -->
+  <div id="booking-modal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md max-h-full flex flex-col overflow-hidden relative"
+      style="height: 100vh;">
+      <button id="modal-close-btn" aria-label="Close modal"
+        class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <div id="modal-content" class="p-6 overflow-auto flex-grow"></div>
     </div>
+  </div>
 
-    <!-- Main Content -->
-    <main
-        class="bg-gray-100 pt-24 sm:pt-6 px-2 sm:px-4 lg:ml-[250px] transition-all duration-300 min-h-screen overflow-y-auto"
-        tabindex="0">
+  <!-- Main Content -->
+  <main
+    class="bg-gray-100 pt-24 sm:pt-6 px-2 sm:px-4 lg:ml-[250px] transition-all duration-300 min-h-screen overflow-y-auto"
+    tabindex="0">
 
-        <!-- Desktop View -->
-        <section id="desktop-content" class="">
-            <h1 class="text-2xl font-bold mb-2 pb-8">Report</h1>
-            <div class="flex justify-between mb-6 relative">
+    <section id="desktop-content">
+      <h1 class="text-2xl font-bold mb-2 pb-8">Report</h1>
 
-                <div>
-                    <div id="section-selection">
-                        <h4 class="text-xl inline">Select a Section:</h4>
-                        <select class="p-2" id="section-dropdown">
-                            <option value="none">None</option>
-                            <option value="bookings">Bookings</option>
-                            <option value="customers">Customers</option>
-                            <option value="mechanics">Mechanics</option>
-                            <option value="issues">Issues</option>
-                            <option value="payments">Payments</option>
-                            <option value="vehicles">Vehicles</option>
-                            <option value="services">Services</option>
-                            <option value="vehicle-services">Vehicle Services</option>
-                        </select>
-                    </div>
-                </div>
+      <div class="flex justify-between mb-6 relative">
+        <div>
+          <div id="section-selection">
+            <h4 class="text-xl inline">Select a Section:</h4>
+            <select class="p-2" id="section-dropdown">
+              <option value="none">None</option>
+              <option value="bookings">Bookings</option>
+              <option value="customers">Customers</option>
+              <option value="mechanics">Mechanics</option>
+              <option value="issues">Issues</option>
+              <option value="payments">Payments</option>
+              <option value="vehicles">Vehicles</option>
+              <option value="services">Services</option>
+              <option value="vehicle-services">Vehicle Services</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <button id="export-btn" class="p-2 bg-primary text-white font-bold mr-10">Export Now</button>
+        </div>
+      </div>
+      
+      <div id="dynamic-pages" class="w-full">
+        <iframe id="report-iframe" src="" class="w-full h-[80vh] border rounded-lg"></iframe>
+      </div>
+      <!-- Analytics Section -->
+      <div id="analytics-section" class="mb-6 hidden">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold">Analytics</h2>
+          <button id="download-analytics-btn" class="p-2 bg-green-600 text-white font-bold">Download Analytics</button>
+        </div>
+        
 
-            </div>
+        <!-- Date Range Display -->
+        <div id="date-range" class="mb-4 p-3 bg-blue-50 rounded-lg">
+          <span class="font-semibold">Date Range: </span>
+          <span id="date-range-text">Loading...</span>
+        </div>
 
-            <div id="dynammic-pages">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-2">Bookings by Status</h3>
+            <canvas id="status-chart" width="400" height="300"></canvas>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-2">Bookings by Category</h3>
+            <canvas id="category-chart" width="400" height="300"></canvas>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-2">Revenue by Date</h3>
+            <canvas id="revenue-chart" width="400" height="300"></canvas>
+          </div>
+          <!-- <div class="bg-white p-4 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-2">Revenue by Status</h3>
+            <canvas id="revenue-status-chart" width="400" height="300"></canvas>
+          </div> -->
+        </div>
+      </div>
 
-            </div>
+      <!-- Iframe container -->
+    </section>
 
+  </main>
 
-        </section>
+  <script type="module" src="../../../components/components-loader.js"></script>
 
-    </main>
-    <script type="module" src="../../../components/components-loader.js"></script>
+  <script>
+        localStorage.setItem('vms_current_page', 'reports');
 
-    <script>
+    const selection_dropdown = document.getElementById('section-dropdown');
+    const dynamic_pages = document.getElementById('dynamic-pages');
+    const export_btn = document.getElementById('export-btn');
+    const analyticsSection = document.getElementById('analytics-section');
+    const dateRangeText = document.getElementById('date-range-text');
+    const downloadAnalyticsBtn = document.getElementById('download-analytics-btn');
 
-        const selection_dropdown = document.getElementById('section-dropdown');
-        const dynammic_pages = document.getElementById('dynammic-pages');
+    let currentIframe = null;
+    let currentSelection = 'none';
+    let exportData = null;
+    let charts = {};
+    let dateRange = {};
 
-        selection_dropdown.addEventListener('change', async () => {
+    // Unified message handler for all iframe communications
+    window.addEventListener('message', function (event) {
+      console.log('Message received from iframe:', event.data);
 
-            const selection = selection_dropdown.value;
+      // Check if it's a string (raw JSON data)
+      if (typeof event.data === 'string') {
+        try {
+          const parsedData = JSON.parse(event.data);
+          console.log('Parsed data:', parsedData);
 
-            switch (selection) {
-                case "none": {
-                    console.log('clicked')
-                    dynammic_pages.innerHTML = '';
-                    break;
-                }
+          // Check if it's an array of bookings (based on your console output)
+          if (Array.isArray(parsedData) && parsedData.length > 0 && parsedData[0].id && parsedData[0].bookerId) {
+            exportData = parsedData;
 
-                case "bookings": {
-                    await loadAndExecuteHTML('../bookings/bookings.html', dynammic_pages);
-                    const main_section = dynammic_pages.querySelector('main');
-                    const header = main_section.querySelector('h1');
-                    header.remove();
-                    main_section.className = "bg-gray-100 px-2 sm:px-4 transition-all duration-300 min-h-screen overflow-y-auto";
-                    const script = document.createElement("script");
-                    script.src = "../bookings/bookings.js";
-                    // script.type = "module";
-                    dynammic_pages.appendChild(script);
-                    break;
-                }
-
-                case "customers": {
-                    await loadAndExecuteHTML('../customer-management/customer-management.html', dynammic_pages);
-                    console.log("hello  =")
-                    const main_section = dynammic_pages.querySelector('main');
-                    const header = main_section.querySelector('h1');
-                    header.remove();
-                    main_section.className = "bg-gray-100 px-2 sm:px-4 transition-all duration-300 min-h-screen overflow-y-auto";
-                    const script = document.createElement("script");
-                    script.async = true;
-                    script.src = "../customer-management/customer-management.js";
-                    // script.type = "module";
-                    dynammic_pages.appendChild(script);
-                    break;
-                }
-
-
+            // Show analytics for bookings
+            if (currentSelection === 'bookings') {
+              showAnalytics(exportData, currentSelection);
             }
-
-
-
-        });
-
-
-
-
-        async function loadAndExecuteHTML(path, container) {
-            try {
-                const response = await fetch(path);
-                if (!response.ok) return "";
-                const htmlText = await response.text();
-                container.innerHTML = "";
-                container.innerHTML = htmlText;
-                let skipped = true;
-                // Find script tags
-                const scripts = container.querySelectorAll('script');
-                scripts.forEach(oldScript => {
-
-                    if (skipped) {
-                        skipped = false;
-
-                    }
-                    // Create a new script
-                    else {
-                        const newScript = document.createElement('script');
-                        // Copy attributes
-                        for (const attr of oldScript.attributes) {
-                            newScript.setAttribute(attr.name, attr.value);
-                        }
-                        // Copy inline code
-                        if (oldScript.textContent) {
-                            newScript.textContent = oldScript.textContent;
-                        }
-                        // Remove old script and insert new one
-                        oldScript.parentNode.removeChild(oldScript);
-                        container.appendChild(newScript);
-                    }
-                });
-
-                return htmlText;
-            } catch (err) {
-                console.log("Failed to load: " + path);
-                return "";
+          }
+        } catch (e) {
+          console.log('Data is not JSON or not in expected format');
+        }
+      }
+      // Check if it's an object with type property (structured message)
+      else if (event.data && event.data.type) {
+        switch (event.data.type) {
+          case 'export_data':
+            exportData = event.data.payload;
+            // Show analytics if we have data for supported sections
+            if (['bookings', 'mechanics'].includes(currentSelection) && exportData && exportData.length > 0) {
+              showAnalytics(exportData, currentSelection);
             }
+            break;
+
+          case 'export_error':
+            alert('Export failed: ' + event.data.message);
+            break;
+
+          case 'selected_list':
+            console.log('Selected list updated:', event.data.payload);
+            break;
+        }
+      }
+    });
+
+    selection_dropdown.addEventListener('change', async () => {
+      currentSelection = selection_dropdown.value;
+      exportData = null;
+
+      // Hide analytics section when changing selection
+      analyticsSection.classList.add('hidden');
+
+      // Destroy existing charts
+      Object.values(charts).forEach(chart => {
+        if (chart) chart.destroy();
+      });
+      charts = {};
+
+      switch (currentSelection) {
+        case "none": {
+          dynamic_pages.innerHTML = '';
+          currentIframe = null;
+          break;
         }
 
+        case "mechanics": {
+          dynamic_pages.innerHTML = "";
 
-        async function getHTMLText(path) {
+          // Create iframe
+          const iframe = document.createElement("iframe");
+          iframe.src = "../mechanic-management/mechanic-management.html";
+          iframe.style.width = "100%";
+          iframe.style.height = "90vh";
+          iframe.style.border = "none";
+          iframe.id = "mechanic-iframe";
+          dynamic_pages.appendChild(iframe);
+
+          currentIframe = iframe;
+
+          // Improved iframe loading handler
+          iframe.addEventListener("load", () => {
             try {
-                const response = await fetch(path);
-                let result;
-                if (response.ok) {
-                    result = await response.text();
-                    return result;
-                }
-            } catch (err) {
-                console.log("Failed to load :" + path);
-                return "";
-            }
+              const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
+              // Use optional chaining to safely remove elements
+              iframeDoc.querySelector("#sidebar-root")?.remove();
+              iframeDoc.querySelector("#navbar-root")?.remove();
+              iframeDoc.querySelector('main')?.classList.remove('lg:ml-[250px]');
+
+              iframeDoc.getElementById('add-mechanic')?.remove();
+              iframeDoc.getElementById('batch-upload')?.remove();
+
+              // Remove the h1 if it exists
+              const h1 = iframeDoc.querySelector("h1");
+              if (h1 && h1.textContent.includes("Mechanic")) {
+                h1.remove();
+              }
+            } catch (error) {
+              console.warn("Cannot modify iframe content:", error);
+            }
+          });
+          break;
         }
 
-    </script>
+        case "bookings": {
+          dynamic_pages.innerHTML = "";
+
+          // Create iframe
+          const iframe = document.createElement("iframe");
+          iframe.src = "/pages/admin/bookings/bookings.html";
+          iframe.style.width = "100%";
+          iframe.style.height = "90vh";
+          iframe.style.border = "none";
+          iframe.id = "bookings-iframe";
+          dynamic_pages.appendChild(iframe);
+
+          currentIframe = iframe;
+
+          // Improved iframe loading handler
+          iframe.addEventListener("load", () => {
+            try {
+              const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+              // Use optional chaining to safely remove elements
+              iframeDoc.querySelector("#sidebar-root")?.remove();
+              iframeDoc.querySelector("#navbar-root")?.remove();
+              iframeDoc.querySelector('main')?.classList.remove('lg:ml-[250px]');
+
+              // Remove the h1 if it exists
+              const h1 = iframeDoc.querySelector("h1");
+              if (h1 && h1.textContent.includes("Booking")) {
+                h1.remove();
+              }
+            } catch (error) {
+              console.warn("Cannot modify iframe content:", error);
+            }
+          });
+          break;
+        }
+
+        case "customers": {
+          dynamic_pages.innerHTML = "<p class='p-4'>Customers report content would go here</p>";
+          currentIframe = null;
+          break;
+        }
+
+        default: {
+          dynamic_pages.innerHTML = `<p class='p-4'>Report for ${currentSelection} would be displayed here</p>`;
+          currentIframe = null;
+          break;
+        }
+      }
+    });
+
+    // Export button click handler
+    export_btn.addEventListener('click', function () {
+      if (currentSelection === 'none') {
+        alert('Please select a section first');
+        return;
+      }
+
+      if (!exportData || exportData.length === 0) {
+        alert('No data available for export. Please load the data first.');
+        return;
+      }
+
+      downloadCSV(exportData, currentSelection + '-export.csv');
+    });
+
+    // Download analytics button handler
+    downloadAnalyticsBtn.addEventListener('click', function () {
+      if (!exportData || exportData.length === 0) {
+        alert('No analytics data available to download.');
+        return;
+      }
+
+      downloadAnalyticsAsImage();
+    });
+
+    function downloadCSV(data, filename) {
+      if (!data || data.length === 0) return;
+
+      const headers = Object.keys(data[0]);
+      const csvContent = [
+        headers.join(','),
+        ...data.map(row => headers.map(header => {
+          const value = row[header];
+          return typeof value === 'string' && value.includes(',') ? `"${value}"` : value;
+        }).join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    function downloadAnalyticsAsImage() {
+      // Create a canvas to combine all charts
+      const combinedCanvas = document.createElement('canvas');
+      const ctx = combinedCanvas.getContext('2d');
+
+      // Set canvas size
+      combinedCanvas.width = 1200;
+      combinedCanvas.height = 1600;
+
+      // Fill with white background
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, combinedCanvas.width, combinedCanvas.height);
+
+      // Add title and date range
+      ctx.fillStyle = 'black';
+      ctx.font = 'bold 24px Arial';
+      ctx.fillText('Analytics Report', 50, 50);
+      ctx.font = '18px Arial';
+      ctx.fillText(`Date Range: ${dateRangeText.textContent}`, 50, 80);
+      ctx.fillText(`Section: ${currentSelection.charAt(0).toUpperCase() + currentSelection.slice(1)}`, 50, 110);
+
+      // Draw each chart on the combined canvas
+      let yOffset = 150;
+      const chartWidth = 500;
+      const chartHeight = 350;
+      const margin = 50;
+
+      // Status Chart
+      if (charts.statusChart) {
+        ctx.drawImage(charts.statusChart.canvas, margin, yOffset, chartWidth, chartHeight);
+        ctx.fillText('Bookings by Status', margin, yOffset - 10);
+      }
+
+      // Category Chart
+      if (charts.categoryChart) {
+        ctx.drawImage(charts.categoryChart.canvas, margin + chartWidth + margin, yOffset, chartWidth, chartHeight);
+        ctx.fillText('Bookings by Category', margin + chartWidth + margin, yOffset - 10);
+      }
+
+      yOffset += chartHeight + margin;
+
+      // Revenue Chart
+      if (charts.revenueChart) {
+        ctx.drawImage(charts.revenueChart.canvas, margin, yOffset, chartWidth, chartHeight);
+        ctx.fillText('Revenue by Date', margin, yOffset - 10);
+      }
+
+      // Revenue by Status Chart
+      if (charts.revenueStatusChart) {
+        ctx.drawImage(charts.revenueStatusChart.canvas, margin + chartWidth + margin, yOffset, chartWidth, chartHeight);
+        ctx.fillText('Revenue by Status', margin + chartWidth + margin, yOffset - 10);
+      }
+
+      // Convert to image and download
+      const image = combinedCanvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `${currentSelection}-analytics-${new Date().toISOString().split('T')[0]}.png`;
+      link.href = image;
+      link.click();
+    }
+
+    // Analytics functions
+    function showAnalytics(data, section) {
+      analyticsSection.classList.remove('hidden');
+
+      if (section === 'bookings') {
+        createBookingsAnalytics(data);
+      } else if (section === 'mechanics') {
+        createMechanicsAnalytics(data);
+      }
+    }
+
+    function createBookingsAnalytics(bookings) {
+      // Calculate date range
+      const dates = bookings.map(b => b.date).sort();
+      dateRange = {
+        start: dates[0],
+        end: dates[dates.length - 1]
+      };
+      dateRangeText.textContent = `${dateRange.start} to ${dateRange.end}`;
+
+      // Bookings by Status (Pie Chart)
+      const statusCounts = {};
+      bookings.forEach(booking => {
+        statusCounts[booking.status] = (statusCounts[booking.status] || 0) + 1;
+      });
+
+      const statusChartCtx = document.getElementById('status-chart').getContext('2d');
+      if (charts.statusChart) charts.statusChart.destroy();
+      charts.statusChart = new Chart(statusChartCtx, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(statusCounts),
+          datasets: [{
+            data: Object.values(statusCounts),
+            backgroundColor: [
+              '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
+            title: {
+              display: true,
+              text: 'Bookings by Status'
+            }
+          }
+        }
+      });
+
+      // Bookings by Category (Pie Chart)
+      const categoryCounts = {};
+      bookings.forEach(booking => {
+        categoryCounts[booking.category] = (categoryCounts[booking.category] || 0) + 1;
+      });
+
+      const categoryChartCtx = document.getElementById('category-chart').getContext('2d');
+      if (charts.categoryChart) charts.categoryChart.destroy();
+      charts.categoryChart = new Chart(categoryChartCtx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(categoryCounts),
+          datasets: [{
+            data: Object.values(categoryCounts),
+            backgroundColor: [
+              '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
+            title: {
+              display: true,
+              text: 'Bookings by Category'
+            }
+          }
+        }
+      });
+
+      // Revenue by Date (Line Chart)
+      const revenueByDate = {};
+      bookings.forEach(booking => {
+        const date = booking.date;
+        revenueByDate[date] = (revenueByDate[date] || 0) + booking.totalAmount;
+      });
+
+      const sortedDates = Object.keys(revenueByDate).sort();
+      const revenueChartCtx = document.getElementById('revenue-chart').getContext('2d');
+      if (charts.revenueChart) charts.revenueChart.destroy();
+      charts.revenueChart = new Chart(revenueChartCtx, {
+        type: 'line',
+        data: {
+          labels: sortedDates,
+          datasets: [{
+            label: 'Revenue (₹)',
+            data: sortedDates.map(date => revenueByDate[date]),
+            borderColor: '#36A2EB',
+            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+            title: {
+              display: true,
+              text: 'Revenue by Date'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Amount (₹)'
+              }
+            }
+          }
+        }
+      });
+
+      // Revenue by Status (Bar Chart)
+      const revenueByStatus = {};
+      bookings.forEach(booking => {
+        revenueByStatus[booking.status] = (revenueByStatus[booking.status] || 0) + booking.totalAmount;
+      });
+
+      const revenueStatusChartCtx = document.getElementById('revenue-status-chart').getContext('2d');
+      if (charts.revenueStatusChart) charts.revenueStatusChart.destroy();
+      charts.revenueStatusChart = new Chart(revenueStatusChartCtx, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(revenueByStatus),
+          datasets: [{
+            label: 'Revenue (₹)',
+            data: Object.values(revenueByStatus),
+            backgroundColor: '#4BC0C0'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+            title: {
+              display: true,
+              text: 'Revenue by Status'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Amount (₹)'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function createMechanicsAnalytics(mechanics) {
+      // For mechanics data, we'll create different analytics
+      dateRangeText.textContent = 'N/A for mechanics';
+
+      // Example: Mechanics by Status (if available)
+      const statusChartCtx = document.getElementById('status-chart').getContext('2d');
+      if (charts.statusChart) charts.statusChart.destroy();
+      charts.statusChart = new Chart(statusChartCtx, {
+        type: 'pie',
+        data: {
+          labels: ['Active', 'Inactive'],
+          datasets: [{
+            data: [mechanics.length, 0], // Assuming all are active for now
+            backgroundColor: ['#36A2EB', '#FF6384']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Mechanics Status'
+            }
+          }
+        }
+      });
+
+      // Example: Mechanics by Experience (if available)
+      const categoryChartCtx = document.getElementById('category-chart').getContext('2d');
+      if (charts.categoryChart) charts.categoryChart.destroy();
+      charts.categoryChart = new Chart(categoryChartCtx, {
+        type: 'bar',
+        data: {
+          labels: mechanics.map(m => m.name || 'Mechanic'),
+          datasets: [{
+            label: 'Bookings Handled',
+            data: mechanics.map(m => Math.floor(Math.random() * 20) + 5), // Random data for demo
+            backgroundColor: '#FFCE56'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Bookings per Mechanic'
+            }
+          }
+        }
+      });
+
+      // Hide the other charts for mechanics
+      document.getElementById('revenue-chart').parentElement.classList.add('hidden');
+      document.getElementById('revenue-status-chart').parentElement.classList.add('hidden');
+    }
+
+    // Initialize with no selection
+    dynamic_pages.innerHTML = '<p class="p-4 text-gray-500">Select a section from the dropdown to view reports</p>';
+    analyticsSection.classList.add('hidden');
+  </script>
+
 </body>
 
 </html>

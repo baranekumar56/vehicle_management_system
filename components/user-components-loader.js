@@ -147,3 +147,50 @@ document.addEventListener('DOMContentLoaded', async () => {
 //   });
 
 });
+
+
+document.addEventListener('navbarLoaded', () => {
+
+
+	// so when this gets executed we automatically highlight the current section which the user is currently at
+	const current_page = localStorage.getItem('vms_current_page');
+
+	// every page is mostly single except services and users , so i need to look on to that
+
+	// lets check each element in the side bar with the value we got for current_page
+
+	// lets get all anchor tag with data value
+	const user_sidebar = document.getElementById('user_sidebar');
+  console.log(user_sidebar)
+
+	navBarHighlight(document.getElementById('user_navbar'), current_page);
+	sideBarHighlight(user_sidebar, current_page)
+
+})
+
+
+function sideBarHighlight(admin_sidebar, current_page) {
+	let links = {};
+
+	document.getElementById('user_sidebar').querySelectorAll('a').forEach(link => {
+		links[link.dataset.value] = link;
+	})
+
+
+	console.log(links);
+
+
+
+	links[current_page].classList.add('bg-blue-700');
+}
+function navBarHighlight(nav_bar, current_page) {
+	console.log("up here")
+	let links = {}
+	nav_bar.querySelector('aside').querySelectorAll('a').forEach(link => {
+		links[link.dataset.value] = link;
+	})
+
+	
+console.log(current_page)
+	links[current_page].classList.add('bg-blue-700');
+}

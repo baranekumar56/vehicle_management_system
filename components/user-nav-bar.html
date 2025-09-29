@@ -1,4 +1,4 @@
-<nav class="block lg:hidden bg-primary w-full fixed top-0 left-0 z-50" aria-label="Mobile Navigation">
+<nav class="block lg:hidden bg-primary w-full fixed top-0 left-0 z-50" aria-label="Mobile Navigation" id="user_navbar">
   <div class="flex items-center justify-between px-4  w-full">
     <span class="flex items-center ">
       <div class="inline flex justify-center w-full">
@@ -33,12 +33,12 @@
     <nav class="mt-6">
       <ul class="space-y-2 px-4">
         <li>
-          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+          <a data-value="dashboard" href="/pages/customer/dashboard/dashboard.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
             Dashboard
           </a>
         </li>
         <li>
-          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+          <a data-value="appointments" href="/pages/customer/appointments/appointments.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
             Appointments
           </a>
         </li>
@@ -49,31 +49,31 @@
             Book an Appointment
           </button>
           <div id="mobile-user-submenu" class="pl-8 mt-1 space-y-1 hidden">
-            <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">
+            <a href="/pages/book/book-service/book-a-service.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">
               Service
             </a>
-            <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">
+            <a href="/pages/book/book-repair/book-a-repair.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-800 transition">
               Repair
             </a>
           </div>
         </li>
         <li>
-          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+          <a data-value="vehicle_management" href="/pages/customer/vehicle-management/vehicle-management.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
             Vehicle Management
           </a>
         </li>
         <li>
-          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+          <a data-value="service_history" href="/pages/customer/service-history/service-history.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
             Service History
           </a>
         </li>
         <li>
-          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+          <a data-value="payments" href="/pages/customer/payments/payments.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
             Payments
           </a>
         </li>
         <li>
-          <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
+          <a data-value="issues" href="/pages/customer/issues-support/issues.html" class="flex items-center py-2 px-3 rounded hover:bg-indigo-900 transition">
             Issues & Tickets
           </a>
         </li>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vehicle Service Management - Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#241358"
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .animate-slide-in {
+      animation: slide-in 0.3s cubic-bezier(0.4,0,0.2,1) forwards;
+    }
+    @keyframes slide-in {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .notification-read {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+    .notification-unread {
+      background: #fff;
+      color: #111827;
+    }
+    .notification-panel {
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+      transform: translateX(100%);
+      display: none;
+    }
+    .notification-panel.open {
+      display: block;
+      transform: translateX(0);
+      z-index: 50;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Navbar Root (sidebar/nav handled externally like payments.html) -->
+  <div id="navbar-root"></div>
+  <div id="sidebar-root"></div>
+
+  <!-- Bell Icon Button (notification trigger) -->
+  <div class="fixed top-20 lg:top-6 right-6 z-40 flex items-center">
+    <button id="bell-btn" aria-label="Show Notifications"
+      class="relative bg-white shadow rounded-full p-2 hover:bg-gray-100">
+      <!-- Bell SVG -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.166 6 8.388 6 11v3c0 .386-.149.735-.405 1.013L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+      <span id="notif-dot" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full hidden"></span>
+    </button>
+  </div>
+
+  <!-- Notification Panel (slides in from right) -->
+  <aside id="notification-panel" class="notification-panel bg-primary fixed top-0 right-0 w-full max-w-sm h-screen shadow-lg p-6 animate-slide-in overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold text-white">Notifications</h2>
+      <button id="close-notif-panel" aria-label="Close panel">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <ul id="notification-list" class="divide-y divide-gray-200">
+      <!-- Notifications are rendered here by JS -->
+    </ul>
+  </aside>
+
+  <!-- Notification Details Modal -->
+  <div id="notification-modal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden ">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md flex flex-col overflow-hidden relative">
+      <button id="close-notification-modal" aria-label="Close modal" class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+      <div id="notification-modal-content" class="p-6 overflow-auto flex-grow"></div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="pt-28 px-2 lg:ml-[260px] transition-all duration-300 overflow-y-auto min-h-screen" tabindex="0">
+
+    <!-- Desktop Upcoming Appointments (Table) -->
+    <section id="desktop-appointments" class="hidden sm:block mb-8">
+      <h1 class="text-2xl font-bold mb-4">Upcoming Appointments</h1>
+      <div class="overflow-x-auto bg-white rounded-lg shadow">
+        <table class="min-w-full">
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="py-2 px-4 text-left bg-primary text-white">Booking ID</th>
+              <th class="py-2 px-4 text-left bg-primary text-white">Date</th>
+              <th class="py-2 px-4 text-left bg-primary text-white">Time</th>
+              <th class="py-2 px-4 text-left bg-primary text-white">Brand</th>
+              <th class="py-2 px-4 text-left bg-primary text-white">Model</th>
+              <th class="py-2 px-4 text-left bg-primary text-white">Fuel</th>
+              <th class="py-2 px-4 text-left bg-primary text-white">Action</th>
+            </tr>
+          </thead>
+          <tbody id="appointments-table">
+            <!-- JS will render rows -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Mobile Upcoming Appointments (List View) -->
+    <section id="mobile-appointments" class="sm:hidden mb-8 px-2">
+      <h1 class="text-xl font-bold mb-4">Upcoming Appointments</h1>
+      <div id="appointments-list" class="space-y-3">
+        <!-- JS will render mobile cards -->
+      </div>
+    </section>
+
+    <!-- Appointment Modal (Details) -->
+    <div id="appointment-modal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
+      <div class="bg-white rounded-lg shadow-lg w-full max-w-md flex flex-col overflow-hidden relative">
+        <button id="close-appointment-modal" aria-label="Close modal" class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none z-10">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <div id="appointment-modal-content" class="p-6 overflow-auto flex-grow"></div>
+      </div>
+    </div>
+
+    <!-- Selected Vehicle Info -->
+    <section class="mt-10">
+      <h2 class="text-lg font-semibold mb-4">Selected Vehicle</h2>
+      <div class="flex items-center bg-white shadow rounded-lg p-4 max-w-lg">
+        <div class="flex-1">
+          <div class="mb-2"><span class="text-gray-900 font-medium">Vehicle No:</span> TN 39 BF 1234</div>
+
+          <div class="mb-2"><span class="text-gray-900 font-medium">Brand:</span> Tata</div>
+          <div class="mb-2"><span class="text-gray-900 font-medium">Model:</span> Safari</div>
+          <div class="mb-2"><span class="text-gray-900 font-medium">Fuel:</span> Petrol</div>
+          <div><span class="text-gray-900 font-medium">Type:</span> Four-Wheeler</div>
+        </div>
+        <img src="/assets/bland_car.png" alt="Selected Vehicle" class="w-60 h-60 object-contain ml-6"/>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/components/user-components-loader.js"></script>
+
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>

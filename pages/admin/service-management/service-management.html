@@ -1,57 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="langen">
 
 <head>
     <meta charset="UTF-8" />
-    <title>Service Management</title>
+    <title>Service Management - Vehicle Services</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Tailwind Play CDN -->
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .primary {
+            background-color: #241358;
+        }
+    </style>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#241358',
-                    },
-                },
-            },
+                        primary: "#241358",
+                        "primary-dark": "#1b0e29",
+                        "primary-light": "#452d68",
+                        "primary-lighter": "#6e578d",
+                        "primary-transparent": "rgba(36,19,88,0.1)"
+                    }
+                }
+            }
         };
     </script>
-    <style>
 
+    <style>
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        ul.suggestion-list {
+            position: absolute;
+            z-index: 60;
+            background: white;
+            border: 1px solid #CBD5E0;
+            border-radius: 0.375rem;
+            max-height: 10rem;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .animate-bounce-in {
+            animation: bounce-in 0.25s ease forwards;
+        }
+
+        @keyframes bounce-in {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 
 <body class="bg-gray-50 min-h-screen">
+
+    <!-- Sidebar and Navbar -->
     <div id="sidebar-root"></div>
     <div id="navbar-root"></div>
 
-    <main id="main-content-service-management"
-        class="bg-gray-100 pt-24 sm:pt-6 px-2 sm:px-4 lg:ml-[250px] transition-all duration-300 min-h-screen overflow-y-auto"
+    <main
+        class="bg-gray-100 pt-[70px] sm:pt-6 px-2 sm:px-4 lg:ml-[250px] transition-all duration-300 min-h-screen overflow-y-auto"
         tabindex="0">
+            <h1 class="text-2xl font-bold mb-2 pb-8">Vehicle Services</h1>
 
         <!-- Desktop View -->
         <section id="desktop-content" class="hidden sm:block">
-            <h1 class="text-2xl font-bold mb-2 pb-8">Service Management</h1>
-            <!-- Search & Filter Bar -->
-            <div class="flex justify-between mb-6">
-                <div class="flex">
-                    <div class="ml-10">
-                        <button id="services" class="p-4 outline-none shadow bg-white rounded">Services
-                        </button>
-                    </div>
 
-                    <div class="ml-10">
-                        <button id="packages" class="p-4 outlin-none shadow bg-white rounded">Packages
-                        </button>
-                    </div>
+            <div class="flex justify-between mb-6 relative">
+                <div>
+                    <button id="openAddServiceModalBtn" class="p-4 outline-none shadow bg-white rounded ml-4">
+                        Add Service to Vehicle
+                    </button>
+
                 </div>
-                <div class="flex items-center gap-2 w-full max-w-lg bg-white shadow rounded-lg px-3 py-2">
-                    <input type="text" id="searchInputDesktop" placeholder="Search customers..."
+
+                <div class="flex items-center gap-2 w-full max-w-lg bg-white shadow rounded-lg px-3 py-2 relative">
+                    <input type="text" id="searchInputDesktop" placeholder="Search services..."
                         class="flex-grow outline-none border-none focus:ring-0 text-sm px-2" />
                     <button id="searchBtnDesktop" class="p-2 rounded-md hover:bg-gray-100" aria-label="Search">
-                        <!-- Search SVG -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -60,91 +102,152 @@
                     </button>
                     <button id="filterBtnDesktop" class="p-2 rounded-md hover:bg-gray-100"
                         aria-label="Toggle filter panel">
-                        <!-- Filter SVG -->
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                             stroke="currentColor" class="w-5 h-5 text-gray-600">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M6 10h12M9 16h6M11 20h2" />
                         </svg>
                     </button>
-                </div>
-                <!-- Floating Filter Panel -->
-                <div id="filterPanelDesktop"
-                    class="hidden absolute top-14 right-0 z-50 bg-white rounded-xl shadow-2xl scale-105 animate-bounce-in px-6 py-4 transition-all duration-300 min-w-[300px]">
-                    <h3 class="text-lg font-semibold mb-2">Filters</h3>
-                    <label class="block mb-2">
-                        <span class="text-sm">Services More Than</span>
-                        <input type="number" id="filterServicesDesktop" class="w-full border rounded px-2 py-1 mt-1"
-                            placeholder="e.g. 3" />
-                    </label>
-                    <button id="applyFilterDesktop"
-                        class="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Apply Filter</button>
+
+                    <!-- Desktop Filter Panel -->
+                    <div id="filterPanelDesktop"
+                        class="hidden absolute top-14 right-0 z-50 bg-white rounded-xl shadow-2xl scale-105 animate-bounce-in px-6 py-4 transition-all duration-300 min-w-[320px]">
+                        <h3 class="text-lg font-semibold mb-4">Filters</h3>
+                        <form id="filterFormDesktop" class="space-y-4">
+                            <div>
+                                <label for="filterDateFromDesktop" class="text-sm block mb-1">Date Added From</label>
+                                <input type="date" id="filterDateFromDesktop" name="dateFrom"
+                                    class="w-full border rounded px-2 py-1" />
+                            </div>
+                            <div>
+                                <label for="filterDateToDesktop" class="text-sm block mb-1">Date Added To</label>
+                                <input type="date" id="filterDateToDesktop" name="dateTo"
+                                    class="w-full border rounded px-2 py-1" />
+                            </div>
+                            <div>
+                                <label for="filterPriceOpDesktop" class="text-sm block mb-1">Price Op</label>
+                                <select id="filterPriceOpDesktop" name="priceOp"
+                                    class="w-full border rounded px-2 py-1">
+                                    <option value="option">Option</option>
+                                    <option value="=">=</option>
+                                    <option value="<">&lt;</option>
+                                    <option value=">">&gt;</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filterPriceDesktop" class="text-sm block mb-1">Price</label>
+                                <input type="number" min="0" step="0.01" id="filterPriceDesktop" name="price"
+                                    placeholder="Amount" class="w-full border rounded px-2 py-1" />
+                            </div>
+                            <div>
+                                <label for="filterTimeOpDesktop" class="text-sm block mb-1">Time Op</label>
+                                <select id="filterTimeOpDesktop" name="timeOp" class="w-full border rounded px-2 py-1">
+                                    <option value="option">Option</option>
+                                    <option value="=">=</option>
+                                    <option value="<">&lt;</option>
+                                    <option value=">">&gt;</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filterTimeDesktop" class="text-sm block mb-1">Time (min)</label>
+                                <input type="number" min="0" id="filterTimeDesktop" name="time" placeholder="Minutes"
+                                    class="w-full border rounded px-2 py-1" />
+                            </div>
+                            <div>
+                                <label for="filterFuelDesktop" class="text-sm block mb-1">Fuel</label>
+                                <select id="filterFuelDesktop" name="fuel" class="w-full border rounded px-2 py-1">
+                                    <option value="All">All</option>
+                                    <option value="Petrol">Petrol</option>
+                                    <option value="Diesel">Diesel</option>
+                                    <option value="EV">EV</option>
+                                    <option value="Hybrid">Hybrid</option>
+                                    <option value="CNG">CNG</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filterTypeDesktop" class="text-sm block mb-1">Vehicle Type</label>
+                                <select id="filterTypeDesktop" name="type" class="w-full border rounded px-2 py-1">
+                                    <option value="All">All</option>
+                                    <option value="two-wheeler">Two-Wheeler</option>
+                                    <option value="four-wheeler">Four-Wheeler</option>
+                                </select>
+                            </div>
+                            <button type="submit"
+                                class="w-full mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                Apply Filter
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
-            <!-- Customer Info Table -->
-            <div class="flex justify-center">
-                <div class="overflow-x-auto w-full max-w-5xl">
-                    <h2 class="text-xl font-semibold mb-2">Mechanic Info</h2>
-                    <table class="min-w-[700px] w-full table-auto border border-gray-300 bg-white shadow-sm rounded-md">
-                        <thead class="bg-gray-100 text-gray-700 text-sm">
-                            <tr>
+            <div class="flex ml-4 mb-4 gap-6">
+                <div class="p-3 outline-none shadow rounded-sm bg-white text-sm"><a href="./vehicles.html">Add /
+                        Deactivate Vehicles</a></div>
+                <div class="p-3 outline-none shadow rounded-sm bg-white text-sm"><a href="./services.html">Add /
+                        Deactivate Services</a></div>
+            </div>
 
-                                <th class="py-2 px-4 border border-gray-300 text-left">Mechanic Id</th>
-                                <th class="py-2 px-4 border border-gray-300 text-left">Name</th>
-                                <th class="py-2 px-4 border border-gray-300 text-left">Email</th>
-                                <th class="py-2 px-4 border border-gray-300 text-left">Phone</th>
-                                <th class="py-2 px-4 border border-gray-300 text-left">Address</th>
-                                <th class="py-2 px-4 border border-gray-300 text-left">Total Services</th>
-                                <th class="py-2 px-4 border border-gray-300 text-left">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="customerTableBodyDesktop" class="text-sm"></tbody>
-                    </table>
-                    <!-- Pagination -->
-                    <div class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-5xl mx-auto px-2">
-                        <button id="prevPageDesktop" class="disabled:opacity-50" aria-label="Previous page">
-                            ← Previous
-                        </button>
+            <!-- Batch Action Buttons -->
+            <div class="flex space-x-2 mb-4 ml-4">
+                <button id="batchDeactivateDesktop" disabled
+                    class="bg-red-600 text-white px-3 py-1 rounded disabled:opacity-60">
+                    Deactivate Selected
+                </button>
+                <button id="batchActivateDesktop" disabled
+                    class="bg-green-600 text-white px-3 py-1 rounded disabled:opacity-60">
+                    Activate Selected
+                </button>
+            </div>
+
+            <div class="flex justify-center p-10">
+                <div class="overflow-x-auto w-full max-w-7xl">
+                    <h2 class="text-xl font-semibold mb-2">Service Info</h2>
+                    <div class="flex justify-center">
+                        <table
+                            class="min-w-[1000px] w-full table-auto border border-gray-300 bg-white shadow-sm rounded-md">
+                            <thead class="bg-gray-100 text-gray-700 text-sm">
+                                <tr>
+                                    <th class="py-2 px-3 border border-gray-300 text-left =">
+                                        <input type="checkbox" id="selectAllDesktop" />
+                                    </th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left ">Brand</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left ">Model</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Fuel</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Type</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Service Name</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Date Added</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Last Deactivated</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Price</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Time to Complete (min)</th>
+                                    <th class="py-2 px-4 border border-gray-300 text-left">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="servicesTableBodyDesktop" class="text-sm"></tbody>
+                        </table>
+                    </div>
+
+                    <div
+                        class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-7xl mx-auto px-2 select-none">
+                        <button id="prevPageDesktop" class="disabled:opacity-50" aria-label="Previous page">←
+                            Previous</button>
                         <span id="pageInfoDesktop"></span>
-                        <button id="nextPageDesktop" class="disabled:opacity-50" aria-label="Next page">Next →</button>
+                        <button id="nextPageDesktop" class="disabled:opacity-50" aria-label="Next page">Next
+                            →</button>
                     </div>
                 </div>
-            </div>
-            
-
-            <!-- Desktop Modal -->
-            <div id="desktop-viewModal"
-                class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-                    <h3 class="text-lg font-bold mb-4">Mechanic Details</h3>
-                    <div id="desktop-modalContent" class="text-sm"></div>
-                    <div class="flex justify-end mt-4">
-                        <button onclick="closeDesktopModal()"
-                            class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">Close</button>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- Toast -->
-            <div id="toastDesktop"
-                class="hidden fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg">
-                User deleted successfully
             </div>
         </section>
 
         <!-- Mobile View -->
         <section class="sm:hidden">
-            <!-- Search & Filter -->
-            <div class="relative mb-4">
-                <div class="flex items-center w-full max-w-full relative">
+            <div class="relative mb-4 px-4 flex items-center gap-2">
+                <div class="flex items-center w-full relative">
                     <input type="text" id="searchInputMobile"
                         class="w-full rounded-full px-4 pr-12 shadow-sm outline-none py-3"
-                        placeholder="Search customers..." aria-label="Search customers" />
+                        placeholder="Search services..." aria-label="Search services" />
                     <button id="searchBtnMobile"
                         class="absolute right-2 top-[6px] bg-white rounded-full p-2 shadow hover:bg-gray-100"
                         aria-label="Search">
-                        <!-- Search SVG -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -152,8 +255,13 @@
                         </svg>
                     </button>
                 </div>
+                <label class="inline-flex items-center space-x-2 cursor-pointer select-none">
+                    <input type="checkbox" id="select-all-filtered-data" class="form-checkbox h-5 w-5 text-primary" />
+                    <span class="text-gray-700 text-sm">Select All</span>
+                </label>
             </div>
-            <div class="flex justify-end px-4 relative">
+
+            <div class="flex justify-end px-4 relative mb-4">
                 <button id="filterBtnMobile" class="bg-white rounded-full p-2 shadow hover:bg-gray-100"
                     aria-label="Toggle filter mobile">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-600" fill="none"
@@ -163,32 +271,100 @@
                     </svg>
                 </button>
                 <div id="filterPanelMobile"
-                    class="hidden absolute top-12 right-0 z-50 bg-white rounded-xl shadow-2xl scale-105 animate-bounce-in px-6 py-4 transition-all duration-300 min-w-[220px]">
-                    <h3 class="text-lg font-semibold mb-2">Filters</h3>
-                    <label class="block mb-2">
-                        <span class="text-sm">Services More Than</span>
-                        <input type="number" id="filterServicesMobile" class="w-full border rounded px-2 py-1 mt-1"
-                            placeholder="e.g. 3" />
-                    </label>
-                    <button id="applyFilterMobile"
-                        class="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 w-full">Apply
-                        Filter</button>
+                    class="hidden absolute top-12 right-0 z-50 bg-white rounded-xl shadow-2xl scale-105 animate-bounce-in px-6 py-4 transition-all duration-300 min-w-[300px]">
+                    <h3 class="text-lg font-semibold mb-4">Filters</h3>
+                    <form id="filterFormMobile" class="space-y-4">
+                        <div>
+                            <label for="filterDateFromMobile" class="text-sm block mb-1">Date Added From</label>
+                            <input type="date" id="filterDateFromMobile" name="dateFrom"
+                                class="w-full border rounded px-2 py-1" />
+                        </div>
+                        <div>
+                            <label for="filterDateToMobile" class="text-sm block mb-1">Date Added To</label>
+                            <input type="date" id="filterDateToMobile" name="dateTo"
+                                class="w-full border rounded px-2 py-1" />
+                        </div>
+                        <div>
+                            <label for="filterPriceOpMobile" class="text-sm block mb-1">Price Op</label>
+                            <select id="filterPriceOpMobile" name="priceOp" class="w-full border rounded px-2 py-1">
+                                <option value="option">Option</option>
+                                <option value="=">=</option>
+                                <option value="<">&lt;</option>
+                                <option value=">">&gt;</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterPriceMobile" class="text-sm block mb-1">Price</label>
+                            <input type="number" min="0" step="0.01" id="filterPriceMobile" name="price"
+                                placeholder="Amount" class="w-full border rounded px-2 py-1" />
+                        </div>
+                        <div>
+                            <label for="filterTimeOpMobile" class="text-sm block mb-1">Time Op</label>
+                            <select id="filterTimeOpMobile" name="timeOp" class="w-full border rounded px-2 py-1">
+                                <option value="option">Option</option>
+                                <option value="=">=</option>
+                                <option value="<">&lt;</option>
+                                <option value=">">&gt;</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterTimeMobile" class="text-sm block mb-1">Time (min)</label>
+                            <input type="number" min="0" id="filterTimeMobile" name="time" placeholder="Minutes"
+                                class="w-full border rounded px-2 py-1" />
+                        </div>
+                        <div>
+                            <label for="filterFuelMobile" class="text-sm block mb-1">Fuel</label>
+                            <select id="filterFuelMobile" name="fuel" class="w-full border rounded px-2 py-1">
+                                <option value="All">All</option>
+                                <option value="Petrol">Petrol</option>
+                                <option value="Diesel">Diesel</option>
+                                <option value="EV">EV</option>
+                                <option value="Hybrid">Hybrid</option>
+                                <option value="CNG">CNG</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filterTypeMobile" class="text-sm block mb-1">Vehicle Type</label>
+                            <select id="filterTypeMobile" name="type" class="w-full border rounded px-2 py-1">
+                                <option value="All">All</option>
+                                <option value="two-wheeler">Two-Wheeler</option>
+                                <option value="four-wheeler">Four-Wheeler</option>
+                            </select>
+                        </div>
+                        <button type="submit"
+                            class="w-full mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            Apply Filter
+                        </button>
+                    </form>
                 </div>
             </div>
-            <!-- Customer List Mobile -->
+
+            <!-- Mobile Batch Actions -->
+            <div class="flex space-x-2 mb-2 px-4">
+                <button id="batchActivateMobile"
+                    class="bg-green-600 text-white px-3 py-1 rounded disabled:opacity-60 text-xs">
+                    Activate Selected
+                </button>
+                <button id="batchDeactivateMobile"
+                    class="bg-red-600 text-white px-3 py-1 rounded disabled:opacity-60 text-xs">
+                    Deactivate Selected
+                </button>
+            </div>
+
             <div>
                 <h2 class="text-lg font-semibold mb-2 px-4">Service Info</h2>
-                <div id="customerListMobile" class="p-2 space-y-2"></div>
-                <div id="paginationMobile"
-                    class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-md mx-auto px-4">
+                <div id="servicesListMobile" class="p-2 space-y-3"></div>
+                <div
+                    class="flex justify-between items-center mt-4 text-sm text-gray-600 max-w-md mx-auto px-4 select-none">
                     <button id="prevPageMobile" class="disabled:opacity-50" aria-label="Previous page">←
                         Previous</button>
                     <span id="pageInfoMobile"></span>
                     <button id="nextPageMobile" class="disabled:opacity-50" aria-label="Next page">Next →</button>
                 </div>
             </div>
+
             <!-- Mobile Modal -->
-            <div id="customer-modal"
+            <div id="vehicle-modal"
                 class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 hidden">
                 <div class="bg-white rounded-lg shadow-lg w-full max-w-md max-h-full flex flex-col overflow-hidden relative"
                     style="height: 100vh;">
@@ -200,409 +376,122 @@
                             <line x1="6" y1="6" x2="18" y2="18" />
                         </svg>
                     </button>
-                    <div id="modal-content" class="p-6 overflow-auto flex-grow">
-                        <!-- Dynamic customer info will be inserted here -->
-                    </div>
+                    <div id="modal-content" class="p-6 overflow-auto flex-grow"></div>
                 </div>
             </div>
-
-            
         </section>
     </main>
 
-    <script type="module" src="../../../components/components-loader.js"></script>
+    <!-- Add Service to Vehicle Modal -->
+    <div id="add-service-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
+        <div role="dialog" aria-modal="true" aria-labelledby="addServiceTitle" tabindex="1"
+            class="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative shadow-lg">
+            <button id="closeAddServiceModal" aria-label="Close modal"
+                class="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-3xl font-bold">&times;</button>
+            <h2 id="addServiceTitle" class="text-2xl font-bold mb-6 text-center">Add Service to Vehicle</h2>
+            <form id="addServiceForm" autocomplete="off" class="space-y-4">
+                <div class="relative">
+                    <label for="brandInput" class="font-semibold block mb-1">Brand <span
+                            class="text-red-600">*</span></label>
+                    <input id="brandInput" name="brand" type="text" aria-autocomplete="list"
+                        aria-controls="brandSuggestionList" aria-haspopup="listbox" aria-expanded="false"
+                        class="border border-gray-300 rounded w-full p-2" />
+                    <ul id="brandSuggestionList" class="suggestion-list hidden" role="listbox"></ul>
+                    <p id="brandError" class="text-xs text-red-600 mt-1 hidden">Please choose a valid brand.</p>
+                </div>
 
+                <div>
+                    <label for="modelSelect" class="font-semibold block mb-1">Model <span
+                            class="text-red-600">*</span></label>
+                    <select id="modelSelect" name="model" disabled class="border border-gray-300 rounded w-full p-2">
+                        <option value="">Select brand first</option>
+                    </select>
+                    <p id="modelError" class="text-xs text-red-600 mt-1 hidden">Please select a model.</p>
+                </div>
 
-    <script>
-        // Shared customer data
-        const customers = [
-            { id: "68686", name: "John", email: "john-44@a.in", phone: "96565464855", address: "xxx, yyy, zzz", services: 7 },
-            { id: "545454", name: "Barane", email: "bk@gmail.com", phone: "4894848458", address: "aaa, zzz", services: 3 },
-            { id: "565468", name: "Kumar", email: "kumar@a.com", phone: "4186468681", address: "ttt, uuu, zzz", services: 1 },
-            { id: "111111", name: "Alice", email: "alice@mail.com", phone: "999888777", address: "abc street", services: 5 },
-            { id: "222222", name: "Bob", email: "bob@mail.com", phone: "111222333", address: "def road", services: 2 },
-            { id: "333333", name: "Charlie", email: "charlie@mail.com", phone: "444555666", address: "ghi ave", services: 9 },
-            { id: "444444", name: "David", email: "david@mail.com", phone: "777888999", address: "jkl lejfhgbherjgbj ergrge grgerge rgergerger errekjerkt hrktwhrkjth    gwrjghrjwghane", services: 4 },
-            { id: "555555", name: "Eva", email: "eva@mail.com", phone: "123123123", address: "mno park", services: 6 }
-        ];
+                <div>
+                    <label for="fuelSelect" class="font-semibold block mb-1">Fuel Type <span
+                            class="text-red-600">*</span></label>
+                    <select id="fuelSelect" name="fuel" disabled class="border border-gray-300 rounded w-full p-2">
+                        <option value="">Select fuel type</option>
+                        <option value="Petrol">Petrol</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="EV">EV</option>
+                        <option value="Hybrid">Hybrid</option>
+                        <option value="CNG">CNG</option>
+                    </select>
+                    <p id="fuelError" class="text-xs text-red-600 mt-1 hidden">Please select fuel type.</p>
+                </div>
 
-        // Desktop Variables
-        const tableBodyDesktop = document.getElementById("customerTableBodyDesktop");
-        const prevBtnDesktop = document.getElementById("prevPageDesktop");
-        const nextBtnDesktop = document.getElementById("nextPageDesktop");
-        const pageInfoDesktop = document.getElementById("pageInfoDesktop");
-        const searchInputDesktop = document.getElementById("searchInputDesktop");
-        const searchBtnDesktop = document.getElementById("searchBtnDesktop");
-        const filterBtnDesktop = document.getElementById("filterBtnDesktop");
-        const filterPanelDesktop = document.getElementById("filterPanelDesktop");
-        const applyFilterDesktop = document.getElementById("applyFilterDesktop");
-        const filterServicesDesktop = document.getElementById("filterServicesDesktop");
-        const toastDesktop = document.getElementById("toastDesktop");
-
-        // Mobile Variables
-        const customerListMobile = document.getElementById("customerListMobile");
-        const searchInputMobile = document.getElementById("searchInputMobile");
-        const searchBtnMobile = document.getElementById("searchBtnMobile");
-        const filterBtnMobile = document.getElementById("filterBtnMobile");
-        const filterPanelMobile = document.getElementById("filterPanelMobile");
-        const applyFilterMobile = document.getElementById("applyFilterMobile");
-        const filterServicesMobile = document.getElementById("filterServicesMobile");
-        const customerModalMobile = document.getElementById("customer-modal");
-        const modalCloseBtnMobile = document.getElementById("modal-close-btn");
-        const modalContentMobile = document.getElementById("modal-content");
-        const addMechanicModalMobile = document.getElementById('add-mechanic-modal-mobile');
-        const addMechanicFormMobile = document.getElementById('addMechanicFormMobile');
-        const closeAddMechMobileBtn = document.getElementById('closeAddMechMobile');
-        const menuActions = document.getElementById('menu_actions');
-
-        // Desktop Modals
-        const desktopViewModal = document.getElementById("desktop-viewModal");
-        const desktopModalContent = document.getElementById("desktop-modalContent");
-
-        // Mobile Pagination Variables
-        const prevBtnMobile = document.getElementById("prevPageMobile");
-        const nextBtnMobile = document.getElementById("nextPageMobile");
-        const pageInfoMobile = document.getElementById("pageInfoMobile");
-
-        // Desktop Pagination
-        let currentPageDesktop = 1;
-        const rowsPerPageDesktop = 5;
-        let filteredDataDesktop = [...customers];
-
-        // Mobile Pagination
-        let currentPageMobile = 1;
-        const rowsPerPageMobile = 5;
-        const fullDataMobile = [...customers];
-        let filteredDataMobile = [...fullDataMobile];
-
-        // ---- Desktop Functions ----
-
-        function renderTableDesktop(data) {
-            filteredDataDesktop = data;
-            const start = (currentPageDesktop - 1) * rowsPerPageDesktop;
-            const end = start + rowsPerPageDesktop;
-            const pageData = filteredDataDesktop.slice(start, end);
-
-            tableBodyDesktop.innerHTML = "";
-            pageData.forEach((c, idx) => {
-                const row = document.createElement("tr");
-                row.className = "hover:bg-gray-50";
-                row.innerHTML = `
-                   
-                    <td class="py-2 px-4 border border-gray-300">${c.id}</td>
-                    <td class="py-2 px-4 border border-gray-300">${c.name}</td>
-                    <td class="py-2 px-4 border border-gray-300">${c.email}</td>
-                    <td class="py-2 px-4 border border-gray-300">${c.phone}</td>
-                    <td class="py-2 px-4 border border-gray-300">${c.address}</td>
-                    <td class="py-2 px-4 border border-gray-300">${c.services}</td>
-                    <td class="py-2 px-4 border border-gray-300 relative">
-                        <button class="actionBtnDesktop p-1 rounded hover:bg-gray-200 ce">⋮</button>
-                        <div class="actionMenuDesktop hidden absolute right-0 mt-1 bg-white border rounded shadow-lg z-10">
-                            <button class="block w-full px-4 py-2 text-left hover:bg-gray-100 viewBtnDesktop">View</button>
-                            <button class="block w-full px-4 py-2 text-left hover:bg-gray-100 deactivateBtnDesktop">Deactivate</button>
-                        </div>
-                    </td>
-                `;
-                tableBodyDesktop.appendChild(row);
-            });
-
-            attachDesktopActionEvents();
-            updatePaginationDesktop();
-        }
-
-        function attachDesktopActionEvents() {
-            document.querySelectorAll(".actionBtnDesktop").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    const menu = btn.nextElementSibling;
-                    if (menu) menu.classList.toggle("hidden");
-                });
-            });
-
-            document.querySelectorAll(".viewBtnDesktop").forEach((btn, idx) => {
-                btn.addEventListener("click", () => {
-                    const customerIndex = (currentPageDesktop - 1) * rowsPerPageDesktop + idx;
-                    showDesktopModal(filteredDataDesktop[customerIndex]);
-                });
-            });
-
-            document.querySelectorAll(".deactivateBtnDesktop").forEach((btn, idx) => {
-                btn.addEventListener("click", () => {
-                    const customerIndex = (currentPageDesktop - 1) * rowsPerPageDesktop + idx;
-                    const customer = filteredDataDesktop[customerIndex];
-                    if (confirm(`Deactivate ${customer.name}?`)) {
-                        showToastDesktop();
-                    }
-                });
-            });
-        }
-
-        function updatePaginationDesktop() {
-            const totalPages = Math.ceil(filteredDataDesktop.length / rowsPerPageDesktop);
-            pageInfoDesktop.textContent = `Page ${currentPageDesktop} of ${totalPages}`;
-            prevBtnDesktop.disabled = currentPageDesktop === 1;
-            nextBtnDesktop.disabled = currentPageDesktop === totalPages;
-        }
-
-        function showDesktopModal(customer) {
-            desktopModalContent.innerHTML = `
-                <p><strong>ID:</strong> ${customer.id}</p>
-                <p><strong>Name:</strong> ${customer.name}</p>
-                <p><strong>Email:</strong> ${customer.email}</p>
-                <p><strong>Phone:</strong> ${customer.phone}</p>
-                <p><strong>Address:</strong> ${customer.address}</p>
-                <p><strong>Services:</strong> ${customer.services}</p>
-            `;
-            desktopViewModal.classList.remove("hidden");
-        }
-
-        function closeDesktopModal() {
-            desktopViewModal.classList.add("hidden");
-        }
-
-        function showToastDesktop() {
-            toastDesktop.classList.remove("hidden");
-            setTimeout(() => toastDesktop.classList.add("hidden"), 3000);
-        }
-
-        // Desktop Pagination events
-        prevBtnDesktop.addEventListener("click", () => {
-            if (currentPageDesktop > 1) {
-                currentPageDesktop--;
-                renderTableDesktop(filteredDataDesktop);
-            }
-        });
-
-        nextBtnDesktop.addEventListener("click", () => {
-            const totalPages = Math.ceil(filteredDataDesktop.length / rowsPerPageDesktop);
-            if (currentPageDesktop < totalPages) {
-                currentPageDesktop++;
-                renderTableDesktop(filteredDataDesktop);
-            }
-        });
-
-        // Desktop Search by SVG button and enter
-        searchBtnDesktop.addEventListener("click", () => {
-            const query = searchInputDesktop.value.trim().toLowerCase();
-            currentPageDesktop = 1;
-            filteredDataDesktop = customers.filter(c =>
-                c.name.toLowerCase().includes(query) ||
-                c.email.toLowerCase().includes(query) ||
-                c.phone.toLowerCase().includes(query) ||
-                c.id.toLowerCase().includes(query)
-            );
-            renderTableDesktop(filteredDataDesktop);
-        });
-        searchInputDesktop.addEventListener("keydown", e => {
-            if (e.key === "Enter") searchBtnDesktop.click();
-        });
-
-        // Desktop Filter floating panel
-        filterBtnDesktop.addEventListener("click", (e) => {
-            e.stopPropagation();
-            filterPanelDesktop.classList.toggle("hidden");
-        });
-        document.addEventListener("click", (e) => {
-            if (!filterPanelDesktop.classList.contains("hidden") && !filterPanelDesktop.contains(e.target) && e.target !== filterBtnDesktop) {
-                filterPanelDesktop.classList.add("hidden");
-            }
-        });
-
-        applyFilterDesktop.addEventListener("click", () => {
-            const minServices = parseInt(filterServicesDesktop.value) || 0;
-            currentPageDesktop = 1;
-            filteredDataDesktop = customers.filter(c => c.services > minServices);
-            renderTableDesktop(filteredDataDesktop);
-        });
-
-        desktopViewModal.addEventListener("click", e => {
-            if (e.target === desktopViewModal) closeDesktopModal();
-        });
-
-        // ---- Mobile Functions ----
-
-        function renderMobileListPaginated(data) {
-            filteredDataMobile = data;
-            const start = (currentPageMobile - 1) * rowsPerPageMobile;
-            const end = start + rowsPerPageMobile;
-            const pageData = filteredDataMobile.slice(start, end);
-
-            customerListMobile.innerHTML = "";
-            pageData.forEach((c, idx) => {
-                const item = document.createElement("div");
-                item.className = "border-b border-black font-medium py-4 flex items-center justify-between px-4";
-                item.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M5.121 17.804A9.97 9.97 0 0112 15c2.21 0 4.24.72 5.879 1.928M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>${c.name}</span>
+                <fieldset class="mb-2">
+                    <legend class="font-semibold mb-1">Vehicle Type <span class="text-red-600">*</span></legend>
+                    <div class="flex gap-6">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="vehicleType" value="two-wheeler" disabled />
+                            <span class="ml-2">Two-Wheelers</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="vehicleType" value="four-wheeler" disabled />
+                            <span class="ml-2">Four-Wheelers</span>
+                        </label>
                     </div>
-                    <button aria-label="View details for ${c.name}" class="viewBtnMobile" data-index="${start + idx}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                `;
-                customerListMobile.appendChild(item);
-            });
+                    <p id="typeError" class="text-xs text-red-600 mt-1 hidden">Please select vehicle type.</p>
+                </fieldset>
 
-            updatePaginationMobile();
-            attachMobileViewEvents();
-        }
+                <div class="relative">
+                    <label for="serviceNameInput" class="font-semibold block mb-1">Service Name <span
+                            class="text-red-600">*</span></label>
+                    <input id="serviceNameInput" name="serviceName" type="text" autocomplete="off"
+                        aria-autocomplete="list" aria-controls="serviceSuggestionList" aria-haspopup="listbox"
+                        aria-expanded="false" disabled class="border border-gray-300 rounded w-full p-2" />
+                    <ul id="serviceSuggestionList" class="suggestion-list hidden" role="listbox"></ul>
+                    <p id="serviceError" class="text-xs text-red-600 mt-1 hidden">Please enter a service name.</p>
+                </div>
 
-        function updatePaginationMobile() {
-            const totalPages = Math.ceil(filteredDataMobile.length / rowsPerPageMobile);
-            pageInfoMobile.textContent = `Page ${currentPageMobile} of ${totalPages}`;
-            prevBtnMobile.disabled = currentPageMobile === 1;
-            nextBtnMobile.disabled = currentPageMobile === totalPages;
-        }
+                <div>
+                    <label for="timeToCompleteInput" class="font-semibold block mb-1">Time to Complete (minutes) <span
+                            class="text-red-600">*</span></label>
+                    <input id="timeToCompleteInput" name="timeToComplete" type="number" min="1" disabled
+                        class="border border-gray-300 rounded w-full p-2" />
+                    <p id="timeError" class="text-xs text-red-600 mt-1 hidden">Please enter valid time.</p>
+                </div>
 
-        function attachMobileViewEvents() {
-            document.querySelectorAll(".viewBtnMobile").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    const idx = parseInt(btn.getAttribute("data-index"));
-                    showMobileModal(filteredDataMobile[idx]);
-                });
-            });
-        }
+                <div>
+                    <label for="priceInput" class="font-semibold block mb-1">Price <span
+                            class="text-red-600">*</span></label>
+                    <input id="priceInput" name="price" type="number" min="0" step="0.01" disabled
+                        class="border border-gray-300 rounded w-full p-2" />
+                    <p id="priceError" class="text-xs text-red-600 mt-1 hidden">Please enter valid price.</p>
+                </div>
 
-        function showMobileModal(customer) {
-            modalContentMobile.innerHTML = `
-                <p><strong>ID:</strong> ${customer.id}</p>
-                <p><strong>Name:</strong> ${customer.name}</p>
-                <p><strong>Email:</strong> ${customer.email}</p>
-                <p><strong>Phone:</strong> ${customer.phone}</p>
-                <p><strong>Address:</strong> ${customer.address}</p>
-                <p><strong>Services:</strong> ${customer.services}</p>
-            `;
-            customerModalMobile.classList.remove("hidden");
-        }
+                <button type="submit" id="addServiceSubmitBtn" disabled
+                    class="w-full bg-primary hover:bg-indigo-900 text-white p-3 rounded font-semibold transition disabled:opacity-50">
+                    Add Service
+                </button>
+            </form>
+        </div>
+    </div>
 
-        function closeMobileModal() {
-            customerModalMobile.classList.add("hidden");
-        }
- 
-        // Mobile Pagination events
-        prevBtnMobile.addEventListener("click", () => {
-            if (currentPageMobile > 1) {
-                currentPageMobile--;
-                renderMobileListPaginated(filteredDataMobile);
-            }
-        });
+    <!-- Toast Notification -->
+    <div id="toast" role="alert" aria-live="assertive"
+        class="fixed bottom-6 right-6 bg-green-600 text-white px-5 py-3 rounded opacity-0 pointer-events-none transition-opacity z-50">
+    </div>
 
-        nextBtnMobile.addEventListener("click", () => {
-            const totalPages = Math.ceil(filteredDataMobile.length / rowsPerPageMobile);
-            if (currentPageMobile < totalPages) {
-                currentPageMobile++;
-                renderMobileListPaginated(filteredDataMobile);
-            }
-        });
+    <!-- Universal Confirmation Modal -->
+    <div id="confirmModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white p-6 rounded shadow-lg max-w-xs w-full text-center">
+            <p id="confirmText" class="mb-4"></p>
+            <div class="flex justify-center space-x-2">
+                <button id="confirmYes" class="bg-primary text-white px-3 py-1 rounded">Yes</button>
+                <button id="confirmNo" class="bg-gray-200 text-gray-700 px-3 py-1 rounded">No</button>
+            </div>
+        </div>
+    </div>
 
-        // Mobile Search by SVG button and enter
-        searchBtnMobile.addEventListener("click", () => {
-            const query = searchInputMobile.value.trim().toLowerCase();
-            filteredDataMobile = fullDataMobile.filter(c =>
-                c.name.toLowerCase().includes(query) ||
-                c.email.toLowerCase().includes(query) ||
-                c.phone.toLowerCase().includes(query) ||
-                c.id.toLowerCase().includes(query)
-            );
-            currentPageMobile = 1;
-            renderMobileListPaginated(filteredDataMobile);
-        });
-        searchInputMobile.addEventListener("keydown", e => {
-            if (e.key === "Enter") searchBtnMobile.click();
-        });
+    <script type="module" src="/components/components-loader.js"></script>
 
-        // Mobile Filter floating panel
-        filterBtnMobile.addEventListener("click", (e) => {
-            e.stopPropagation();
-            filterPanelMobile.classList.toggle("hidden");
-        });
-        document.addEventListener("click", (e) => {
-            if (!filterPanelMobile.classList.contains("hidden") && !filterPanelMobile.contains(e.target) && e.target !== filterBtnMobile) {
-                filterPanelMobile.classList.add("hidden");
-            }
-        });
-
-        applyFilterMobile.addEventListener("click", () => {
-            const minServices = parseInt(filterServicesMobile.value) || 0;
-            filteredDataMobile = fullDataMobile.filter(c => c.services > minServices);
-            currentPageMobile = 1;
-            renderMobileListPaginated(filteredDataMobile);
-        });
-
-        modalCloseBtnMobile.addEventListener("click", closeMobileModal);
-
-        customerModalMobile.addEventListener("click", (e) => {
-            if (e.target === customerModalMobile) {
-                closeMobileModal();
-            }
-        });
-
-        // Initial renders
-        renderTableDesktop(customers);
-        renderMobileListPaginated(fullDataMobile);
-
-        function closeDesktopModal() {
-            desktopViewModal.classList.add("hidden");
-        }
-
-
-        
-
-
-
-        document.addEventListener('navbarLoaded', () => {
-            const menu_actions = document.getElementById('menu_actions');
-
-            menu_actions.addEventListener('click', (event) => {
-                event.stopPropagation();
-
-                let dropdown = document.getElementById('pageActionsDropdown');
-                if (dropdown) {
-                    dropdown.classList.toggle('hidden');
-                    return;
-                }
-
-                dropdown = document.createElement('div');
-                dropdown.id = 'pageActionsDropdown';
-                dropdown.className = 'absolute right-0 mt-12 w-44 rounded-md shadow-lg bg-primary text-white ring-1 ring-black ring-opacity-5 z-50';
-
-                dropdown.innerHTML = `
-      <a href="services.html" class="block w-full text-left px-4 py-2 hover:bg-indigo-700 focus:outline-none" type="button">
-        Services
-      </a>
-
-      <a href="packages.html" class="block w-full text-left px-4 py-2 hover:bg-indigo-700 focus:outline-none" type="button">
-        Packages
-      </a>
-      <!-- Add more buttons here if needed -->
-    `;
-
-                menu_actions.parentElement.appendChild(dropdown);
-            });
-
-            // Close dropdown if clicked outside
-            document.addEventListener('click', () => {
-                const dropdown = document.getElementById('pageActionsDropdown');
-                if (dropdown) {
-                    dropdown.classList.add('hidden');
-                }
-            });
-
-
-
-
-        });
- 
-
-        
-
-    </script>
+    <script type="module" src="./JS/service-management.js"></script>
 </body>
 
 </html>
