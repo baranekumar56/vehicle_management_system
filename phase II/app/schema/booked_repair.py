@@ -57,4 +57,4 @@ class BookedRepairCreate(BaseBookedRepair):
 
 class BookedRepair(BookedRepairCreate):
 
-    id : int = Field(..., gt=-1)
+    booked_repair_id : int = Field(..., gt=-1)

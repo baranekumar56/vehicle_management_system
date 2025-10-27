@@ -16,4 +16,4 @@ class ScheduleCreate(BaseModel):
 
 class Schedule(ScheduleCreate):
 
-    id : int = Field(..., ge=0)
+    schedule_id : int = Field(..., ge=0)

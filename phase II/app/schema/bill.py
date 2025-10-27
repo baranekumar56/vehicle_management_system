@@ -21,7 +21,7 @@ class BillCreate(BaseBill):
 
 class Bill(BillCreate):
     
-    id : int = Field(..., ge=0)
+    bill_id : int = Field(..., ge=0)
 
 
 

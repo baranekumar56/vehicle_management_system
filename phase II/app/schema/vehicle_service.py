@@ -1,7 +1,7 @@
 from enum import Enum
 from pydantic import BaseModel, field_validator, ConfigDict, model_validator,RootModel,Field
 from fastapi import HTTPException
-import datetime
+from datetime import datetime
 
 """
 This file desrcibes about all the vehicle to service pydantic models that we gonna use in our project
@@ -57,7 +57,7 @@ class VehicleServiceCreate(BaseVehicleService):
 
 class VehicleService(VehicleServiceCreate):
 
-    id : int = Field(...)
+    vehicle_service_id : int = Field(...)
 
     @field_validator('id')
     def vehicle_id_validation(cls, id:int):

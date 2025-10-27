@@ -39,7 +39,7 @@ class MechNoteCreate(BaseModel):
 
 class MechNote(MechNoteCreate):
 
-    id : str = Field(..., alias='_id')
+    mechanic_note_id : str = Field(..., alias='_id')
 
     class Config:
         json_encoders = {ObjectId: str}

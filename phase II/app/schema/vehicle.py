@@ -1,7 +1,7 @@
 from enum import Enum
 from pydantic import BaseModel, field_validator, ConfigDict, model_validator,RootModel,Field
 from fastapi import HTTPException
-import datetime
+from datetime import datetime
 
 
 """
@@ -29,7 +29,7 @@ class BaseVehicle(BaseModel):
     brand : str = Field(...)
     model : str = Field(...)
     fuel : FuelType = Field(...)
-    vtype : VehicleType = Field(...)
+    vehicle_type : VehicleType = Field(...)
     active : bool = True
 
     @field_validator('brand')
@@ -77,7 +77,7 @@ class VehicleCreate(BaseVehicle):
 
 class Vehicle(VehicleCreate):
 
-    id : int = Field(...)
+    vehicle_id : int = Field(...)
 
     @field_validator('id')
     def vehicle_id_validation(cls, id:int):

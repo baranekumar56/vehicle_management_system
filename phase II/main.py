@@ -1,45 +1,40 @@
 
 from fastapi import FastAPI, Depends
+from fastapi.security import HTTPBearer
 from sqlalchemy import select, update, delete, insert
 from app.schema.service import Service, ServiceCreate
 from app.schema.mech_note import MechNote, MechNoteCreate
-from app.models.services.Service import Service
-from app.database import get_db, init_db
+from app.database.database import get_db, init_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
-from app.database import mech_notes
+from app.database.database import mech_notes
+from app.middlewares.AuthorizationMiddleware import AuthorizationMiddleware
 
-
-
+from app.routes import *
 
 app = FastAPI()
 
+bearer_scheme = HTTPBearer()
+
+@app.get("/secure-data", dependencies=[Depends(bearer_scheme)])
+async def get_secure_data():
+    return {"secure": True}
+
+
+#middle ware initializations
+# app.add_middleware(middleware_class=AuthorizationMiddleware)
+
+
+# init db
 @app.on_event('startup')
 async def load_tables():
     await init_db()
 
-@app.post('/add_service')
-async def add_service(service:ServiceCreate, db:Session = Depends(get_db)):
-    service = Service(**service.model_dump())
-    db.add(service)
-    await db.commit()
-    return {"msg": "nalladhae nadanthirukku"}
+# initializing the routes
 
-@app.get('/get_services')
-async def get_all_service(db:AsyncSession = Depends(get_db)):
+app.include_router(router=user_router, prefix='/users', tags=['users'])
+app.include_router(router=service_router, prefix='/service', tags=['services'])
 
-    result = await db.execute(select(Service))
-    services = []
-
-    for service in result.scalars():
-        services.append(service)
-    return {"services": services}
-
-@app.post('/add_mech_note', response_model=MechNote)
-async def add_mech_note(mech_note: MechNoteCreate):
-    
-    mech_note = await mech_notes.insert_one(mech_note.model_dump())
-    print(mech_note)
-    mech_note = await mech_notes.find_one({"_id": mech_note.inserted_id})
-    mech_note['_id'] = str(mech_note['_id'])
-    return MechNote(**mech_note)
+@app.get('/')
+def root():
+    return {"msg": "Working fine"}

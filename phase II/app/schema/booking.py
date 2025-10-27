@@ -104,6 +104,7 @@ class BaseBooking(BaseModel):
     raw_material_cost : float = Field(..., gt=-1)
     repair_description : str
     estimated_completion_days : int = Field(..., gt=0)
+    rc_image : str # it will be a file url
 
     @field_validator('user_id')
     def user_id_validation(cls, user_id: int) -> int : 
@@ -163,4 +164,6 @@ class BookingCreate(BaseBooking):
     cancelled_at : Optional[datetime]
     
 
+class Booking(BookingCreate):
 
+    booking_id : int

@@ -6,7 +6,7 @@ load_dotenv()
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/vsms")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+psycopg://postgres:postgres@localhost:5432/vsms")
     MONGODB_URL: str = os.getenv("MONGODB_URL", "mongodb://localhost:27017/nexa_cms")
     
     # JWT

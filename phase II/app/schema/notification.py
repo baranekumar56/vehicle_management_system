@@ -13,6 +13,6 @@ class NotificationCreate(BaseModel):
 
 class Notification(NotificationCreate):
 
-    id : int = Field(..., ge=0)
+    notification_id : int = Field(..., ge=0)
     read : bool = False
     

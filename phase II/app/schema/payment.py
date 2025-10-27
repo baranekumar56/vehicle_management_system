@@ -23,6 +23,6 @@ class PaymentCreate(BasePayment):
 
 class Payment(PaymentCreate):
 
-    id : int = Field(..., ge=0)
+    payment_id : int = Field(..., ge=0)
 
     

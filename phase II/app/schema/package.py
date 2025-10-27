@@ -6,7 +6,7 @@ from datetime import datetime
 
 class BasePackage(BaseModel):
 
-    name : str
+    package_name : str
     vehicle_id: int = Field(..., ge=0)
     total_services : int = 0
     total_time : int = 0
@@ -35,12 +35,12 @@ class PackageCreate(BasePackage):
 
 class Package(PackageCreate):
 
-    id : int = Field(..., ge=0)
+    package_id : int = Field(..., ge=0)
 
 
 class PackageService(BaseModel):
 
-    id : int = Field(..., ge=0)
+    package_service_id : int = Field(..., ge=0)
     package_id : int = Field(..., ge=0)
     vehicle_service_id : int = Field(..., ge=0)
 

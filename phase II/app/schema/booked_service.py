@@ -57,4 +57,4 @@ class BookedServiceCreate(BaseBookedService):
 
 class BookedService(BookedServiceCreate):
 
-    id : int = Field(..., gt=-1)
+    booked_service_id : int = Field(..., gt=-1)

@@ -11,11 +11,10 @@ class BaseService(BaseModel):
     service_name: str = Field(...)
     active : bool = True
 
+    model_config = ConfigDict(from_attributes=True)
 
     @field_validator('service_name')
     def service_name_validation(cls, service_name: str):
-
-        
         
         service_name = service_name.strip()
 
@@ -36,13 +35,14 @@ class BaseService(BaseModel):
 class ServiceCreate(BaseService):
 
     created_at: datetime = Field(default=datetime.now())
-    last_deactivated : datetime = None
+    last_deactivated : datetime = Field(None)
 
-    model_config = ConfigDict(from_attributes=True)
 
 class Service(ServiceCreate):
 
-    id : int = Field(...)
+    service_id : int = Field(...)
+
+
 
 
 class Services(RootModel[list[Service]]):
