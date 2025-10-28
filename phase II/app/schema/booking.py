@@ -77,6 +77,7 @@ class BookingStatus(str, Enum):
     booked = "booked"
     billing = "billing"
     billing_confirmation = "billing_confirmation"
+    pending = "pending"
     on_going = "on_going"
     halted = "halted"
     cancelled = "cancelled"
@@ -91,7 +92,7 @@ class PaymentStatus(str, Enum):
 class BaseBooking(BaseModel):
 
     user_id : int
-    vehicle_id : int
+    user_vehicle_id : int
     total_amount : float
     type : ServiceType
     status : BookingStatus
@@ -106,6 +107,9 @@ class BaseBooking(BaseModel):
     estimated_completion_days : int = Field(..., gt=0)
     rc_image : str # it will be a file url
 
+    model_config = ConfigDict(from_attributes=True)
+
+
     @field_validator('user_id')
     def user_id_validation(cls, user_id: int) -> int : 
 
@@ -114,7 +118,7 @@ class BaseBooking(BaseModel):
 
         return user_id
     
-    @field_validator('vehicle_id')
+    @field_validator('user_vehicle_id')
     def vehicle_id_validation(cls, vehicle_id: int) -> int :
 
         if vehicle_id < 0:

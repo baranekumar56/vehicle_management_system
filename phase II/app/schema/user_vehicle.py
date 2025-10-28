@@ -19,6 +19,9 @@ class BaseUserVehicle(BaseModel):
     rc_image : str
     selected : bool = False # auto fill option
 
+    model_config = ConfigDict(from_attributes=True)
+
+
 class UserVehicleCreate(BaseUserVehicle):
 
     created_at : datetime = Field(default_factory=datetime.now)

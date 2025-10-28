@@ -7,9 +7,10 @@ from app.models.services_vehicles import Service
 from app.custom_db_types.custom_db_classes import Address
 from app.database.database import get_db
 from datetime import datetime
+from app.models.services_vehicles.Service import Service
 
 
-async def check_service_exists(service_id: int, db:AsyncSession = Depends(get_db)):
+async def check_service_exists(service_id: int, db:AsyncSession):
 
     # check whether the service id is in the table
 
@@ -21,7 +22,7 @@ async def check_service_exists(service_id: int, db:AsyncSession = Depends(get_db
     
     return service
 
-async def activate_deactivate_service(service_id: int, activate: bool = True, db:AsyncSession = Depends(get_db)):
+async def activate_deactivate_service(service_id: int, db:AsyncSession,  activate: bool = True,):
 
     # if activate is true set the service to true else dont
     try:
@@ -29,6 +30,8 @@ async def activate_deactivate_service(service_id: int, activate: bool = True, db
             await db.execute(update(Service).where(Service.service_id == service_id).values(active=True))
         else :
             await db.execute(update(Service).where(Service.service_id == service_id).values(active = False, last_deactivated = datetime.now()))
+
+        await db.commit()
 
         return True
     

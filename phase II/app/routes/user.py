@@ -3,11 +3,11 @@ from fastapi import APIRouter, Query, Form, File, UploadFile, Depends, HTTPExcep
 from pydantic import Field
 from app.database.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.user.User import Users
 from sqlalchemy.sql import select, update, insert
 from app.auth.jwt_handler import create_access_token, create_refresh_token, verify_password, hash_password
 from app.schema.user import User, UserCreate, UserLoginRequest
 from sqlalchemy.exc import IntegrityError
+from app.schema.user_vehicle import UserVehicle, UserVehicleCreate
 
 from app.crud.user import *
 
@@ -128,4 +128,12 @@ async def activate_user(response: Response, user_id: int, db:AsyncSession = Depe
         response.status_code = 400
         return {"msg": "User status update failed"}
     
+
+
+# vehicles
+
+@router.post('/add_vehicle')
+async def add_vehicle_to_user(response: Response,user_vehicle: UserVehicleCreate, db:AsyncSession = Depends(get_db) ):
+    
+    return user_vehicle
 

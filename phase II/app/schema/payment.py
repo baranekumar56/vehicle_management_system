@@ -15,6 +15,9 @@ class BasePayment(BaseModel):
     user_id : int = Field(..., gt=-1)
     paid_amount : float = Field(...)
     type : PaymentType = Field(PaymentType.payment)
+
+    model_config = ConfigDict(from_attributes=True)
+
     
 
 class PaymentCreate(BasePayment):

@@ -29,8 +29,12 @@ class MechNoteCreate(BaseModel):
 
     booking_id : int = Field(..., ge=0)
     mechanic_id : int = Field(..., ge=0)
+    mechanic_name : str
     note : str = Field(...,max_length=500 )
     created_at : datetime = Field(default_factory=datetime.now)
+
+    model_config = ConfigDict(from_attributes=True)
+
 
 
     @field_validator('note')

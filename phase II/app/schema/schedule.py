@@ -14,6 +14,9 @@ class ScheduleCreate(BaseModel):
     stopped : bool = False
     stop_reason : str = Field(..., max_length=100)
 
+    model_config = ConfigDict(from_attributes=True)
+
+
 class Schedule(ScheduleCreate):
 
     schedule_id : int = Field(..., ge=0)

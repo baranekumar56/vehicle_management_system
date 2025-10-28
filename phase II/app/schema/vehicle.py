@@ -32,6 +32,8 @@ class BaseVehicle(BaseModel):
     vehicle_type : VehicleType = Field(...)
     active : bool = True
 
+    model_config = ConfigDict(from_attributes=True)
+
     @field_validator('brand')
     def validation_for_brand_name(cls, brand: str):
 
@@ -71,22 +73,21 @@ class BaseVehicle(BaseModel):
 
 class VehicleCreate(BaseVehicle):
 
-    created_at: datetime = Field(..., default_factory=datetime.datetime.now)
-    last_deactivated : datetime = None
+    created_at: datetime = Field(..., default_factory=datetime.now)
+    last_deactivated : datetime | None = None
 
 
 class Vehicle(VehicleCreate):
 
     vehicle_id : int = Field(...)
 
-    @field_validator('id')
+    @field_validator('vehicle_id')
     def vehicle_id_validation(cls, id:int):
 
         if id < 0:
             raise ValueError("Id cannot be negative")
         
         return id
-
 
 class Vehicles(RootModel[list[Vehicle]]):
     pass 

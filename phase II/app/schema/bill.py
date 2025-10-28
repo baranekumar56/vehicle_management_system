@@ -11,9 +11,11 @@ This file desrcibes about all the bills model used in the app
 class BaseBill(BaseModel):
 
     booking_id : int = Field(..., ge=0)
-    forwarded_at : datetime = Field(default=datetime.now())
     forwarded_mechanic_id : int = Field(..., ge=0)
     status : bool = True
+
+    model_config = ConfigDict(from_attributes=True)
+
 
 class BillCreate(BaseBill):
 

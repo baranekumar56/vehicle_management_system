@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from app.database.database import mech_notes
 from app.middlewares.AuthorizationMiddleware import AuthorizationMiddleware
+from app.routes.vehicle import router as vehicle_router
 
 from app.routes import *
 
@@ -34,6 +35,7 @@ async def load_tables():
 
 app.include_router(router=user_router, prefix='/users', tags=['users'])
 app.include_router(router=service_router, prefix='/service', tags=['services'])
+app.include_router(router=vehicle_router, prefix='/vehicle', tags=['vehicles'])
 
 @app.get('/')
 def root():

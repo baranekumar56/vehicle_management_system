@@ -4,7 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from app.config import settings
 from app.custom_db_types.custom_types import enums, composites
 from sqlalchemy.sql import text
-
+from app.database.constraints import constraints
 # postgres 
 engine = create_async_engine(settings.DATABASE_URL, echo=True)
 SessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
@@ -40,7 +40,14 @@ async def init_db():
             await conn.execute(text(enumeration))
 
         # create all tables
+        # await conn.run_sync(Base.metadata.drop_all)
+
         await conn.run_sync(Base.metadata.create_all)
+
+        # bind all the constraints to the associative table
+
+        for constraint in constraints:
+            await conn.execute(text(constraint))
 
 
 async def get_db():

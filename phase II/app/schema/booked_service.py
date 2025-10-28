@@ -17,6 +17,9 @@ class BaseBookedService(BaseModel):
     status : bool = False
     cancelled_by_admin : bool = False
 
+    model_config = ConfigDict(from_attributes=True)
+
+
     @field_validator('booking_id')
     def booking_id_validation(cls, booking_id: int) -> int:
 

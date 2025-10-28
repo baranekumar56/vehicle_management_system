@@ -18,6 +18,9 @@ class BaseBookedRepair(BaseModel):
     cancelled_by_user : bool = False
     removable : bool = True
 
+    model_config = ConfigDict(from_attributes=True)
+
+
     @field_validator('booking_id')
     def booking_id_validation(cls, booking_id: int) -> int:
 

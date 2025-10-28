@@ -46,6 +46,8 @@ async def activate_deactivate_user(user_id: int,db: AsyncSession, activate: bool
             await db.execute(update(Users).where(Users.user_id == user_id).values(active=True))
         else :
             await db.execute(update(Users).where(Users.user_id == user_id).values(active = False, last_deactivated = datetime.now()))
+        
+        await db.commit()
 
         return True
     

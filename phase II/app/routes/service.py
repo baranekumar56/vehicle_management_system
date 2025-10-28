@@ -28,14 +28,14 @@ async def get_all_service(db:AsyncSession = Depends(get_db)):
 
 
 @router.patch('/deactivate_service/{service_id}')
-async def deactivate_service(response: Response, serivce_id: int):
+async def deactivate_service(response: Response, serivce_id: int, db:AsyncSession = Depends(get_db)):
     
-    service = await check_service_exists(service_id=serivce_id)
+    service = await check_service_exists(service_id=serivce_id ,db=db)
 
     if service is None:
         raise HTTPException(status_code=404, detail="service with id {service_id} not found")
     
-    res = await activate_deactivate_service(service_id=serivce_id, activate=False)
+    res = await activate_deactivate_service(service_id=serivce_id,db=db, activate=False)
 
     if res :
         response.status_code = 200
@@ -46,14 +46,14 @@ async def deactivate_service(response: Response, serivce_id: int):
 
 
 @router.patch('/activate_service/{service_id}')
-async def deactivate_service(response: Response, serivce_id: int):
+async def deactivate_service(response: Response, serivce_id: int , db:AsyncSession = Depends(get_db)):
     
-    service = await check_service_exists(service_id=serivce_id)
+    service = await check_service_exists(service_id=serivce_id, db=db)
 
     if service is None:
         raise HTTPException(status_code=404, detail="service with id {service_id} not found")
     
-    res = await activate_deactivate_service(service_id=serivce_id, activate=True)
+    res = await activate_deactivate_service(service_id=serivce_id,db=db, activate=True)
 
     if res :
         response.status_code = 200

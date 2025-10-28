@@ -13,6 +13,9 @@ class BasePackage(BaseModel):
     total_price : float = 0.0
     active : bool = True
 
+    model_config = ConfigDict(from_attributes=True)
+
+
 
     @field_validator('name')
     def name_validation(cls, name: str) -> str:
@@ -25,7 +28,7 @@ class BasePackage(BaseModel):
         if not name.isalpha():
             raise ValueError("Package name should only have letters")
         
-        return name
+        return name.lower()
 
 class PackageCreate(BasePackage):
 

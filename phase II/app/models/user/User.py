@@ -23,6 +23,14 @@ class Users(Base):
     active = Column(Boolean, default=True)
 
 
+class Role(Base):
+
+    __tablename__ = 'roles'
+
+    role_id = Column(Integer, primary_key=True)
+    role_name = Column(String, nullable=False)
+    
+
 class UserVehicle(Base):
 
     __tablename__ = 'user_vehicles'

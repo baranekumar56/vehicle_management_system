@@ -16,6 +16,8 @@ class BaseVehicleService(BaseModel):
     time_to_complete : int
     active : bool = True
 
+    model_config = ConfigDict(from_attributes=True)
+
     @field_validator('service_id')
     def service_id_validation(cls, service_id: int) -> int :
 
@@ -52,14 +54,14 @@ class BaseVehicleService(BaseModel):
 
 class VehicleServiceCreate(BaseVehicleService):
 
-    created_at: datetime = Field(..., default_factory=datetime.datetime.now)
+    created_at: datetime = Field(..., default_factory=datetime.now)
     last_deactivated : datetime = None
 
 class VehicleService(VehicleServiceCreate):
 
     vehicle_service_id : int = Field(...)
 
-    @field_validator('id')
+    @field_validator('vehicle_id')
     def vehicle_id_validation(cls, id:int):
 
         if id < 0:
@@ -68,5 +70,5 @@ class VehicleService(VehicleServiceCreate):
         return id
 
 
-class VehicleServices(RootModel[VehicleService[list[VehicleService]]]):
+class VehicleServices(RootModel[list[VehicleService]]):
     pass

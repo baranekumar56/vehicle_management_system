@@ -10,6 +10,8 @@ class NotificationCreate(BaseModel):
     from_user_id : int = Field(..., ge=0)
     msg_content : str = Field(..., max_length=500)
     created_at : datetime = Field(default_factory=datetime.now)
+    model_config = ConfigDict(from_attributes=True)
+
 
 class Notification(NotificationCreate):
 

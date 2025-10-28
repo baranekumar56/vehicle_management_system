@@ -23,7 +23,7 @@ class Vehicle(Base):
     __tablename__ = "vehicles"
 
     vehicle_id = Column(Integer, primary_key=True)
-    brand = Column(String(50), unique=True, index=True)
+    brand = Column(String(50), index=True)
     model = Column(String(50))
     fuel = Column(Enum(FuelType, name="fuel_type"))
     vehicle_type = Column(Enum(VehicleType, name="vehicle_type"))
