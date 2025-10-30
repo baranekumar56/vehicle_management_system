@@ -5,13 +5,13 @@ from sqlalchemy.orm import relationship, relationship, Mapped, mapped_column
 
 class Schedule(Base):
 
-    __tablename__ = "schedules"
+    __tablename__ = "schedule"
 
     schedule_id = Column(Integer, primary_key=True)
-    booking_id = Column(Integer, nullable=False)
+    booking_id = Column(Integer)
     scheduled_from = Column(DateTime(timezone=True), nullable=False)
     scheduled_to = Column(DateTime(timezone=True), nullable=False)
-    mechanic_id = Column(Integer, nullable=False)
+    mechanic_id = Column(Integer)
     under_taken = Column(Boolean, default=False)
     stopped = Column(Boolean, default=False)
     stop_reason = Column(String)

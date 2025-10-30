@@ -22,6 +22,45 @@ class BaseUserVehicle(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+    @field_validator('vehicle_no')
+    def vehicle_no_validation(cls, vehicle_no: str) -> str:
+
+        # strip all the white spaces 
+        vehicle_no  = vehicle_no.strip()
+
+        # there are two formats
+        """
+        Format example: YY BH XXXX AA where:
+
+        YY = year of first registration, e.g., “21” for 2021. 
+
+        “BH” stands for Bharat (India) series.
+
+        XXXX = four digits (random / sequential)
+
+        AA = two-letter suffix.
+
+        Current format => SS RR LL NNNN
+
+        SS => state
+        RR => regional transport office code
+        LL => some random letter of length one or two or three
+        NNNN => number
+
+        """
+
+
+        # convert all alphabets to capital  
+        t = []
+        for ind in range(0, len(vehicle_no)):
+
+            if vehicle_no[ind].isalpha():
+                t.append( vehicle_no[ind].upper())
+            else :
+                t.append(vehicle_no[ind])
+
+        return "".join(t)
+
 class UserVehicleCreate(BaseUserVehicle):
 
     created_at : datetime = Field(default_factory=datetime.now)

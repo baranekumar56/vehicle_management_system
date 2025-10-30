@@ -2,9 +2,13 @@ from fastapi import APIRouter, Query, Form, File, UploadFile, Depends, HTTPExcep
 from pydantic import Field
 from app.database.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schema.vehicle_service import VehicleService, VehicleServiceCreate
+from app.schema.vehicle_service import VehicleService as ModelVehicleService, VehicleServiceCreate
 from sqlalchemy.exc import IntegrityError
 from app.crud.vehicle import *
+from app.crud.generic import *
+from app.models.services_vehicles.Vehicle import VehicleService 
+from app.models.user.User import Search
+from app.schema.vehicle_service import Search as ModelSearch
 
 
 router = APIRouter()
@@ -20,13 +24,13 @@ async def add_a_vehicle(vehicle_service: VehicleServiceCreate , db:AsyncSession 
             raise HTTPException(status_code=409, detail="vehicle service already exists")
         
         try :
-              vehicle_service:VehicleService = await add_vehicle_service_to_db(vehicle_service, db)
+              vehicle_service:ModelVehicleService = await add_vehicle_service_to_db(vehicle_service, db)
 
               return {"msg":"vehicle service added successfully", "data": vehicle_service}
         except Exception as e:
 
             e = str(e)
-            raise HTTPException(status_code=500, detail="Some thing bad happened, {e}")
+            raise HTTPException(status_code=500, detail="Some thing bad happened, {}".format(e))
         
 @router.patch('/deactivate_vehicle_service/{vehicle_service_id}')
 async def deactivate_a_vehicle(response:Response, vehicle_service_id: int, db:AsyncSession = Depends(get_db) ):
@@ -59,7 +63,7 @@ async def activate_a_vehicle(response:Response, vehicle_service_id: int, db:Asyn
     if not vehicle_service_exists:
          raise HTTPException(status_code=404, detail="Vehicle service not found")
     
-    res = await activate_deactivate_vehicle(vehicle_service_id=vehicle_service_id, db=db, activate=True)
+    res = await activate_deactivate_vehicle_service(vehicle_service_id = vehicle_service_id, db = db, activate = True)
 
     if res:
         response.status_code = 200
@@ -68,3 +72,34 @@ async def activate_a_vehicle(response:Response, vehicle_service_id: int, db:Asyn
     else :
         response.status_code = 400
         return {"msg": "User status update failed"}
+
+@router.put('/update_vehicle_service')
+async def update_vehicle_service(vehicle_service: ModelVehicleService , db:AsyncSession = Depends(get_db)):
+     
+     # this is put , i check whether it is a legal object by checking its id, then put everything with the upcoming data
+    try :
+        vehicle_service: ModelVehicleService = await check_if_id_exists(vehicle_service.vehicle_service_id, VehicleService, db)
+
+        if vehicle_service is None:
+            raise HTTPException(status_code=404, detail="Vehicle service not found")
+        
+        # update the new attributes
+
+        updated_rows = await update_entry_by_id(VehicleService, vehicle_service.vehicle_service_id, db, price = vehicle_service.price, time_to_complete = vehicle_service.time_to_complete )
+        await commit_changes(db)
+
+        return {"data": "updation successfull", "affected_rows":updated_rows }
+    except Exception as e:
+         raise HTTPException(status_code=500, detail="Can't update vehicle service, {}".format(str(e)))
+
+@router.post("/get_services")
+async def get_all_vehicle_services(search_string: str,filters:dict, db:AsyncSession = Depends(get_db)):
+     
+    records = await get_entries(Search, db, search_string=search_string, **filters)
+    matches = []
+    for record in records:
+         matches.append(ModelSearch.model_validate(record))
+
+    return matches
+
+

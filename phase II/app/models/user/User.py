@@ -18,14 +18,14 @@ class Users(Base):
     phone = Column(String(15))
     profile_picture = Column(Text, nullable=True)
     id_picture = Column(Text)
-    role_id = Column(Integer )
+    role_id = Column(Integer)
     joined_on = Column(DateTime)
     active = Column(Boolean, default=True)
 
 
 class Role(Base):
 
-    __tablename__ = 'roles'
+    __tablename__ = 'role'
 
     role_id = Column(Integer, primary_key=True)
     role_name = Column(String, nullable=False)
@@ -33,7 +33,7 @@ class Role(Base):
 
 class UserVehicle(Base):
 
-    __tablename__ = 'user_vehicles'
+    __tablename__ = 'user_vehicle'
 
     user_vehicle_id = Column(Integer, primary_key=True, index=True)
     vehicle_no = Column(String(20), index=True)
@@ -46,7 +46,15 @@ class UserVehicle(Base):
     is_deleted = Column(Boolean, default=False)
     rc_image = Column(Text, nullable=True)
     selected = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True))
 
 
+class Search(Base):
 
-    
+    __tablename__ = "search"
+
+    id = Column(Integer, primary_key=True)
+    first_name = Column(String)
+    last_name = Column(String)
+    address = Column(String)
+    phone = Column(String)

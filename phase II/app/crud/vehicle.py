@@ -1,6 +1,7 @@
 
 from app.models.services_vehicles.Vehicle import Vehicle, VehicleService
 from app.schema.vehicle import VehicleCreate, Vehicle as ModelVehicle
+from app.schema.vehicle_service import VehicleService as ModelVehicleService
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 from fastapi import HTTPException
@@ -41,7 +42,7 @@ async def add_vehicle_to_db(vehicle: VehicleCreate, db:AsyncSession) :
     await db.commit()
     await db.refresh(vehicle)
 
-    return ModelVehicle.model_validate(vehicle.__dict__)
+    return ModelVehicle.model_validate(vehicle)
 
 
 async def activate_deactivate_vehicle(vehicle_id: int,db: AsyncSession, activate: bool = True):
@@ -49,9 +50,9 @@ async def activate_deactivate_vehicle(vehicle_id: int,db: AsyncSession, activate
     # if activate is true set the service to true else dont
     try:
         if activate:
-            await db.execute(update(Vehicle).where(Vehicle.vehicle_id == vehicle_id).values(active=True))
+            await db.execute(update(Vehicle).where(vehicle_id == vehicle_id).values(active=True))
         else :
-            await db.execute(update(Vehicle).where(Vehicle.vehicle_id == vehicle_id).values(active = False, last_deactivated = datetime.now()))
+            await db.execute(update(Vehicle).where(vehicle_id == vehicle_id).values(active = False, last_deactivated = datetime.now()))
 
         await db.commit()
         return True
@@ -76,12 +77,12 @@ async def add_vehicle_service_to_db(vehicle_service: VehicleService, db:AsyncSes
     # first we need to check whether the vehicle already exists
     
     vehicle_service:Vehicle = VehicleService(**vehicle_service.model_dump())
-    # print(vehicle)
+    print(vehicle_service.__dict__)
     db.add(vehicle_service)
     await db.commit()
     await db.refresh(vehicle_service)
 
-    return ModelVehicle.model_validate(vehicle_service.__dict__)
+    return ModelVehicleService.model_validate(vehicle_service)
 
 async def check_if_vehicle_service_exists_by_id(vehicle_service_id:int, db:AsyncSession ):
 
@@ -95,14 +96,15 @@ async def check_if_vehicle_service_exists_by_id(vehicle_service_id:int, db:Async
         return False
     return True
 
-async def activate_deactivate_vehicle_service(vehicle_service_id: int,db: AsyncSession, activate: bool = True):
+async def activate_deactivate_vehicle_service(vehicle_service_id: int, db: AsyncSession, activate: bool = True):
 
     # if activate is true set the service to true else dont
     try:
         if activate:
             await db.execute(update(VehicleService).where(VehicleService.vehicle_service_id == vehicle_service_id).values(active=True))
-        else :
-            await db.execute(update(Vehicle).where(VehicleService.vehicle_service_id == vehicle_service_id).values(active = False, last_deactivated = datetime.now()))
+        else:
+            await db.execute(update(VehicleService).where(VehicleService.vehicle_service_id == vehicle_service_id).values(active=False, last_deactivated=datetime.now()))
+
 
         await db.commit()
         return True

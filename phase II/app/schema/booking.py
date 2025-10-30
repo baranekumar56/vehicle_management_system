@@ -3,68 +3,10 @@ from pydantic import BaseModel, field_validator, ConfigDict, model_validator,Roo
 from fastapi import HTTPException
 from typing import Optional
 from datetime import datetime
-
+from app.schema.user import Address
 """
 This file desrcibes about the structure of a booking object
 """
-
-class Address(BaseModel):
-
-    street: str
-    area : str
-    city : str
-    state : str
-    pincode : str
-
-    @field_validator('street')
-    def street_name_validation(cls, street:str) -> str:
-
-        street = street.strip()
-
-        if len(street) <= 3 or len(street) > 50:
-            raise ValueError('Street name should have length between 3 to 50')
-        
-        return street.lower()
-    
-    @field_validator('area')
-    def area_name_validation(cls, area:str) -> str:
-
-        area = area.strip()
-
-        if len(area) <= 3 or len(area) > 50:
-            raise ValueError('area name should have length between 3 to 50')
-        
-        return area.lower()
-    
-    @field_validator('city')
-    def street_name_validation(cls, city:str) -> str:
-
-        city = city.strip()
-
-        if len(city) <= 3 or len(city) > 50:
-            raise ValueError('city name should have length between 3 to 50')
-        
-        return city.lower()
-    
-    @field_validator('state')
-    def street_name_validation(cls, state:str) -> str:
-
-        state = state.strip()
-
-        if len(state) <= 3 or len(state) > 50:
-            raise ValueError('state name should have length between 3 to 50')
-        
-        return state.lower()
-    
-    @field_validator('pincode')
-    def street_name_validation(cls, pincode:str) -> str:
-
-        pincode = pincode.strip()
-
-        if len(pincode) != 6:
-            raise ValueError('pincode length should be 6')
-        
-        return pincode.lower()
 
 
 class ServiceType(str, Enum):

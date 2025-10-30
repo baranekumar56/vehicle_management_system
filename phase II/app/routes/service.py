@@ -6,15 +6,22 @@ from app.database.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.crud.service import check_service_exists, activate_deactivate_service
+from sqlalchemy.exc import IntegrityError
 
 router = APIRouter()
 
 @router.post('/add_service')
 async def add_service(service:ServiceCreate, db:AsyncSession = Depends(get_db)):
-    service = Service(**service.model_dump())
-    db.add(service)
-    await db.commit()
-    return {"msg": "nalladhae nadanthirukku"}
+    try:
+        service = Service(**service.model_dump())
+        db.add(service)
+        await db.commit()
+        return {"msg": "nalladhae nadanthirukku"}
+    except IntegrityError as e:
+        raise HTTPException(status_code=409, detail="Service already exists")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to add service")
+
 
 @router.get('/get_services')
 async def get_all_service(db:AsyncSession = Depends(get_db)):

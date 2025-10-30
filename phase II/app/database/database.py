@@ -29,7 +29,6 @@ mech_notes = mongodb_database.get_collection('mech_notes')
 
 async def init_db():
     import app.models
-
     # for now i have only one composite type lets run that string
 
     async with engine.begin() as conn:
@@ -40,6 +39,7 @@ async def init_db():
             await conn.execute(text(enumeration))
 
         # create all tables
+        # await conn.run_sync(Base.metadata.drop_all)
         # await conn.run_sync(Base.metadata.drop_all)
 
         await conn.run_sync(Base.metadata.create_all)

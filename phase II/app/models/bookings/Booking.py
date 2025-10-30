@@ -11,11 +11,12 @@ from datetime import datetime
 
 class Booking(Base):
 
-   __tablename__ = "bookings" 
+   __tablename__ = "booking" 
+
 
    booking_id = Column(Integer, primary_key=True)
-   user_id = Column(Integer, nullable=False)
-   user_vehicle_id = Column(Integer, nullable=False)
+   user_id = Column(Integer)
+   user_vehicle_id = Column(Integer)
    type = Column(Enum(ServiceType, name="service_type"))
    status = Column(Enum(BookingStatus, name="booking_status"))
    pickup_required = Column(Boolean, default=False)
@@ -35,11 +36,11 @@ class Booking(Base):
 
 class BookedService(Base):
    
-   __tablename__ = "booked_services"
+   __tablename__ = "booked_service"
 
    booked_service_id = Column(Integer, primary_key=True)
-   booking_id = Column(Integer, nullable=False)
-   vehicle_service_id = Column(Integer, nullable=False)
+   booking_id = Column(Integer)
+   vehicle_service_id = Column(Integer)
    price = Column(Numeric(10, 2), nullable=False)
    time_to_complete = Column(Integer, nullable=False)
    status = Column(Boolean, default=False)
@@ -49,10 +50,10 @@ class BookedService(Base):
 
 class BookedRepair(Base):
    
-  __tablename__ = "booked_repairs" 
+  __tablename__ = "booked_repair" 
 
   booked_repair_id = Column(Integer, primary_key=True)
-  booking_id = Column(Integer, nullable=False)
+  booking_id = Column(Integer)
   repair_name = Column(String, nullable=False)
   price = Column(Numeric(10, 2), nullable=False)
   cancelled_by_admin = Column(Boolean, default=False)

@@ -9,21 +9,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from app.database.database import mech_notes
 from app.middlewares.AuthorizationMiddleware import AuthorizationMiddleware
-from app.routes.vehicle import router as vehicle_router
+from app.auth.jwt_bearer import JWTBearer
 
 from app.routes import *
 
+# app = FastAPI(dependencies=[Depends(JWTBearer())])
 app = FastAPI()
 
-bearer_scheme = HTTPBearer()
+# bearer_scheme = HTTPBearer()
 
-@app.get("/secure-data", dependencies=[Depends(bearer_scheme)])
-async def get_secure_data():
-    return {"secure": True}
+# @app.get("/secure-data", dependencies=[Depends(bearer_scheme)])
+# async def get_secure_data():
+#     return {"secure": True}
 
 
 #middle ware initializations
-# app.add_middleware(middleware_class=AuthorizationMiddleware)
+# app.add_middleware(AuthorizationMiddleware)
 
 
 # init db
@@ -36,6 +37,7 @@ async def load_tables():
 app.include_router(router=user_router, prefix='/users', tags=['users'])
 app.include_router(router=service_router, prefix='/service', tags=['services'])
 app.include_router(router=vehicle_router, prefix='/vehicle', tags=['vehicles'])
+app.include_router(router=vehicle_service_router, prefix='/vehicle_service', tags=['vehicle services'])
 
 @app.get('/')
 def root():

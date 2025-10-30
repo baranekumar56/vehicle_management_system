@@ -13,8 +13,8 @@ def create_access_token(payload: dict) -> str:
     token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return token
 
-def create_refresh_token() -> str:
-    to_encode = {}
+def create_refresh_token(payload) -> str:
+    to_encode = payload.copy()
     expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
@@ -28,6 +28,7 @@ def verify_token(token: str) -> dict:
         raise HTTPException(status_code=451, detail="Token has been expaired, please login again")
     except JWTError:
         return None
+
 
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")

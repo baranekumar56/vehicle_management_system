@@ -17,10 +17,10 @@ C = """
     BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM pg_constraint 
-        WHERE conname = 'fk_users_roles' and conrelid = 'users'::regclass
+        WHERE conname = 'fk_users_role' and conrelid = 'users'::regclass
     ) THEN
     ALTER TABLE users
-    ADD CONSTRAINT fk_users_roles FOREIGN KEY (role_id) REFERENCES roles(role_id);
+    ADD CONSTRAINT fk_users_role FOREIGN KEY (role_id) REFERENCES role(role_id) ON DELETE SET NULL;
     END IF;
     END 
     $$
@@ -36,10 +36,10 @@ C = """
     BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM pg_constraint 
-        WHERE conname = 'fk_user_vehicles_users' and conrelid = 'user_vehicles'::regclass
+        WHERE conname = 'fk_user_vehicle_users' and conrelid = 'user_vehicle'::regclass
     ) THEN
-    ALTER TABLE user_vehicles
-    ADD CONSTRAINT fk_user_vehicles_users FOREIGN KEY (user_id) REFERENCES users(user_id);
+    ALTER TABLE user_vehicle
+    ADD CONSTRAINT fk_user_vehicle_users FOREIGN KEY (user_id) REFERENCES users(user_id)  ON DELETE SET NULL;
     END IF;
     END 
     $$
@@ -55,10 +55,10 @@ C = """
     BEGIN
     IF NOT EXISTS ( 
         SELECT 1 FROM pg_constraint 
-        WHERE conname = 'fk_vehicle_services_services' and conrelid = 'vehicle_services'::regclass 
+        WHERE conname = 'fk_vehicle_service_service' and conrelid = 'vehicle_service'::regclass 
     ) THEN 
-    ALTER TABLE vehicle_services
-    ADD CONSTRAINT fk_vehicle_services_services FOREIGN KEY (service_id) REFERENCES services(service_id);
+    ALTER TABLE vehicle_service
+    ADD CONSTRAINT fk_vehicle_service_service FOREIGN KEY (service_id) REFERENCES service(service_id)  ON DELETE SET NULL;
     END IF;
     END
     $$
@@ -71,10 +71,10 @@ C = """
     BEGIN
     IF NOT EXISTS ( 
         SELECT 1 FROM pg_constraint 
-        WHERE conname = 'fk_vehicle_services_vehicles' and conrelid = 'vehicle_services'::regclass 
+        WHERE conname = 'fk_vehicle_service_vehicle' and conrelid = 'vehicle_service'::regclass 
     ) THEN 
-    ALTER TABLE vehicle_services
-    ADD CONSTRAINT fk_vehicle_services_vehicles FOREIGN KEY (service_id) REFERENCES vehicles(vehicle_id);
+    ALTER TABLE vehicle_service
+    ADD CONSTRAINT fk_vehicle_service_vehicle FOREIGN KEY (vehicle_id) REFERENCES vehicle(vehicle_id)  ON DELETE SET NULL;
     END IF;
     END
     $$
@@ -89,18 +89,18 @@ C = """
     BEGIN
     IF NOT EXISTS ( 
         SELECT 1 FROM pg_constraint 
-        WHERE conname = 'fk_bookings_users' and conrelid = 'bookings'::regclass 
+        WHERE conname = 'fk_booking_users' and conrelid = 'booking'::regclass 
     ) THEN 
-    ALTER TABLE bookings
-    ADD CONSTRAINT fk_bookings_users FOREIGN KEY (user_id) REFERENCES users(user_id);
+    ALTER TABLE booking
+    ADD CONSTRAINT fk_booking_users FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL ;
     END IF;
 
     IF NOT EXISTS ( 
         SELECT 1 FROM pg_constraint 
-        WHERE conname = 'fk_bookings_user_vehicles' and conrelid = 'bookings'::regclass 
+        WHERE conname = 'fk_booking_user_vehicle' and conrelid = 'booking'::regclass 
     ) THEN 
-    ALTER TABLE bookings
-    ADD CONSTRAINT fk_bookings_user_vehicles FOREIGN KEY (user_vehicle_id) REFERENCES user_vehicles(user_vehicle_id);
+    ALTER TABLE booking
+    ADD CONSTRAINT fk_booking_user_vehicle FOREIGN KEY (user_vehicle_id) REFERENCES user_vehicle(user_vehicle_id) ON DELETE SET NULL ;
     END IF;
 
     END
@@ -118,18 +118,18 @@ C = """
 
     IF NOT EXISTS ( 
         SELECT 1 FROM pg_constraint 
-        WHERE conname = 'fk_booked_services_bookings' and conrelid = 'booked_services'::regclass 
+        WHERE conname = 'fk_booked_service_booking' and conrelid = 'booked_service'::regclass 
     ) THEN 
-    ALTER TABLE booked_services
-    ADD CONSTRAINT fk_booked_services_bookings FOREIGN KEY (booking_id) REFERENCES bookings(booking_id);
+    ALTER TABLE booked_service
+    ADD CONSTRAINT fk_booked_service_booking FOREIGN KEY (booking_id) REFERENCES booking(booking_id)  ON DELETE SET NULL;
     END IF;
 
     IF NOT EXISTS ( 
         SELECT 1 FROM pg_constraint 
-        WHERE conname = 'fk_booked_services_vehicle_services' and conrelid = 'booked_services'::regclass 
+        WHERE conname = 'fk_booked_service_vehicle_service' and conrelid = 'booked_service'::regclass 
     ) THEN 
-    ALTER TABLE booked_services
-    ADD CONSTRAINT fk_booked_services_vehicle_services FOREIGN KEY (vehicle_service_id) REFERENCES vehicle_services(vehicle_service_id);
+    ALTER TABLE booked_service
+    ADD CONSTRAINT fk_booked_service_vehicle_service FOREIGN KEY (vehicle_service_id) REFERENCES vehicle_service(vehicle_service_id)  ON DELETE SET NULL ;
     END IF;
 
     END
@@ -145,10 +145,10 @@ C = """
     BEGIN
     IF NOT EXISTS ( 
         SELECT 1 FROM pg_constraint 
-        WHERE conname = 'fk_booked_repairs_bookings' and conrelid = 'booked_repairs'::regclass 
+        WHERE conname = 'fk_booked_repair_booking' and conrelid = 'booked_repair'::regclass 
     ) THEN 
-    ALTER TABLE booked_repairs
-    ADD CONSTRAINT fk_booked_repairs_bookings FOREIGN KEY (booking_id) REFERENCES bookings(booking_id);
+    ALTER TABLE booked_repair
+    ADD CONSTRAINT fk_booked_repair_booking FOREIGN KEY (booking_id) REFERENCES booking(booking_id)  ON DELETE SET NULL;
     END IF;
     END
     $$
@@ -165,18 +165,18 @@ C = """
 
     IF NOT EXISTS ( 
         SELECT 1 FROM pg_constraint 
-        WHERE conname = 'fk_payments_bookings' and conrelid = 'payments'::regclass 
+        WHERE conname = 'fk_payment_booking' and conrelid = 'payment'::regclass 
     ) THEN 
-    ALTER TABLE payments
-    ADD CONSTRAINT fk_payments_bookings FOREIGN KEY (booking_id) REFERENCES bookings(booking_id);
+    ALTER TABLE payment
+    ADD CONSTRAINT fk_payment_booking FOREIGN KEY (booking_id) REFERENCES booking(booking_id)  ON DELETE SET NULL;
     END IF;
 
     IF NOT EXISTS ( 
         SELECT 1 FROM pg_constraint 
-        WHERE conname = 'fk_payments_users' and conrelid = 'payments'::regclass 
+        WHERE conname = 'fk_payment_users' and conrelid = 'payment'::regclass 
     ) THEN 
-    ALTER TABLE payments
-    ADD CONSTRAINT fk_payments_users FOREIGN KEY (user_id) REFERENCES users(user_id);
+    ALTER TABLE payment
+    ADD CONSTRAINT fk_payment_users FOREIGN KEY (user_id) REFERENCES users(user_id)  ON DELETE SET NULL;
     END IF;
 
     END
@@ -195,23 +195,69 @@ C = """
 
     IF NOT EXISTS ( 
         SELECT 1 FROM pg_constraint 
-        WHERE conname = 'fk_package_services_packages' and conrelid = 'package_services'::regclass 
+        WHERE conname = 'fk_package_service_package' and conrelid = 'package_service'::regclass 
     ) THEN 
-    ALTER TABLE package_services
-    ADD CONSTRAINT fk_package_services_packages FOREIGN KEY (package_id) REFERENCES packages(package_id);
+    ALTER TABLE package_service
+    ADD CONSTRAINT fk_package_service_package FOREIGN KEY (package_id) REFERENCES package(package_id)  ON DELETE SET NULL;
     END IF;
 
     IF NOT EXISTS ( 
         SELECT 1 FROM pg_constraint 
-        WHERE conname = 'fk_package_services_vehicle_services' and conrelid = 'package_services'::regclass 
+        WHERE conname = 'fk_package_service_vehicle_service' and conrelid = 'package_service'::regclass 
     ) THEN 
-    ALTER TABLE package_services
-    ADD CONSTRAINT fk_package_services_vehicle_services FOREIGN KEY (vehicle_service_id) REFERENCES vehicle_services(vehicle_service_id);
+    ALTER TABLE package_service
+    ADD CONSTRAINT fk_package_service_vehicle_service FOREIGN KEY (vehicle_service_id) REFERENCES vehicle_service(vehicle_service_id)  ON DELETE SET NULL;
     END IF;
 
+    END
+    $$
+"""
+
+constraints.append(C)
+
+### Package service
+
+C = """
+
+    DO $$ 
+    BEGIN
+    IF NOT EXISTS ( 
+        SELECT 1 FROM pg_constraint 
+        WHERE conname = 'fk_package_vehicle' and conrelid = 'package'::regclass 
+    ) THEN 
+    ALTER TABLE package
+    ADD CONSTRAINT fk_package_vehicle FOREIGN KEY (vehicle_id) REFERENCES vehicle(vehicle_id)  ON DELETE SET NULL;
+    END IF;
     END
     $$
 
 """
 
+### Bill
+
+
+C = """
+    DO $$ 
+    BEGIN
+
+    IF NOT EXISTS ( 
+        SELECT 1 FROM pg_constraint 
+        WHERE conname = 'fk_bill_booking' and conrelid = 'bill'::regclass 
+    ) THEN 
+    ALTER TABLE bill
+    ADD CONSTRAINT fk_bill_booking FOREIGN KEY (booking_id) REFERENCES booking(booking_id)  ON DELETE SET NULL;
+    END IF;
+
+    IF NOT EXISTS ( 
+        SELECT 1 FROM pg_constraint 
+        WHERE conname = 'fk_bill_users' and conrelid = 'bill'::regclass 
+    ) THEN 
+    ALTER TABLE bill
+    ADD CONSTRAINT fk_bill_users FOREIGN KEY (forwarded_mechanic_id) REFERENCES users(user_id)  ON DELETE SET NULL;
+    END IF;
+
+    END
+    $$
+"""
+constraints.append(C)
 

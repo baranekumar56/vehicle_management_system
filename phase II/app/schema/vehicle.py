@@ -53,7 +53,7 @@ class BaseVehicle(BaseModel):
         return brand.lower()
 
     @field_validator('model')
-    def validation_for_brand_name(cls, model: str):
+    def validation_for_model_name(cls, model: str):
 
         model = model.strip()
 

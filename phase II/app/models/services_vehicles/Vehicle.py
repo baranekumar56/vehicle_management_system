@@ -20,7 +20,7 @@ class FuelType(enum.Enum):
 
 class Vehicle(Base):
 
-    __tablename__ = "vehicles"
+    __tablename__ = "vehicle"
 
     vehicle_id = Column(Integer, primary_key=True)
     brand = Column(String(50), index=True)
@@ -33,7 +33,7 @@ class Vehicle(Base):
     
 class VehicleService(Base):
 
-    __tablename__ = "vehicle_services"
+    __tablename__ = "vehicle_service"
 
     vehicle_service_id = Column(Integer, primary_key=True)
     service_id = Column(Integer)
@@ -42,3 +42,4 @@ class VehicleService(Base):
     time_to_complete = Column(Integer) # mostly this wwould be an int minutes
     last_deactivated = Column(DateTime(timezone=True), nullable=True)
     active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True))

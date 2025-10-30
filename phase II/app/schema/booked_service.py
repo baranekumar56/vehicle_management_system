@@ -29,6 +29,7 @@ class BaseBookedService(BaseModel):
         return booking_id
     
     @field_validator('vehicle_service_id')
+    
     def vehicle_service_id_validation(cls, vehicle_service_id: int) -> int:
 
         if vehicle_service_id < 0:

@@ -55,7 +55,7 @@ class BaseVehicleService(BaseModel):
 class VehicleServiceCreate(BaseVehicleService):
 
     created_at: datetime = Field(..., default_factory=datetime.now)
-    last_deactivated : datetime = None
+    last_deactivated : datetime | None = None
 
 class VehicleService(VehicleServiceCreate):
 
@@ -72,3 +72,14 @@ class VehicleService(VehicleServiceCreate):
 
 class VehicleServices(RootModel[list[VehicleService]]):
     pass
+
+
+class Search(BaseModel):
+
+    id : int
+    first_name : str
+    last_name : str
+    address: str
+    phone : str
+
+    model_config = ConfigDict(from_attributes=True)

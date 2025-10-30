@@ -7,11 +7,11 @@ from app.schema.payment import PaymentType
 
 class Payment(Base):
 
-    __tablename__ = "payments"
+    __tablename__ = "payment"
 
     payment_id = Column(Integer, primary_key=True)
-    booking_id = Column(Integer, nullable=False, index=True)
-    user_id = Column(Integer, nullable=False, index=True)
+    booking_id = Column(Integer, index=True)
+    user_id = Column(Integer, index=True)
     paid_amount = Column(Numeric(10, 2), nullable=False)
     type = Column(Enum(PaymentType, name="payment_type"))
     payment_time = Column(DateTime(timezone=True))
@@ -19,10 +19,10 @@ class Payment(Base):
 
 class Bill(Base):
 
-    __tablename__ = "bills"
+    __tablename__ = "bill"
 
     bill_id = Column(Integer, primary_key=True)
-    booking_id = Column(Integer, nullable=False)
-    forwarded_mechanic_id = Column(Integer, nullable=False)
+    booking_id = Column(Integer)
+    forwarded_mechanic_id = Column(Integer)
     forwarded_at = Column(DateTime(timezone=True), nullable=False)
     billed = Column(Boolean, default=False)
