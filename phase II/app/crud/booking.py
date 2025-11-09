@@ -26,7 +26,7 @@ async def handle_booking_status_change(booking_id:int, status:str, db:AsyncSessi
     # when are possible activity required statges 
     # when its is in billing, billing_confirmation or on_going, no problem, 
 
-    booking = get_entries(Booking, db=db, booking_id=booking_id)[0]
+    booking = await get_entries(Booking, db=db, booking_id=booking_id)[0]
 
     updated_row_count = 0
 
@@ -34,7 +34,7 @@ async def handle_booking_status_change(booking_id:int, status:str, db:AsyncSessi
 
         # carry out status update and return the object
         
-        updated_row_count = update_entry_by_id(Booking, id=booking_id, db=db, status = status)
+        updated_row_count = await update_entry_by_id(Booking, id=booking_id, db=db, status = status)
 
     else :
 

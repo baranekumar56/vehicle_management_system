@@ -12,7 +12,7 @@ class BaseBookedRepair(BaseModel):
 
     booking_id : int
     repair_name : str
-    price : float
+    price : float = 0
     status : bool = False
     cancelled_by_admin : bool = False
     cancelled_by_user : bool = False

@@ -245,7 +245,6 @@ async def get_entries(table_class,
         tokens = key.split
         
         
-
         try:
             if tokens[0] == "dt":
                 # datetime filters, tokens e.g., ['dt', 'created_at', 'le']

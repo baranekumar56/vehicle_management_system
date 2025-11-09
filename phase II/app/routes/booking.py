@@ -8,14 +8,16 @@ from app.schema.booked_repair import BookedRepair as ModelBookedRepair, BookedRe
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.database import get_db
 from app.schema.user_vehicle import UserVehicle as ModelUserVehicle, UserVehicleCreate
-from app.models.bookings.Booking import Booking, BookedRepair, BookedService
+from app.schema.bill import BillCreate
+from app.schema.booked_repair import BookedRepairCreate, BookedRepair as ModelBookedRepair
+from app.models.bookings.Booking import Booking, BookedRepair, BookedService, Bill
 from app.models.user.User import UserVehicle
 from app.crud.generic import *
 from app.crud.booking import *
 from database.database import mech_notes
 from app.schema.booking import MechNote, MechNoteCreate
 from datetime import datetime, timedelta
-
+from database.database import schedule_settings
 
 router = APIRouter()
 
@@ -87,7 +89,7 @@ async def create_service_booking(new_booking: BookingCreate = Body(...), booked_
 
         est_completion_time = booking.booked_date + timedelta(minutes = total_time) 
 
-        res = await update_entry_by_id(Booking, booking.booking_id, db, total_amount = total_price, estimated_completion_time = est_completion_time )
+        res = await update_entry_by_id(Booking, booking.booking_id, db, total_amount = total_price, estimated_completion_time = est_completion_time, total_time = total_time)
 
         # now we look for user vehicle , check whether the user id + vehicle no , combo exists
 
@@ -102,6 +104,14 @@ async def create_service_booking(new_booking: BookingCreate = Body(...), booked_
 
         if res <= 0:
             raise HTTPException(status_code=500, detail="Cannot create booking")
+
+
+        if booking.booked_date.date() == datetime.now().date() and datetime.now().time() > 6:
+            ## add to unschedulabe queue
+            doc = await schedule_settings.find_one({})
+            doc['unschedulable_bookings'].append(booking.booking_id)
+            await schedule_settings.delete_many()
+            await schedule_settings.insert_one(doc) 
 
         await commit_changes(db)
 
@@ -120,8 +130,57 @@ async def update_booking_status(booking_id: int,status:str, db:AsyncSession = De
     pass
 
 
+@router.post('/create_bill')
+async def create_a_bill_for_repair_booking(billCreate : BillCreate, requirement_list: list[BookedRepairCreate] , db:AsyncSession = Depends(get_db)):
+
+    # first create the bill then, add the required repair
+    
+    try:
+        
+        await add_entry(Bill,billCreate, db)
+
+        for requirement in requirement_list:
+            await add_entry(BookedRepair, requirement, db)
+        
+        await commit_changes(db)
+
+        return {"msg": "bill created successfully and requirement list updated successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Some thing wrong happend, {str(e)}")
+
+@router.post('/repair/add_requirements')
+async def add_requirements_to_repair(requirements: list[BookedRepairCreate], db:AsyncSession = Depends(get_db)):
+    
+    try:
+
+        for requirement in requirements:
+            await add_entry(BookedRepair, requirement, db)
+        
+        await commit_changes(db)
+
+        return {"msg": "requirements have been added successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Some thing wrong happend, {str(e)}")
 
 
+@router.put('/repair/update_repair')
+async def update_repairs(repairs: list[ModelBookedRepair], db:AsyncSession = Depends(get_db)):
+
+    try:
+
+        for repair in repairs:
+            args = repair.model_dump()
+            del args.booked_repair_id
+            await update_entry_by_id(BookedRepair, repair.booked_repair_id, db, **args  )
+        
+        await commit_changes(db)
+
+        return {"msg": "Repair details have been updated successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Some thing wrong happend, {str(e)}")
 
 
 

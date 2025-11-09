@@ -3,8 +3,8 @@
 from datetime import datetime, time, timedelta, date
 
 def calculate_schedule_window(booking):
-        from_time = booking.booked_date.time() # now add this with the estimated completion time
-        to_time = booking.estimated_completion_time.time()
+        from_time = booking.booked_date # now add this with the estimated completion time
+        to_time = booking.estimated_completion_time
 
         # round it off to nnearest hour
 

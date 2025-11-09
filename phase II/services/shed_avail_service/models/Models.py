@@ -18,11 +18,13 @@ class BookingStatus(str, Enum):
     booked = "booked"
     billing = "billing"
     billing_confirmation = "billing_confirmation"
+    not_scheduled = "not_scheduled"
     pending = "pending"
     on_going = "on_going"
     halted = "halted"
     cancelled = "cancelled"
     rejected = "rejected"
+    completed = "completed"
 
 class PaymentStatus(str, Enum):
 
@@ -39,6 +41,7 @@ class Booking(Base):
    user_id = Column(Integer)
    user_vehicle_id = Column(Integer)
    total_amount = Column(Numeric(10, 2))
+   total_time = Column(Integer, default=0)
    type = Column(Enum(ServiceType, name="service_type"))
    status = Column(Enum(BookingStatus, name="booking_status"))
    pickup_required = Column(Boolean, default=False)

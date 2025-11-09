@@ -36,8 +36,13 @@ message empty{
 
 }
 
-service ShedAvailService {
+message Status {
+    int32 status = 1;
+}
 
+service ShedAvailService {
+    rpc simulate_daily_schedule(empty) returns (Status) {};
+    rpc simulate_reminder_emails(empty) retutns (Status) {};
     rpc get_available_hours(AvailabilityRequirements) returns (AvailabilityResponse) {};
     rpc handle_schedule(ScheduleDetails) returns (ScheduleResponse) {};
     rpc updated_mech_status(MechStatus) returns (empty) {};

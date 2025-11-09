@@ -18,6 +18,7 @@ class Booking(Base):
    user_id = Column(Integer)
    user_vehicle_id = Column(Integer)
    total_amount = Column(Numeric(10, 2))
+   total_time = Column(Integer, default=0)
    type = Column(Enum(ServiceType, name="service_type"))
    status = Column(Enum(BookingStatus, name="booking_status"))
    pickup_required = Column(Boolean, default=False)
@@ -64,6 +65,18 @@ class BookedRepair(Base):
   removable = Column(Boolean, default=True)
   created_at =  Column(DateTime(timezone=True), nullable=False)
   
+
+class Bill(Base):
+
+   __tablename__ = 'bill'
+
+   bill_id = Column(Integer, primary_key=True)
+   booking_id = Column(Integer)
+   forwarded_mechanic_id = Column(Integer)
+   forwarded_mechanic_name = Column(String)
+   status = Column(Boolean, default=False)
+   forwarded_at = Column(DateTime(timezone=True), default=func.now)
+   billed_at = Column(DateTime(timezone=True))
 
 class AvailabilityCache(Base):
 

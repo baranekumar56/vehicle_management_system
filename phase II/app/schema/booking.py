@@ -5,6 +5,8 @@ from typing import Optional
 from datetime import datetime
 from app.schema.user import Address
 from datetime import date
+
+
 """
 This file desrcibes about the structure of a booking object
 """
@@ -21,6 +23,7 @@ class BookingStatus(str, Enum):
     billing = "billing"
     billing_confirmation = "billing_confirmation"
     pending = "pending"
+    not_scheduled = "not_scheduled"
     on_going = "on_going"
     halted = "halted"
     cancelled = "cancelled"
@@ -39,6 +42,7 @@ class BaseBooking(BaseModel):
     user_id : int
     user_vehicle_id : int
     total_amount : float
+    total_time : int
     type : ServiceType
     status : BookingStatus = Field(BookingStatus.booked)
     pickup_required : bool = False

@@ -20,6 +20,8 @@ mongodb_database = client.get_database('vsms')
 
 mech_notes = mongodb_database.get_collection('mech_notes')
 
+schedule_settings = mongodb_database.get_collection('schedule_settings')
+
 
 # Before executing the creation of all the tables lets 
 # first run the code to execute all the user defined 

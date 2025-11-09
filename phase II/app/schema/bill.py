@@ -12,6 +12,7 @@ class BaseBill(BaseModel):
 
     booking_id : int = Field(..., ge=0)
     forwarded_mechanic_id : int = Field(..., ge=0)
+    forwarded_mechanic_name : str
     status : bool = True
 
     model_config = ConfigDict(from_attributes=True)
@@ -24,6 +25,7 @@ class BillCreate(BaseBill):
 class Bill(BillCreate):
     
     bill_id : int = Field(..., ge=0)
+    billed_at : datetime = Field(default_factory=datetime.now)
 
 
 
