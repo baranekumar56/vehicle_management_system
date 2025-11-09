@@ -14,7 +14,7 @@ class BaseUserVehicle(BaseModel):
     model : str
     fuel : FuelType
     vehicle_type : VehicleType
-    owned : bool = True
+    owned : bool = False
     is_deleted : bool = False
     rc_image : str
     selected : bool = False # auto fill option

@@ -58,3 +58,4 @@ class Search(Base):
     last_name = Column(String)
     address = Column(String)
     phone = Column(String)
+    created_at = Column(DateTime(timezone=True), index=True)

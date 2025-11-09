@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, func, CheckConstraint, Boolean, Text, Enum, Numeric
+from sqlalchemy import Column, Integer, String, Float, DateTime, func, CheckConstraint, Boolean, Text, Enum, Numeric, Date, ARRAY, ForeignKey
 from app.database.database import Base
 from sqlalchemy.orm import relationship, relationship, Mapped, mapped_column
 from dataclasses import dataclass
@@ -17,6 +17,7 @@ class Booking(Base):
    booking_id = Column(Integer, primary_key=True)
    user_id = Column(Integer)
    user_vehicle_id = Column(Integer)
+   total_amount = Column(Numeric(10, 2))
    type = Column(Enum(ServiceType, name="service_type"))
    status = Column(Enum(BookingStatus, name="booking_status"))
    pickup_required = Column(Boolean, default=False)
@@ -29,6 +30,7 @@ class Booking(Base):
    repair_description = Column(String)
    estimated_completion_days = Column(Integer, default=1)
    rc_image = Column(String)
+   booked_date = Column(DateTime(timezone=True))
    created_at = Column(DateTime(timezone=True))
    cancelled_at = Column(DateTime(timezone=True))
 
@@ -63,7 +65,43 @@ class BookedRepair(Base):
   created_at =  Column(DateTime(timezone=True), nullable=False)
   
 
+class AvailabilityCache(Base):
+
+   __tablename__ = 'availabilitycache'
+
+   id = Column(Integer, primary_key=True)
+   shed_id = Column(Integer)
+   day = Column(Date)
+   available_hours = Column(ARRAY(Integer))
+   version = Column(Integer, default = 0)
+   active = Column(Boolean, default=True)
   
+class Shed(Base):
+
+   __tablename__ = 'shed'
+
+   shed_id = Column(Integer, primary_key=True)
+   shed_no = Column(Integer)
+   shed_name = Column(String)
+   active = Column(Boolean, default=True)
+
+
+class ServiceReminder(Base):
+
+   __tablename__ = 'service_reminder'
+
+   remind_at = Column(Date, index=True)
+   user_id = Column(Integer)
+   user_vehicle_id = Column(Integer)
+   created_at = Column(DateTime(timezone=True))
+
+   __tableargs__ = (
+      ForeignKey(['user_id'], ['users.user_id']),
+      ForeignKey(['user_vehicle_id'], ['user_vehicle.user_vehicle_id']),
+   )
+
+   user_details = relationship("Users", lazy="joined")
+   vehicle_details = relationship("UserVehicle", lazy="joined")
 
 
 

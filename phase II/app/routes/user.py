@@ -143,7 +143,7 @@ user_vehicle_router = APIRouter()
 async def add_vehicle_to_user(response: Response,user_vehicle: ModelUserVehicleCreate, db:AsyncSession = Depends(get_db), payload = Depends(JWTBearer())):
     try:
         print(payload)
-        exists: UserVehicle = await check_if_entry_exists(UserVehicle, db,user_id = payload['user_id'], vehicle_no=user_vehicle.vehicle_no)
+        exists: UserVehicle = await check_if_entry_exists(UserVehicle, db,user_id = payload['user_id'], vehicle_no=user_vehicle.vehicle_no, owned = True)
         print("1")
         if exists is not None:
             if exists.is_deleted:

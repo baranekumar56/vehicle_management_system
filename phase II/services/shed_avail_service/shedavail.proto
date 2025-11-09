@@ -1,0 +1,45 @@
+
+syntax = "proto3";
+
+package shed_avail_service;
+
+message ScheduleDetails {
+    int32 booking_id = 1;
+    string current_status = 2;
+    int32 mechanic_id= 3;
+    int32 schedule_id = 4;
+}
+
+message ScheduleResponse {
+    string status  = 1;
+}
+
+message AvailabilityRequirements {
+    int32 required_hours = 1;
+}
+
+message Slot {
+    string available_date = 1;
+    repeated int32 available_hours= 2;
+}
+
+message AvailabilityResponse {
+    repeated Slot slots = 1;
+}
+
+message MechStatus {
+    int32 mech_id = 1;
+    string status = 2;
+}
+
+message empty{
+
+}
+
+service ShedAvailService {
+
+    rpc get_available_hours(AvailabilityRequirements) returns (AvailabilityResponse) {};
+    rpc handle_schedule(ScheduleDetails) returns (ScheduleResponse) {};
+    rpc updated_mech_status(MechStatus) returns (empty) {};
+
+}

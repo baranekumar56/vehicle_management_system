@@ -40,12 +40,15 @@ class Package(PackageCreate):
 
     package_id : int = Field(..., ge=0)
 
+class PackageServiceCreate(BaseModel):
 
-class PackageService(BaseModel):
-
-    package_service_id : int = Field(..., ge=0)
     package_id : int = Field(..., ge=0)
     vehicle_service_id : int = Field(..., ge=0)
+
+class PackageService(PackageServiceCreate):
+
+    package_service_id : int = Field(..., ge=0)
+
 
 
 

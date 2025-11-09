@@ -14,7 +14,7 @@ class BasePayment(BaseModel):
     booking_id: int = Field(..., gt=-1)
     user_id : int = Field(..., gt=-1)
     paid_amount : float = Field(...)
-    type : PaymentType = Field(PaymentType.payment)
+    type : PaymentType = Field(PaymentType.payment.value)
 
     model_config = ConfigDict(from_attributes=True)
 

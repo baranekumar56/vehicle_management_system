@@ -1,9 +1,10 @@
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update , cast, String
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, insert, delete, update
 from functools import wraps
 from datetime import datetime, timedelta
+from pydantic import BaseModel
 
 def ErrorHandler(func):
     @wraps(func)
@@ -85,8 +86,30 @@ async def add_entry(model_class, schema_object, db:AsyncSession, **kwargs):
     await db.refresh(to_be_added)
     return to_be_added
 
+
 @ErrorHandler
-async def update_entry_by_id(table_class, id:int, db:AsyncSession, **kwargs):
+async def insert_multiple_entries(model_class, schema_objects, db:AsyncSession, **kwargs):
+
+
+    """
+    This function adds multiple schema objects provided in the `schema_objects` variable 
+    using values(), and not by using db.add, so this function wont return any updated records 
+    """
+
+    to_be_added = []
+
+    for object in schema_objects:
+        to_be_added.append(object.model_dump())
+    
+
+    query = insert(model_class).values(to_be_added)
+
+    inserted_rows = await db.execute(query)
+
+    return inserted_rows.rowcount
+
+@ErrorHandler
+async def update_entry_by_id(table_class, id:int, db:AsyncSession, **kwargs) -> int:
 
     """
     This function updates with the help of its primary key, 
@@ -153,6 +176,9 @@ async def commit_changes(db:AsyncSession) :
 async def get_entries(table_class, 
                       db: AsyncSession, 
                       search_string: str = "",
+                      join_tables : list[BaseModel] | None = None,
+                      join_columns : list[str] | None = None,
+                      omit_columns : list[str] = [],
                       limit: int = 100, 
                       offset: int = 0,
                       **filters):
@@ -172,7 +198,7 @@ async def get_entries(table_class,
             Logical operator maps:
             gt => greater than
             ge => greater than or equal to
-            lt => less than 
+            lt => less than
             le => less than or equal to
 
     NOTE for datetime objects key should be like this , dt-columnname-op : val
@@ -189,6 +215,11 @@ async def get_entries(table_class,
 
     query = select(table_class)
 
+    # here we carry out joins for the given column
+
+
+    
+
     search_columns = []
 
     ### building condition base for search string
@@ -199,6 +230,9 @@ async def get_entries(table_class,
 
         for column in table_class.__table__.columns:
 
+            if column.name in omit_columns:
+                continue
+
             attr = getattr(table_class, column.name)
 
             search_columns.append(cast(attr, String).ilike("%{}%".format(search_string)))
@@ -208,7 +242,9 @@ async def get_entries(table_class,
     filter_columns = []
 
     for key, val in filters.items():
-        tokens = key.split('-')
+        tokens = key.split
+        
+        
 
         try:
             if tokens[0] == "dt":
@@ -279,5 +315,20 @@ async def get_entries(table_class,
 
             
                 
+
+@ErrorHandler
+async def delete_multiple_entries_using_id(model_class, ids: list[int], db:AsyncSession, **kwargs):
+
+    primary_attr = f"{model_class.__tablename__}_id"
+    primary_attr = getattr(model_class, primary_attr)
+
+    query = delete(model_class).where(primary_attr.in_(ids))
+
+    deleted_rows = await db.execute(query)
+
+    return deleted_rows.rowcount
+
+
+
 
 

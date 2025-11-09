@@ -81,5 +81,6 @@ class Search(BaseModel):
     last_name : str
     address: str
     phone : str
+    created_at : datetime
 
     model_config = ConfigDict(from_attributes=True)

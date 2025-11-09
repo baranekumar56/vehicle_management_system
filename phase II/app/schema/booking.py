@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from typing import Optional
 from datetime import datetime
 from app.schema.user import Address
+from datetime import date
 """
 This file desrcibes about the structure of a booking object
 """
@@ -24,10 +25,12 @@ class BookingStatus(str, Enum):
     halted = "halted"
     cancelled = "cancelled"
     rejected = "rejected"
+    completed = "completed"
+    # add a status called "completed"
 
 class PaymentStatus(str, Enum):
 
-    payed = "payed"
+    payed = "paid" # change to paid
     pending = "pending"
 
 
@@ -37,18 +40,18 @@ class BaseBooking(BaseModel):
     user_vehicle_id : int
     total_amount : float
     type : ServiceType
-    status : BookingStatus
+    status : BookingStatus = Field(BookingStatus.booked)
     pickup_required : bool = False
     address : Optional[Address] | None = None
     phone_no : str
     estimated_completion_time : Optional [datetime] | None = None
     time_of_completion : Optional[datetime] | None = None
     payment_status : PaymentStatus
-    raw_material_cost : float = Field(..., gt=-1)
-    repair_description : str
-    estimated_completion_days : int = Field(..., gt=0)
-    rc_image : str # it will be a file url
-
+    raw_material_cost : float = Field(0, gt=-1)
+    repair_description : str = ""
+    estimated_completion_days : int = Field(1, gt=0)
+    rc_image : str = Field("") # it will be a file url
+    booked_date : datetime = Field(default_factory=datetime.now)
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -106,10 +109,48 @@ class BaseBooking(BaseModel):
 
 class BookingCreate(BaseBooking):
 
-    created_at : datetime
-    cancelled_at : Optional[datetime]
+    created_at : datetime = Field(default_factory=datetime.now)
+    cancelled_at : Optional[datetime] | None = None
     
 
 class Booking(BookingCreate):
 
     booking_id : int
+
+
+class AvailabilitySlot(BaseModel):
+
+    id : int
+    shed_id : int
+    day : date
+    available_hours : list[int]
+    version : int
+    active : bool
+
+class AvailbilitySlotResponse(BaseModel):
+
+    available_hours : list[int]
+    day : date
+    
+
+
+class MechNoteCreate(BaseModel):
+
+    mechanic_id : int
+    mechanic_name : str
+    booking_id : int
+    note : str
+    created_at : datetime = Field(default_factory=datetime.now)
+
+class MechNote(MechNoteCreate):
+
+    note_id : str
+
+
+
+class ServiceReminderCreate(BaseModel):
+
+    remind_at : date = Field(...)
+    user_id : int = Field(..., ge=0)
+    user_vehicle_id : int = Field(..., ge=0)
+    created_at : datetime = Field(default_factory=datetime.now)

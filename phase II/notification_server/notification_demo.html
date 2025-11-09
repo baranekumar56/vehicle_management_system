@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Notification WebSocket Client</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #log { border: 1px solid #ccc; height: 200px; overflow: auto; padding: 10px; margin-top: 15px; }
+    label, input, button { font-size: 1em; }
+    .input-group { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <h2>Connect to Notification WebSocket</h2>
+
+  <form id="connectForm">
+    <div class="input-group">
+      <label for="userIdInput">Enter your User ID:</label>
+      <input type="text" id="userIdInput" required />
+    </div>
+    <div class="input-group">
+      <label for="roleIdInput">Enter your Role ID:</label>
+      <input type="text" id="roleIdInput" required />
+    </div>
+    <button type="submit">Connect</button>
+  </form>
+
+  <div id="log"></div>
+
+  <script>
+    const form = document.getElementById('connectForm');
+    const userIdInput = document.getElementById('userIdInput');
+    const roleIdInput = document.getElementById('roleIdInput');
+    const logDiv = document.getElementById('log');
+    let websocket;
+
+    function logMessage(message) {
+      const p = document.createElement('p');
+      p.textContent = message;
+      logDiv.appendChild(p);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+      const userId = userIdInput.value.trim();
+      const roleId = roleIdInput.value.trim();
+
+      if (!userId) {
+        alert('Please enter a User ID');
+        return;
+      }
+      if (!roleId) {
+        alert('Please enter a Role ID');
+        return;
+      }
+
+      if (websocket) {
+        websocket.close();
+        websocket = null;
+      }
+
+      // Construct the WebSocket URL (adjust protocol and host as needed)
+      const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+      const wsUrl = `ws://127.0.0.1:9696/ws/${encodeURIComponent(userId)}/${encodeURIComponent(roleId)}`;
+      console.log(`Connecting to: ${wsUrl} with Role ID: ${roleId}`);
+
+      websocket = new WebSocket(wsUrl);
+
+      websocket.onopen = () => {
+        logMessage(`Connected to WebSocket as user ${userId} with Role ID ${roleId}`);
+      };
+
+      websocket.onmessage = (event) => {
+        logMessage(`Received: ${event.data}`);
+      };
+
+      websocket.onerror = (event) => {
+        logMessage(`WebSocket error`);
+      };
+
+      websocket.onclose = (event) => {
+        logMessage(`WebSocket connection closed`);
+      };
+    });
+  </script>
+
+</body>
+</html>

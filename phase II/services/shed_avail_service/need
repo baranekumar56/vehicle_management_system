@@ -1,0 +1,17 @@
+
+what are the things that this service could offer
+
+--> it should compute available hours with date for each user, based on their service time
+
+--> it should carry out the scheduling daily or immediate schedule call when halt/block/reject/booking/completed
+    most of the time , the invocation states will be handled in the fastapi server
+
+--> the main thing is the communication is part
+
+--> what is the efficient message type that could help me , tell which booking affected and what to do next ?
+
+
+fields in msg:
+
+    --> booking id, current status, mechanic id, schedule_id(may or may not come)
+    --> msg for getting available hours, hour span in array format(9, 10, 11, 12), that's it

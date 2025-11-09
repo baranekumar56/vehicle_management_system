@@ -38,6 +38,8 @@ app.include_router(router=user_router, prefix='/users', tags=['users'])
 app.include_router(router=service_router, prefix='/service', tags=['services'])
 app.include_router(router=vehicle_router, prefix='/vehicle', tags=['vehicles'])
 app.include_router(router=vehicle_service_router, prefix='/vehicle_service', tags=['vehicle services'])
+app.include_router(router=booking_router, prefix='/booking', tags=['booking'])
+
 
 @app.get('/')
 def root():

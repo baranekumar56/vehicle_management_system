@@ -10,7 +10,6 @@ This file desrcibes about all the services selected for a vehicle
 
 class BaseBookedService(BaseModel):
 
-    booking_id : int
     vehicle_service_id : int
     price : float
     time_to_complete : int
@@ -20,13 +19,6 @@ class BaseBookedService(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-    @field_validator('booking_id')
-    def booking_id_validation(cls, booking_id: int) -> int:
-
-        if booking_id < 0: 
-            raise ValueError('Booking id cannot be negative')
-        
-        return booking_id
     
     @field_validator('vehicle_service_id')
     
@@ -61,4 +53,13 @@ class BookedServiceCreate(BaseBookedService):
 
 class BookedService(BookedServiceCreate):
 
+    booking_id : int
     booked_service_id : int = Field(..., gt=-1)
+
+    @field_validator('booking_id')
+    def booking_id_validation(cls, booking_id: int) -> int:
+
+        if booking_id < 0: 
+            raise ValueError('Booking id cannot be negative')
+        
+        return booking_id

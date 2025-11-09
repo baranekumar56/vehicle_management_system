@@ -22,14 +22,18 @@ class AddressType(UserDefinedType):
         return "address_type"
     
     def bind_processor(self, dialect):
-        
         def process(value):
             if value is None:
                 return None
-            print(value)
-            return (value.street, value.area, value.district, value.state, value.country, value.pincode)
-        
+            if isinstance(value, Address):
+                return (value.street, value.area, value.district, value.state, value.country, value.pincode)
+            elif isinstance(value, dict):
+                # Convert dict to Address object or tuple
+                return (value['street'], value['area'], value['district'], value['state'], value['country'], value['pincode'])
+            # handle other types as needed
+            return value
         return process
+
     
     def result_processor(self, dialect, coltype):
         

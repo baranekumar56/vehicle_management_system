@@ -5,6 +5,7 @@ from app.config import settings
 from app.custom_db_types.custom_types import enums, composites
 from sqlalchemy.sql import text
 from app.database.constraints import constraints
+from app.custom_db_types.procedures import procedures
 # postgres 
 engine = create_async_engine(settings.DATABASE_URL, echo=True)
 SessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
@@ -48,6 +49,9 @@ async def init_db():
 
         for constraint in constraints:
             await conn.execute(text(constraint))
+
+        for procedure in procedures:
+            await conn.execute(text(procedure))
 
 
 async def get_db():
