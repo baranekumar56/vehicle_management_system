@@ -15,11 +15,11 @@ from models.Mech import Mechanic
 from utils.util import *
 
 
-from sqlalchemy import cast, Date, desc
+from sqlalchemy import cast, Date, desc, create_engine
 from datetime import datetime, date, time, timedelta
 # from sqlalchemy.ext.serializer
 
-from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import MongoClient
 
 import yagmail
 
@@ -28,11 +28,11 @@ from collections import deque
 
 def init_db():
 
-    engine = engine(URL="")
+    engine = create_engine(url="postgresql+psycopg://postgres:postgres@localhost:5432/vsms")
     sessionLocal = sessionmaker(bind=engine,autocommit=False, autoflush=False)
     URL = "mongodb://localhost:27017"
 
-    client = AsyncIOMotorClient(URL)
+    client = MongoClient(URL)
 
     mongodb_database = client.get_database('vsms')
 
@@ -53,7 +53,7 @@ def get_db():
 
 class ShedAvailService(ShedAvailServiceServicer):
 
-    async def simulate_daily_schedule(self, request, context):
+    def simulate_daily_schedule(self, request, context):
         db: Session = next(get_db())
 
         # get all todays booking from booking table
@@ -70,7 +70,7 @@ class ShedAvailService(ShedAvailServiceServicer):
                          .all()  # Added missing .all() to execute query
 
             # now fetch the previous days mech list (the order)
-            doc = await schedule_settings.find_one({})
+            doc =   schedule_settings.find_one({})
             available_mechs = doc['available_mechanics']
 
             # now i have all the available mechs previous day mech object
@@ -209,8 +209,8 @@ class ShedAvailService(ShedAvailServiceServicer):
             doc['available_mechanics'] = available_mechanics
             doc['unschedulable_bookings'] = not_scheduleable
 
-            await schedule_settings.delete_many({})
-            await schedule_settings.insert_one(doc)
+            schedule_settings.delete_many({})
+            schedule_settings.insert_one(doc)
 
             db.commit()
 
@@ -220,11 +220,11 @@ class ShedAvailService(ShedAvailServiceServicer):
             print(f"Failed to schedule...: {e}")
             return Status(status=0)
 
-    async def update_mech_status(self, request, context):
+    def update_mech_status(self, request, context):
 
         if request.status == 'available':
             # add him to today's available mechanics
-            doc = await schedule_settings.find_one({})
+            doc =   schedule_settings.find_one({})
             available_mechanics = doc['available_mechanics']
 
             # just add him
@@ -232,15 +232,15 @@ class ShedAvailService(ShedAvailServiceServicer):
             available_mechanics.append(mechanic)
 
             doc['available_mechanics'] = available_mechanics
-            await schedule_settings.delete_many({})
-            await schedule_settings.insert_one(doc)
+            schedule_settings.delete_many({})
+            schedule_settings.insert_one(doc)
             return empty()
 
         else:
             # the only gotcha, get all the removing mechs bookings , then for each booking 
             # if they are in pause state, leave it , then 
 
-            doc = await schedule_settings.find_one({})
+            doc =   schedule_settings.find_one({})
             available_mechanics = doc['available_mechanics']
             unschedulable_bookings = doc['unschedulable_bookings']
 
@@ -279,13 +279,13 @@ class ShedAvailService(ShedAvailServiceServicer):
             available_mechanics = [mech for mech in available_mechanics if mech.mechanic_id != request.mech_id]
             doc['available_mechanics'] = available_mechanics
             doc['unschedulable_bookings'] = unschedulable_bookings
-            await schedule_settings.delete_many({})
-            await schedule_settings.insert_one(doc)
+            schedule_settings.delete_many({})
+            schedule_settings.insert_one(doc)
 
             return empty()
 
 
-    async def handle_schedule(self, request, context):
+    def handle_schedule(self, request, context):
         # i dont know what to do at this point here
 
         # when status is going to be => billing or billing confirmation or pending or not scheduled or cancelled or rejected or completed
@@ -297,7 +297,7 @@ class ShedAvailService(ShedAvailServiceServicer):
         
         booking = db.query(Booking).filter(Booking.booking_id == request.booking_id).first()  # Use correct Booking field and fetch one
         
-        doc = await schedule_settings.find_one({})
+        doc =   schedule_settings.find_one({})
 
         available_mechanics = doc['available_mechanics']
         not_scheduleable = doc['unschedulable_bookings']
@@ -331,10 +331,10 @@ class ShedAvailService(ShedAvailServiceServicer):
                     break
 
         db.commit()
-        await schedule_settings.delete_many({})
+        schedule_settings.delete_many({})
         doc['available_mechanics'] = available_mechanics
         doc['unschedulable_bookings'] = not_scheduleable
-        await schedule_settings.insert_one(doc)
+        schedule_settings.insert_one(doc)
 
         return Status(status=1)
 
@@ -455,7 +455,11 @@ def serve():
 
     server.start()
 
+    print("GRPC server has been started...")
+
     server.wait_for_termination()
 
 
+if __name__ == '__main__':
+    serve()
 
