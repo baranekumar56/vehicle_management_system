@@ -222,6 +222,68 @@ EXECUTE FUNCTION package_meta_data_remove_updater_for_time_price();
 
 """
 
+booking_total_amount_compute_for_repair = """
+
+    DROP TRIGGER IF EXISTS update_booking_price ON booked_repair;
+
+    CREATE OR REPLACE FUNCTION update_booking_amount_for_repair()
+    RETURNS TRIGGER AS $$
+    DECLARE
+        c_total_amount int;
+    BEGIN 
+        -- Calculate the sum and assign it to total_amount
+        SELECT SUM(price) INTO c_total_amount 
+        FROM booked_repair 
+        WHERE booking_id = NEW.booking_id 
+        AND cancelled_by_admin = false 
+        AND cancelled_by_user = false;
+
+        -- Update the booking's total_amount
+        UPDATE booking 
+        SET total_amount = c_total_amount 
+        WHERE booking_id = NEW.booking_id;
+
+        RETURN NEW;
+    END;
+    $$ LANGUAGE plpgsql;
+
+    CREATE TRIGGER update_booking_price
+    AFTER UPDATE ON booked_repair 
+    FOR EACH ROW
+    EXECUTE FUNCTION update_booking_amount_for_repair();
+
+"""
+
+booking_payment_status_updater = """
+
+    CREATE OR REPLACE FUNCTION update_booking_payment_status ()
+    AS $$
+    DECLARE
+        total_paid_amount int default 0;
+    BEGIN
+
+        SELECT SUM(paid_amount) INTO total_paid_amount FROM payment WHERE booking_id = NEW.booking_id;
+
+        -- now check if the paid amount is equal to the total amount
+
+        UPDATE 
+            booking
+        SET payment_status = 'paid' 
+            WHERE booking_id = NEW.booking_id and total_amount <= total_paid_amount;
+
+        RETURN NEW;
+    END;
+
+    $$ LANGUAGE plpgsql;
+
+    CREATE TRIGGER update_booking_status_on_payment
+    AFTER INSERT ON payment
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_booking_payment_status();
+
+"""
 
 
-procedures = [package_batch_state_change, service_batch_state_change, vehicle_batch_state_change, vehicle_service_batch_state_change, vehicle_service_log_in_booked_service, db_availability_cache_updater, service_updation_triggers ]
+
+
+procedures = [package_batch_state_change, service_batch_state_change, vehicle_batch_state_change, vehicle_service_batch_state_change, vehicle_service_log_in_booked_service, db_availability_cache_updater, service_updation_triggers, booking_total_amount_compute_for_repair, booking_payment_status_updater ]

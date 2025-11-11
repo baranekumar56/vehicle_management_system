@@ -11,3 +11,10 @@ class Mechanic:
         self.job_queue = job_queue
         self.bookings = bookings
 
+    def to_dict(self) -> dict:
+        return {
+            "mechanic_id": self.mechanic_id,
+            "job_queue": self.job_queue,
+            "bookings": self.bookings
+        }
+

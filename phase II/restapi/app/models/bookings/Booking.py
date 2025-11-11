@@ -3,7 +3,7 @@ from app.database.database import Base
 from sqlalchemy.orm import relationship, relationship, Mapped, mapped_column
 from dataclasses import dataclass
 from app.custom_db_types.custom_db_classes import AddressType
-
+import enum
 
 from app.schema.booking import BookingStatus, ServiceType, PaymentStatus
 from datetime import datetime
@@ -78,6 +78,11 @@ class Bill(Base):
    forwarded_at = Column(DateTime(timezone=True), default=func.now)
    billed_at = Column(DateTime(timezone=True))
 
+class ShedType(enum.Enum):
+
+    repair = "repair"
+    service = "service"
+
 class AvailabilityCache(Base):
 
    __tablename__ = 'availabilitycache'
@@ -88,13 +93,14 @@ class AvailabilityCache(Base):
    available_hours = Column(ARRAY(Integer))
    version = Column(Integer, default = 0)
    active = Column(Boolean, default=True)
+   shed_type = Column(Enum(ShedType, name="shed_type"))
   
 class Shed(Base):
 
    __tablename__ = 'shed'
 
-   shed_id = Column(Integer, primary_key=True)
-   shed_no = Column(Integer)
+   shed_id = Column(Integer, primary_key=True, autoincrement=False)
+   shed_type = Column(String)
    shed_name = Column(String)
    active = Column(Boolean, default=True)
 
@@ -109,7 +115,7 @@ class ServiceReminder(Base):
    user_vehicle_id = Column(Integer)
    created_at = Column(DateTime(timezone=True))
 
-   __tableargs__ = (
+   __table_args__ = (
       ForeignKeyConstraint(['user_id'], ['users.user_id']),
       ForeignKeyConstraint(['user_vehicle_id'], ['user_vehicle.user_vehicle_id']),
    )

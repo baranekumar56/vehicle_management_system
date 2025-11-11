@@ -16,6 +16,7 @@ message ScheduleResponse {
 
 message AvailabilityRequirements {
     int32 required_hours = 1;
+    string booking_type = 2;
 }
 
 message Slot {
@@ -45,6 +46,6 @@ service ShedAvailService {
     rpc simulate_reminder_emails(empty) returns (Status) {};
     rpc get_available_hours(AvailabilityRequirements) returns (AvailabilityResponse) {};
     rpc handle_schedule(ScheduleDetails) returns (ScheduleResponse) {};
-    rpc updated_mech_status(MechStatus) returns (empty) {};
+    rpc update_mech_status(MechStatus) returns (empty) {};
 
 }

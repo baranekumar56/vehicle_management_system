@@ -259,5 +259,48 @@ C = """
     END
     $$
 """
+
+service_reminder_constrainsts = """
+
+    DO $$
+    BEGIN
+
+    IF NOT EXISTS ( 
+        SELECT 1 FROM pg_constraint 
+        WHERE conname = 'fk_service_reminder_users' and conrelid = 'service_reminder'::regclass 
+    ) THEN 
+    ALTER TABLE service_reminder
+    ADD CONSTRAINT fk_service_reminder_users FOREIGN KEY (user_id) REFERENCES users(user_id)  ON DELETE SET NULL;
+    END IF;
+
+    IF NOT EXISTS ( 
+        SELECT 1 FROM pg_constraint 
+        WHERE conname = 'fk_service_reminder_user_vehicle' and conrelid = 'service_reminder'::regclass 
+    ) THEN 
+    ALTER TABLE service_reminder
+    ADD CONSTRAINT fk_service_reminder_user_vehicle FOREIGN KEY (user_vehicle_id) REFERENCES user_vehicle(user_vehicle_id)  ON DELETE SET NULL;
+    END IF;
+
+    END
+    $$;
+
+
+"""
+constraints.append(service_reminder_constrainsts)
+mechanic = """
+    DO $$ 
+    BEGIN
+    IF NOT EXISTS ( 
+        SELECT 1 FROM pg_constraint 
+        WHERE conname = 'fk_mechanic_users' and conrelid = 'mechanic'::regclass 
+    ) THEN 
+    ALTER TABLE mechanic
+    ADD CONSTRAINT fk_mechanic_users FOREIGN KEY (mechanic_id) REFERENCES users(user_id)  ON DELETE SET NULL;
+    END IF;
+    END
+    $$    
+
+"""
+constraints.append(mechanic)
 constraints.append(C)
 

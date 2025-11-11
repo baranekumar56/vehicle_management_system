@@ -5,14 +5,39 @@ from app.database.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import select, update, insert
 from app.auth.jwt_handler import create_access_token, create_refresh_token, verify_password, hash_password
-from app.schema.user import User, UserCreate, UserLoginRequest
+from app.schema.user import User, UserCreate, UserLoginRequest, MechanicCreate, Mechanic as ModelMechanic, MechanicDBInsert
+from app.models.user.User import Users as DBUser
+from app.models.user.User import Mechanic
 from sqlalchemy.exc import IntegrityError
 from app.schema.user_vehicle import UserVehicle as ModelUserVehicle, UserVehicleCreate as ModelUserVehicleCreate
 from app.models.user.User import UserVehicle
 from app.auth.jwt_bearer import JWTBearer
+from app.database.database import schedule_settings
 
 from app.crud.user import *
 from app.crud.generic import *
+
+
+
+class MechanicSchedule:
+
+    mechanic_id:int 
+    job_queue: list[list[int]]
+    bookings : list[list[int]] # booking id, scheulde id
+
+    def __init__(self, mechanic_id, job_queue, bookings):
+        self.mechanic_id = mechanic_id
+        self.job_queue = job_queue
+        self.bookings = bookings
+
+    def to_dict(self) -> dict:
+        return {
+            "mechanic_id": self.mechanic_id,
+            "job_queue": self.job_queue,
+            "bookings": self.bookings
+        }
+
+
 
 router = APIRouter()
 
@@ -94,6 +119,7 @@ async def signup(response: Response, user: UserCreate, db:AsyncSession = Depends
         raise HTTPException(status_code=400, detail={"msg": "unexpected error occured", "detail": str(e)})
 
 
+
 @router.get('/filter')
 async def filter_users():
     pass
@@ -134,6 +160,62 @@ async def activate_user(response: Response, user_id: int, db:AsyncSession = Depe
         response.status_code = 400
         return {"msg": "User status update failed"}
     
+# mechanic
+
+@router.post('/mechanic/add_mechanic')
+async def add_mechanic(mechanic: MechanicCreate, db:AsyncSession = Depends(get_db)):
+
+    try :
+
+        # first add him to the table as a user
+        # then using his user_id, set as mechanic id
+
+        user = UserCreate.model_validate(mechanic.model_dump())
+
+        user:DBUser = await add_entry(DBUser, user, db )
+
+        mechanic = MechanicDBInsert(**mechanic.model_dump(), mechanic_id=user.user_id)
+        # print(mechanic.model_dump())
+        # add mechanic
+
+        mechanic = await add_entry(Mechanic, mechanic, db )
+        # now add him to available mechanics in scheduling
+
+        doc = await schedule_settings.find_one({})
+        mech = MechanicSchedule(mechanic_id=mechanic.mechanic_id, job_queue=[], bookings=[]).to_dict()
+        doc['available_mechanics'].append(mech)
+
+        await schedule_settings.find_one_and_update({"_id": doc['_id']}, {"$set": {"available_mechanics":doc['available_mechanics'] }})
+
+
+
+        await commit_changes(db)
+
+        return {"msg": "mechanic added successfully", "mechanic_id": mechanic}
+        
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create new mechanic, {str(e)}")
+
+@router.patch('/mechanic/update_status')
+async def update_status_of_mechanic(mechanic_id: int, status: str, db:AsyncSession = Depends(get_db)):
+    
+    try:
+        # check if id exists
+        mechanic = await check_if_id_exists(mechanic_id, Mechanic, db)
+
+        if mechanic is None:
+            raise HTTPException(status_code=404, detail="Mechanic id not found")
+
+        updated_row_count = await update_mechanic_status(mechanic_id=mechanic_id, status=status,db= db)
+
+        return {"msg" :"mechanic status updated successfully"}
+
+    except HTTPException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail) 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update mechanic status, {str(e)}")
+
 
 # vehicles
 

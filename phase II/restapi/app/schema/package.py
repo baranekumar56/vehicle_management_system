@@ -25,10 +25,15 @@ class BasePackage(BaseModel):
         if len(name) == 0 or len(name) > 50:
             raise ValueError("Package name should be between 1 to 50 characters")
         
-        if not name.isalpha():
-            raise ValueError("Package name should only have letters")
+        name = name.lower()
+
+        for i in name:
+            if (i >= 'a' and i <= 'z') or (i >= 'A' and i <= 'Z') or i == ' ':
+                continue
+            else:
+                raise ValueError("Package name should only contain alphabets and spaces")
         
-        return name.lower()
+        return name
 
 class PackageCreate(BasePackage):
 

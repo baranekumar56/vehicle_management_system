@@ -2,11 +2,12 @@ from enum import Enum
 from pydantic import BaseModel, field_validator, ConfigDict, model_validator,RootModel,Field
 from fastapi import HTTPException
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, date
 
 class ScheduleCreate(BaseModel):
 
     booking_id : int = Field(..., ge=0)
+    scheduled_date : date 
     scheduled_from : datetime = Field(...)
     scheduled_to : datetime = Field(...)
     mechanic_id : int = Field(..., ge=0)

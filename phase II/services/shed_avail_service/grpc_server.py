@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import text, update, insert
-
+from models.Models import Mechanic as DBMechanic
 from models.Models import AvailabilityCache, Schedule
 from models.Models import Booking, ServiceReminder
 from models.Mech import Mechanic
@@ -60,7 +60,7 @@ class ShedAvailService(ShedAvailServiceServicer):
         bookings = []
 
         conditions = or_(Booking.status == 'booked', Booking.status == 'on_going')
-
+        today = datetime.now().date()
         try:
             bookings = db.query(Booking)\
                          .filter(cast(Booking.booked_date, Date) <= datetime.now().date(), conditions)\
@@ -75,8 +75,17 @@ class ShedAvailService(ShedAvailServiceServicer):
 
             # now i have all the available mechs previous day mech object
             temp: list[Mechanic] = []
-            for mechh in available_mechs:
-                t = Mechanic(mechh['mechanic_id'], [], [])
+
+            # i think i can get all mechnics who are available today,
+
+            available_mechanics_id = db.query(DBMechanic).filter(DBMechanic.status == 'available').all()
+
+            available_mechs = []
+            for avail in available_mechanics_id:
+                available_mechs.append(avail.mechanic_id)
+
+            for mech_id in available_mechs:
+                t = Mechanic(mech_id, [], [])
                 temp.append(t)
 
             q = deque()
@@ -111,6 +120,7 @@ class ShedAvailService(ShedAvailServiceServicer):
 
                 schedule = Schedule(
                     booking_id=booking.booking_id,
+                    scheduled_date = today,
                     scheduled_from=from_time,
                     scheduled_to=to_time,
                     mechanic_id=mech.mechanic_id,
@@ -144,6 +154,7 @@ class ShedAvailService(ShedAvailServiceServicer):
 
                     schedule = Schedule(
                         booking_id=booking.booking_id,
+                        scheduled_date = today,
                         scheduled_from=from_time,
                         scheduled_to=to_time,
                         mechanic_id=mech.mechanic_id,
@@ -179,6 +190,7 @@ class ShedAvailService(ShedAvailServiceServicer):
 
                         schedule = Schedule(
                             booking_id=booking.booking_id,
+                            scheduled_date = today,
                             scheduled_from=from_time,
                             scheduled_to=to_time,
                             mechanic_id=current_mech.mechanic_id,
@@ -205,6 +217,9 @@ class ShedAvailService(ShedAvailServiceServicer):
             # with all the mechs, schedule their todays jobs
             all_mechs = complete_mechs + list(q)
 
+            for i in range(0, len(all_mechs)):
+                all_mechs[i] = all_mechs[i].to_dict()
+
             available_mechanics = all_mechs
             doc['available_mechanics'] = available_mechanics
             doc['unschedulable_bookings'] = not_scheduleable
@@ -221,69 +236,88 @@ class ShedAvailService(ShedAvailServiceServicer):
             return Status(status=0)
 
     def update_mech_status(self, request, context):
+        try: 
+            
+            if request.status == 'available':
+                # add him to today's available mechanics
+                doc =   schedule_settings.find_one({})
+                available_mechanics = doc['available_mechanics']
 
-        if request.status == 'available':
-            # add him to today's available mechanics
-            doc =   schedule_settings.find_one({})
-            available_mechanics = doc['available_mechanics']
+                # just add him
+                mechanic = Mechanic(mechanic_id=request.mech_id, job_queue=[], bookings=[])
+                available_mechanics.append(mechanic.to_dict())
 
-            # just add him
-            mechanic = Mechanic(mechanic_id=request.mech_id, job_queue=[], bookings=[])
-            available_mechanics.append(mechanic)
+                doc['available_mechanics'] = available_mechanics
+                schedule_settings.delete_many({})
+                schedule_settings.insert_one(doc)
+                return empty()
 
-            doc['available_mechanics'] = available_mechanics
-            schedule_settings.delete_many({})
-            schedule_settings.insert_one(doc)
-            return empty()
+            else:
+                # the only gotcha, get all the removing mechs bookings , then for each booking 
+                # if they are in pause state, leave it , then 
 
-        else:
-            # the only gotcha, get all the removing mechs bookings , then for each booking 
-            # if they are in pause state, leave it , then 
+                doc =   schedule_settings.find_one({})
+                available_mechanics = doc['available_mechanics']
+                unschedulable_bookings = doc['unschedulable_bookings']
 
-            doc =   schedule_settings.find_one({})
-            available_mechanics = doc['available_mechanics']
-            unschedulable_bookings = doc['unschedulable_bookings']
+                print(available_mechanics)
+                print(unschedulable_bookings)
 
-            # fixed typo: mechainc_id → mechanic_id
-            mech = [mech for mech in available_mechanics if mech.mechanic_id == request.mech_id][0]
+                # fixed typo: mechainc_id → mechanic_id
+                mech = [mech for mech in available_mechanics if mech['mechanic_id'] == request.mech_id]
 
-            for booking in mech.bookings:
-                # booking[0] => booking id, booking[1] => schedule id
-                schedule_id = booking[1]
+                if mech == []:
+                    return empty()
+                mech = mech[0]
 
-                # sync SQLAlchemy session from get_db generator
-                db = next(get_db())
-                db_booking = db.query(Booking).filter(Booking.booking_id == booking[0]).first()
-                if not isinstance(db_booking, Booking):
-                    db.close()
-                    continue
+                print("here1")
 
-                if db_booking.status in ['completed', 'halted', 'billing_confirmation', 'billing', 'cancelled', 'rejected', 'pending']:
-                    db.close()
-                    continue
+                for booking in mech['bookings']:
+                    # booking[0] => booking id, booking[1] => schedule id
+                    schedule_id = booking[1]
 
-                # now either booking or on going
-                # cancel all the schedules for this booking in schedules table
-                query = update(Schedule).where(Schedule.schedule_id == schedule_id).values(stopped=True, stop_reason="Mechanic blocked")
-                db.execute(query)
+                    # sync SQLAlchemy session from get_db generator
+                    db = next(get_db())
+                    db_booking = db.query(Booking).filter(Booking.booking_id == booking[0]).first()
+                    if not isinstance(db_booking, Booking):
+                        db.close()
+                        continue
 
-                if db_booking.status == 'on_going':
-                    query = update(Booking).where(Booking.booking_id == db_booking.booking_id).values(status="not_scheduled")
+                    if db_booking.status in ['completed', 'halted', 'billing_confirmation', 'billing', 'cancelled', 'rejected', 'pending']:
+                        db.close()
+                        continue
+
+                    # now either booking or on going
+                    # cancel all the schedules for this booking in schedules table
+                    query = update(Schedule).where(Schedule.schedule_id == schedule_id).values(stopped=True, stop_reason="Mechanic blocked")
                     db.execute(query)
-                    # later add the code to log the reason for status change
 
-                unschedulable_bookings.append(db_booking.booking_id)
-                db.close()
+                    if db_booking.status == 'on_going':
+                        query = update(Booking).where(Booking.booking_id == db_booking.booking_id).values(status="not_scheduled")
+                        db.execute(query)
+                        # later add the code to log the reason for status change
 
-            # that's it , now remove the mechanic from available ones
-            available_mechanics = [mech for mech in available_mechanics if mech.mechanic_id != request.mech_id]
-            doc['available_mechanics'] = available_mechanics
-            doc['unschedulable_bookings'] = unschedulable_bookings
-            schedule_settings.delete_many({})
-            schedule_settings.insert_one(doc)
+                    unschedulable_bookings.append(db_booking.booking_id)
+                    db.close()
+                print("here2")
+                
 
-            return empty()
+                # that's it , now remove the mechanic from available ones
+                available_mechanics = [mech for mech in available_mechanics if mech['mechanic_id'] != request.mech_id]
+                doc['available_mechanics'] = available_mechanics
+                doc['unschedulable_bookings'] = unschedulable_bookings
+                schedule_settings.delete_many({})
+                schedule_settings.insert_one(doc)
 
+                
+
+                print("here3")
+
+
+                return empty()
+        except Exception as e:
+            print(str(e))
+            raise Exception(e)
 
     def handle_schedule(self, request, context):
         # i dont know what to do at this point here
@@ -310,23 +344,26 @@ class ShedAvailService(ShedAvailServiceServicer):
                 found = False
                 updated_bookings = []
 
-                for booking_id, schedule_id in mech.bookings:
+                for booking_id, schedule_id in mech['bookings']:
                     if booking_id == request.booking_id:
                         # then cancel the schedule
                         query = update(Schedule).where(Schedule.schedule_id == schedule_id)\
                                             .values(stopped=True, stop_reason="Cancelled due to booking status change")
+                        
+                        # call the notification server to send aa notification to the user
+
                         db.execute(query)
                         found = True
 
                         # remove from bookings list
-                        updated_bookings = [pair for pair in mech.bookings if pair[0] != request.booking_id]
+                        updated_bookings = [pair for pair in mech['bookings'] if pair[0] != request.booking_id]
 
                         if booking_id not in not_scheduleable:
                             not_scheduleable.append(booking_id)
                         break
 
                 if found:
-                    mech.bookings = updated_bookings
+                    mech['bookings'] = updated_bookings
                     available_mechanics[i] = mech
                     break
 
@@ -346,10 +383,26 @@ class ShedAvailService(ShedAvailServiceServicer):
         db:Session = next(get_db())
 
         # as this is a microservice , i think we can directly execute statements
+        records = None
+        if request.booking_type == 'repair':
 
-        records = db.query(AvailabilityCache).all()
+            records = db.query(AvailabilityCache).filter(AvailabilityCache.shed_type == request.booking_type, AvailabilityCache.day == datetime.now().date()).all()
         
+        else :
+            records = db.query(AvailabilityCache).filter(AvailabilityCache.shed_type == request.booking_type).all()
+
+
         # now for availability cache , for each row check whether we have have a conitnuous set of numbers
+        res = AvailabilityResponse()
+        if request.booking_type == 'repair':
+            ## just check today
+            # if atleast one record got returned then it is bookable
+            if len(records) != 0:
+                slot = Slot(available_hours=9, available_date=str(datetime.now().date()))
+                res.slots.append(slot)
+                return res
+            else :
+                return res
 
         result = {}
 

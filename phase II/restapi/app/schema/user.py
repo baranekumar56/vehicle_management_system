@@ -1,7 +1,7 @@
 from pydantic import BaseModel, field_validator, ConfigDict, model_validator,RootModel
 from fastapi import HTTPException, UploadFile, File
 from datetime import datetime
-
+from enum import Enum
 """
 This file desrcibes about all the user pydantic models that we gonna use in our project
 """
@@ -109,6 +109,8 @@ class UserCreate(BaseModel):
     role_id : int = Field(..., ge=0)
     joined_on : datetime = Field(default_factory=datetime.now)
     active : bool = True
+    profile_picture : Optional[str] = ""
+    id_picture : Optional[str] = ""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -199,10 +201,30 @@ class UserCreate(BaseModel):
 class User(UserCreate):
 
     user_id : int = Field(..., ge=0)
-    profile_picture : Optional[str]
-    id_picture : Optional[str]  # these both act as file url's in our server
+  # these both act as file url's in our server
 
+class MechanicStatus(Enum):
 
+    available = "available"
+    blocked = "blocked"
+
+class MechanicCreate(UserCreate):
+
+    date_joined : datetime = Field(default_factory=datetime.now)
+    experience : int = Field(..., ge=0)
+    status : MechanicStatus = Field(MechanicStatus.available.value)
+
+class MechanicDBInsert(BaseModel):
+
+    mechanic_id : int
+    date_joined : datetime = Field(default_factory=datetime.now)
+    experience : int = Field(..., ge=0)
+    status : MechanicStatus = Field(MechanicStatus.available)
+
+class Mechanic(MechanicDBInsert):
+
+    mechanic_id : int
+    id : int
 
 class UserLoginRequest(BaseModel):
 

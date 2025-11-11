@@ -92,25 +92,24 @@ async def deactivate_package(package_id:int,db:AsyncSession = Depends(get_db) ):
         raise HTTPException(status_code=500, detail="Some thing bad happend, couldn't update package")
 
 
+from fastapi import HTTPException
+
 @router.post('/add_package_services')
-async def add_package_services(services:list[PackageServiceCreate], db:AsyncSession = Depends(get_db)):
-
-    """this function tries to insert all the package service provided by the user, if a duplicate pair is found all the insertions are rollbacked"""
-    try: 
+async def add_package_services(services: list[PackageServiceCreate], db: AsyncSession = Depends(get_db)):
+    """Insert all package services, rollback on duplicates."""
+    try:
         inserted_rows = await insert_multiple_entries(PackageService, services, db)
-
-        if inserted_rows != len(services):
-            raise IntegrityError(statement="Duplicate entries found")
-
         await commit_changes(db)
 
         return {"msg": "package services added successfully"}
 
-    except IntegrityError as e:
-        raise HTTPException(status_code=422, detail="Duplicate entries found")
+    except HTTPException:
+        # Re-raise HTTPExceptions so FastAPI handles them
+        raise
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to add services to packages")
+        # Log or handle DBAPIError or IntegrityError naturally thrown by DB
+        raise HTTPException(status_code=500, detail=f"Failed to add services to packages, {str(e)}")
 
 @router.post('/remove_package_services')
 async def remove_package_services(package_service_ids: list[int], db:AsyncSession = Depends(get_db)):
@@ -131,11 +130,12 @@ async def remove_package_services(package_service_ids: list[int], db:AsyncSessio
 async def batch_status_changer(package_ids: list[int],new_status: bool, db:AsyncSession = Depends(get_db)):
 
     try:
+        # print(package_ids)
         updated_rows = await package_state_changer(package_ids, new_status, db)
 
         await commit_changes(db)
         return {"msg": "batch updation successfull"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to delete package services")
+        raise HTTPException(status_code=500, detail=f"Failed to batch update packages, {str(e)}")
     
 ### the only remaining thing i guess is, filter,

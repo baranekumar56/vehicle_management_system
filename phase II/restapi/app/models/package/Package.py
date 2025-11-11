@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, func, CheckConstraint, Boolean, Text, Enum, Numeric
+from sqlalchemy import Column, Integer, String, Float, DateTime, UniqueConstraint, func, CheckConstraint, Boolean, Text, Enum, Numeric
 from app.database.database import Base
 from sqlalchemy.orm import relationship, relationship, Mapped, mapped_column
 
@@ -26,3 +26,6 @@ class PackageService(Base):
     package_id = Column(Integer)
     vehicle_service_id = Column(Integer)
     
+    __table_args__ = (
+        UniqueConstraint('package_id', 'vehicle_service_id', name='uix_package_id_vehicle_service_id'),
+    )

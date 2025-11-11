@@ -1,11 +1,12 @@
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, func, CheckConstraint, Boolean, Text, Enum
+from sqlalchemy import Column, ForeignKeyConstraint, Integer, String, Float, DateTime, func, CheckConstraint, Boolean, Text, Enum, ForeignKey
 from app.database.database import Base
 from sqlalchemy.orm import relationship, relationship, Mapped, mapped_column
 from dataclasses import dataclass
 from app.custom_db_types.custom_db_classes import AddressType
 from app.models.services_vehicles.Vehicle import VehicleType, FuelType
-
+from app.schema.user import MechanicStatus
+import enum
 class Users(Base):
 
     __tablename__ = 'users'
@@ -21,6 +22,18 @@ class Users(Base):
     role_id = Column(Integer)
     joined_on = Column(DateTime)
     active = Column(Boolean, default=True)
+
+
+
+class Mechanic(Base):
+
+    __tablename__ = "mechanic"
+
+    id = Column(Integer, primary_key=True)
+    mechanic_id = Column(Integer, index=True)
+    experience = Column(Integer)
+    date_joined = Column(DateTime(timezone=True))
+    status = Column(Enum(MechanicStatus, name="mechanic_status"))
 
 
 class Role(Base):
@@ -48,14 +61,17 @@ class UserVehicle(Base):
     selected = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True))
 
+class UserActivityLog(Base):
 
-class Search(Base):
+    __tablename__ = "user_activity_log"
 
-    __tablename__ = "search"
+    log_id = Column(Integer, primary_key=True)
+    request_id = Column(String(36), index=True)
+    user_id = Column(Integer)
+    route = Column(String)
+    response_status_code = Column(Integer)
+    error_string = Column(String)
+    timestamp = Column(DateTime(timezone=True), default=func.now)
 
-    id = Column(Integer, primary_key=True)
-    first_name = Column(String)
-    last_name = Column(String)
-    address = Column(String)
-    phone = Column(String)
-    created_at = Column(DateTime(timezone=True), index=True)
+
+    

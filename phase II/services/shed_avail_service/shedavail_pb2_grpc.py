@@ -54,8 +54,8 @@ class ShedAvailServiceStub(object):
                 request_serializer=shedavail__pb2.ScheduleDetails.SerializeToString,
                 response_deserializer=shedavail__pb2.ScheduleResponse.FromString,
                 _registered_method=True)
-        self.updated_mech_status = channel.unary_unary(
-                '/shed_avail_service.ShedAvailService/updated_mech_status',
+        self.update_mech_status = channel.unary_unary(
+                '/shed_avail_service.ShedAvailService/update_mech_status',
                 request_serializer=shedavail__pb2.MechStatus.SerializeToString,
                 response_deserializer=shedavail__pb2.empty.FromString,
                 _registered_method=True)
@@ -88,7 +88,7 @@ class ShedAvailServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def updated_mech_status(self, request, context):
+    def update_mech_status(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -117,8 +117,8 @@ def add_ShedAvailServiceServicer_to_server(servicer, server):
                     request_deserializer=shedavail__pb2.ScheduleDetails.FromString,
                     response_serializer=shedavail__pb2.ScheduleResponse.SerializeToString,
             ),
-            'updated_mech_status': grpc.unary_unary_rpc_method_handler(
-                    servicer.updated_mech_status,
+            'update_mech_status': grpc.unary_unary_rpc_method_handler(
+                    servicer.update_mech_status,
                     request_deserializer=shedavail__pb2.MechStatus.FromString,
                     response_serializer=shedavail__pb2.empty.SerializeToString,
             ),
@@ -242,7 +242,7 @@ class ShedAvailService(object):
             _registered_method=True)
 
     @staticmethod
-    def updated_mech_status(request,
+    def update_mech_status(request,
             target,
             options=(),
             channel_credentials=None,
@@ -255,7 +255,7 @@ class ShedAvailService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/shed_avail_service.ShedAvailService/updated_mech_status',
+            '/shed_avail_service.ShedAvailService/update_mech_status',
             shedavail__pb2.MechStatus.SerializeToString,
             shedavail__pb2.empty.FromString,
             options,

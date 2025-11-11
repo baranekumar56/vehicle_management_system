@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fshedavail.proto\x12\x12shed_avail_service\"g\n\x0fScheduleDetails\x12\x12\n\nbooking_id\x18\x01 \x01(\x05\x12\x16\n\x0e\x63urrent_status\x18\x02 \x01(\t\x12\x13\n\x0bmechanic_id\x18\x03 \x01(\x05\x12\x13\n\x0bschedule_id\x18\x04 \x01(\x05\"\"\n\x10ScheduleResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\"2\n\x18\x41vailabilityRequirements\x12\x16\n\x0erequired_hours\x18\x01 \x01(\x05\"7\n\x04Slot\x12\x16\n\x0e\x61vailable_date\x18\x01 \x01(\t\x12\x17\n\x0f\x61vailable_hours\x18\x02 \x03(\x05\"?\n\x14\x41vailabilityResponse\x12\'\n\x05slots\x18\x01 \x03(\x0b\x32\x18.shed_avail_service.Slot\"-\n\nMechStatus\x12\x0f\n\x07mech_id\x18\x01 \x01(\x05\x12\x0e\n\x06status\x18\x02 \x01(\t\"\x07\n\x05\x65mpty\"\x18\n\x06Status\x12\x0e\n\x06status\x18\x01 \x01(\x05\x32\xe0\x03\n\x10ShedAvailService\x12R\n\x17simulate_daily_schedule\x12\x19.shed_avail_service.empty\x1a\x1a.shed_avail_service.Status\"\x00\x12S\n\x18simulate_reminder_emails\x12\x19.shed_avail_service.empty\x1a\x1a.shed_avail_service.Status\"\x00\x12o\n\x13get_available_hours\x12,.shed_avail_service.AvailabilityRequirements\x1a(.shed_avail_service.AvailabilityResponse\"\x00\x12^\n\x0fhandle_schedule\x12#.shed_avail_service.ScheduleDetails\x1a$.shed_avail_service.ScheduleResponse\"\x00\x12R\n\x13updated_mech_status\x12\x1e.shed_avail_service.MechStatus\x1a\x19.shed_avail_service.empty\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fshedavail.proto\x12\x12shed_avail_service\"g\n\x0fScheduleDetails\x12\x12\n\nbooking_id\x18\x01 \x01(\x05\x12\x16\n\x0e\x63urrent_status\x18\x02 \x01(\t\x12\x13\n\x0bmechanic_id\x18\x03 \x01(\x05\x12\x13\n\x0bschedule_id\x18\x04 \x01(\x05\"\"\n\x10ScheduleResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\"H\n\x18\x41vailabilityRequirements\x12\x16\n\x0erequired_hours\x18\x01 \x01(\x05\x12\x14\n\x0c\x62ooking_type\x18\x02 \x01(\t\"7\n\x04Slot\x12\x16\n\x0e\x61vailable_date\x18\x01 \x01(\t\x12\x17\n\x0f\x61vailable_hours\x18\x02 \x03(\x05\"?\n\x14\x41vailabilityResponse\x12\'\n\x05slots\x18\x01 \x03(\x0b\x32\x18.shed_avail_service.Slot\"-\n\nMechStatus\x12\x0f\n\x07mech_id\x18\x01 \x01(\x05\x12\x0e\n\x06status\x18\x02 \x01(\t\"\x07\n\x05\x65mpty\"\x18\n\x06Status\x12\x0e\n\x06status\x18\x01 \x01(\x05\x32\xdf\x03\n\x10ShedAvailService\x12R\n\x17simulate_daily_schedule\x12\x19.shed_avail_service.empty\x1a\x1a.shed_avail_service.Status\"\x00\x12S\n\x18simulate_reminder_emails\x12\x19.shed_avail_service.empty\x1a\x1a.shed_avail_service.Status\"\x00\x12o\n\x13get_available_hours\x12,.shed_avail_service.AvailabilityRequirements\x1a(.shed_avail_service.AvailabilityResponse\"\x00\x12^\n\x0fhandle_schedule\x12#.shed_avail_service.ScheduleDetails\x1a$.shed_avail_service.ScheduleResponse\"\x00\x12Q\n\x12update_mech_status\x12\x1e.shed_avail_service.MechStatus\x1a\x19.shed_avail_service.empty\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -36,17 +36,17 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_SCHEDULERESPONSE']._serialized_start=144
   _globals['_SCHEDULERESPONSE']._serialized_end=178
   _globals['_AVAILABILITYREQUIREMENTS']._serialized_start=180
-  _globals['_AVAILABILITYREQUIREMENTS']._serialized_end=230
-  _globals['_SLOT']._serialized_start=232
-  _globals['_SLOT']._serialized_end=287
-  _globals['_AVAILABILITYRESPONSE']._serialized_start=289
-  _globals['_AVAILABILITYRESPONSE']._serialized_end=352
-  _globals['_MECHSTATUS']._serialized_start=354
-  _globals['_MECHSTATUS']._serialized_end=399
-  _globals['_EMPTY']._serialized_start=401
-  _globals['_EMPTY']._serialized_end=408
-  _globals['_STATUS']._serialized_start=410
-  _globals['_STATUS']._serialized_end=434
-  _globals['_SHEDAVAILSERVICE']._serialized_start=437
-  _globals['_SHEDAVAILSERVICE']._serialized_end=917
+  _globals['_AVAILABILITYREQUIREMENTS']._serialized_end=252
+  _globals['_SLOT']._serialized_start=254
+  _globals['_SLOT']._serialized_end=309
+  _globals['_AVAILABILITYRESPONSE']._serialized_start=311
+  _globals['_AVAILABILITYRESPONSE']._serialized_end=374
+  _globals['_MECHSTATUS']._serialized_start=376
+  _globals['_MECHSTATUS']._serialized_end=421
+  _globals['_EMPTY']._serialized_start=423
+  _globals['_EMPTY']._serialized_end=430
+  _globals['_STATUS']._serialized_start=432
+  _globals['_STATUS']._serialized_end=456
+  _globals['_SHEDAVAILSERVICE']._serialized_start=459
+  _globals['_SHEDAVAILSERVICE']._serialized_end=938
 # @@protoc_insertion_point(module_scope)

@@ -1,3 +1,4 @@
+import enum
 from sqlalchemy import Column, ForeignKeyConstraint, Integer, String, Float, DateTime, func, CheckConstraint, Boolean, Text, Enum, Numeric, Date, ARRAY, ForeignKey
 
 from sqlalchemy.orm import relationship, relationship, Mapped, mapped_column
@@ -95,6 +96,10 @@ class BookedRepair(Base):
   removable = Column(Boolean, default=True)
   created_at =  Column(DateTime(timezone=True), nullable=False)
   
+class ShedType(enum.Enum):
+
+    repair = "repair"
+    service = "service"
 
 class AvailabilityCache(Base):
 
@@ -106,6 +111,7 @@ class AvailabilityCache(Base):
    available_hours = Column(ARRAY(Integer))
    version = Column(Integer, default = 0)
    active = Column(Boolean, default=True)
+   shed_type = Column(DBEnum(ShedType, name="shed_type"))
   
 class Shed(Base):
 
@@ -182,6 +188,7 @@ class Schedule(Base):
 
     schedule_id = Column(Integer, primary_key=True)
     booking_id = Column(Integer)
+    scheduled_date = Column(Date)
     scheduled_from = Column(DateTime(timezone=True), nullable=False)
     scheduled_to = Column(DateTime(timezone=True), nullable=False)
     mechanic_id = Column(Integer)
@@ -207,3 +214,19 @@ class ServiceReminder(Base):
 
    user_details = relationship("Users", lazy="joined")
    vehicle_details = relationship("UserVehicle", lazy="joined")
+
+
+class MechStatus(enum.Enum):
+
+    available = 'available'
+    blocked = 'blocked'
+
+class Mechanic(Base):
+
+    __tablename__ = "mechanic"
+
+    id = Column(Integer, primary_key=True)
+    mechanic_id = Column(Integer, index=True)
+    experience = Column(Integer)
+    date_joined = Column(DateTime(timezone=True))
+    status = Column(DBEnum(MechStatus, name="mechanic_status"))

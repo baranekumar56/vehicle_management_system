@@ -1,5 +1,6 @@
 
 from fastapi import Request, Depends
+from fastapi.security import HTTPBearer
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse
 from app.auth.jwt_bearer import JWTBearer

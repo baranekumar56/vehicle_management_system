@@ -21,7 +21,6 @@ from app.database.database import schedule_settings
 
 router = APIRouter()
 
-
 # the flow for booking being created is 
     # create a booking entry => after successfull booking generation => add all the services or add a repair entry for that booking
 
@@ -45,20 +44,20 @@ async def create_repair_booking(new_booking: BookingCreate,user_vehicle: UserVeh
 
     try:
 
-        user_vehicle_entry = await check_if_entry_exists(UserVehicle, db, user_id = booking.user_id, vehicle_no = user_vehicle.vehicle_no)
-        user_veh = None
-        if user_vehicle_entry is None:
+        user_vehicle_entry = await check_if_entry_exists(UserVehicle, db, user_id = new_booking.user_id, vehicle_no = user_vehicle.vehicle_no)
+        # print(user_vehicle_entry.__dict__)
+        user_veh = user_vehicle_entry
+        if user_vehicle_entry == None:
 
             # then it is a new vehicle then add to user vehicle with owned flag set to false
 
             user_veh:UserVehicle = await add_entry(UserVehicle, user_vehicle, db )
-
+            print(user_veh.__dict__)
         new_booking.user_vehicle_id = user_veh.user_vehicle_id
-
+        print("here")
         # register booking
         booking:Booking = await add_entry(Booking, new_booking, db, type="repair")
-
-
+        print(booking)
         await commit_changes(db=db)
 
         return {"msg": "Booking created successfully", "data": ModelBooking.model_validate(booking)} 
@@ -70,7 +69,7 @@ async def create_repair_booking(new_booking: BookingCreate,user_vehicle: UserVeh
 
 # the problem with service booking is i should get all the booking data at once , the services they picked the booking details etc, 
 @router.post('/create_booking/service')
-async def create_service_booking(new_booking: BookingCreate = Body(...), booked_services:List[int] = Body(...),user_vehicle:UserVehicleCreate = Body(...), db:AsyncSession = Depends(get_db)):
+async def create_service_booking(new_booking: BookingCreate = Body(...), booked_services:List[int] = Body(...),user_vehicle:UserVehicleCreate = Body(...), payment_details: Payment = Body(...), db:AsyncSession = Depends(get_db)):
 
     # get booking create first -> store all the booked services -> perform aggreagtions (total amount , total time) -> then commit 
     # so that the order flow wont change , also i need to get the data of the users vehicles
@@ -79,6 +78,11 @@ async def create_service_booking(new_booking: BookingCreate = Body(...), booked_
     try :
         user_vehicle_entry = await check_if_entry_exists(UserVehicle, db, user_id = booking.user_id, vehicle_no = user_vehicle.vehicle_no)
         user_veh = None
+
+
+        await commit_changes(db)
+
+
         if user_vehicle_entry is None:
 
             # then it is a new vehicle then add to user vehicle with owned flag set to false
@@ -104,6 +108,7 @@ async def create_service_booking(new_booking: BookingCreate = Body(...), booked_
         # now we look for user vehicle , check whether the user id + vehicle no , combo exists
 
 
+        payment = await add_entry(Payment, payment, db)
 
         if res <= 0:
             raise HTTPException(status_code=500, detail="Cannot create booking")
@@ -128,9 +133,11 @@ async def create_service_booking(new_booking: BookingCreate = Body(...), booked_
 async def update_booking_status(booking_id: int,status:str, db:AsyncSession = Depends(get_db)):
 
     # update the status of the booking take necessary actions
-
-    _ = handle_booking_status_change(booking_id=booking_id, status=status, db=db)
-    pass
+    try:
+        updated_row_count = await handle_booking_status_change(booking_id=booking_id, status=status, db=db)
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Some error occured, {str(e)}")
 
 
 @router.post('/create_bill')
@@ -139,7 +146,7 @@ async def create_a_bill_for_repair_booking(billCreate : BillCreate, requirement_
     # first create the bill then, add the required repair
     
     try:
-        
+    
         await add_entry(Bill,billCreate, db)
 
         for requirement in requirement_list:
@@ -175,7 +182,7 @@ async def update_repairs(repairs: list[ModelBookedRepair], db:AsyncSession = Dep
 
         for repair in repairs:
             args = repair.model_dump()
-            del args.booked_repair_id
+            del args['booked_repair_id']
             await update_entry_by_id(BookedRepair, repair.booked_repair_id, db, **args  )
         
         await commit_changes(db)

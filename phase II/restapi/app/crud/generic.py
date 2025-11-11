@@ -98,13 +98,16 @@ async def insert_multiple_entries(model_class, schema_objects, db:AsyncSession, 
 
     to_be_added = []
 
-    for object in schema_objects:
-        to_be_added.append(object.model_dump())
+    for obj in schema_objects:
+        to_be_added.append(obj.model_dump())
     
 
     query = insert(model_class).values(to_be_added)
 
     inserted_rows = await db.execute(query)
+
+    if inserted_rows.rowcount == -1:
+        None
 
     return inserted_rows.rowcount
 
@@ -242,7 +245,7 @@ async def get_entries(table_class,
     filter_columns = []
 
     for key, val in filters.items():
-        tokens = key.split
+        tokens = key.split("-")
         
         
         try:

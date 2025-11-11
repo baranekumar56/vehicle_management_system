@@ -9,12 +9,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from app.database.database import mech_notes
 from app.middlewares.AuthorizationMiddleware import AuthorizationMiddleware
+from app.middlewares.LogMiddleWare import Logger
 from app.auth.jwt_bearer import JWTBearer
 
 from app.routes import *
 
 # app = FastAPI(dependencies=[Depends(JWTBearer())])
 app = FastAPI()
+
+# initialize the log file
+# which will be used by LogMiddleWare
+
+
+
+
 
 # bearer_scheme = HTTPBearer()
 
@@ -25,6 +33,8 @@ app = FastAPI()
 
 #middle ware initializations
 # app.add_middleware(AuthorizationMiddleware)
+
+app.add_middleware(Logger)
 
 
 # init db
@@ -40,6 +50,10 @@ app.include_router(router=vehicle_router, prefix='/vehicle', tags=['vehicles'])
 app.include_router(router=vehicle_service_router, prefix='/vehicle_service', tags=['vehicle services'])
 app.include_router(router=booking_router, prefix='/booking', tags=['booking'])
 app.include_router(router=package_router, prefix='/package', tags=['package'])
+app.include_router(router=garage_router, prefix='/garage', tags=['garage'])
+
+
+
 
 @app.get('/')
 def root():
