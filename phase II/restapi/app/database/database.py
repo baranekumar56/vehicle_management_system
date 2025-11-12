@@ -14,7 +14,7 @@ Base = declarative_base()
 #mongodb
 URL = "mongodb://localhost:27017"
 
-client = AsyncIOMotorClient(URL)
+client = AsyncIOMotorClient(URL, uuidRepresentation='standard')
 
 mongodb_database = client.get_database('vsms')
 
@@ -23,6 +23,14 @@ mech_notes = mongodb_database.get_collection('mech_notes')
 schedule_settings = mongodb_database.get_collection('schedule_settings')
 
 user_activity_log = mongodb_database.get_collection('user_activity_log')
+
+booking_status_change_log = mongodb_database.get_collection('booking_status_change_log')
+
+issue_status_change_log = mongodb_database.get_collection('issue_status_change_log')
+
+blacklist = mongodb_database.get_collection('blacklist') # for access token invalidation
+
+content_management = mongodb_database.get_collection('content_management')
 
 
 # Before executing the creation of all the tables lets 

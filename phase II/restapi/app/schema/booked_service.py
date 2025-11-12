@@ -49,6 +49,7 @@ class BaseBookedService(BaseModel):
 class BookedServiceCreate(BaseBookedService):
 
     created_at : datetime = Field(..., default_factory=datetime.now)
+    completed_at : datetime | None = Field(None)
 
 
 class BookedService(BookedServiceCreate):

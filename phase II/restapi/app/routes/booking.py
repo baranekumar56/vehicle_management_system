@@ -1,10 +1,12 @@
 
 
+import math
 from typing import List
-from fastapi import APIRouter, Depends, Form, Body, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, Form, Body, HTTPException
 from app.schema.booking import Booking as ModelBooking, BookingCreate, BookingStatus, ServiceType, PaymentStatus
 from app.schema.booked_service import BookedService as ModelBookedService, BookedServiceCreate
 from app.schema.booked_repair import BookedRepair as ModelBookedRepair, BookedRepairCreate
+from app.schema.payment import PaymentCreate , Payment as ModelPayment
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.database import get_db
 from app.schema.user_vehicle import UserVehicle as ModelUserVehicle, UserVehicleCreate
@@ -18,6 +20,7 @@ from app.database.database import mech_notes
 from app.schema.booking import MechNote, MechNoteCreate
 from datetime import datetime, timedelta
 from app.database.database import schedule_settings
+from app.notification_utils.util import *
 
 router = APIRouter()
 
@@ -25,15 +28,16 @@ router = APIRouter()
     # create a booking entry => after successfull booking generation => add all the services or add a repair entry for that booking
 
 @router.get('/get_available_slots')
-async def get_available_slots(db:AsyncSession = Depends(get_db)):
+async def get_available_slotss(required_hours: int,type:str, db:AsyncSession = Depends(get_db)):
     
     try: 
 
         # we will call the schedule and availability service here
-        pass
+        res = await get_available_slots(stub,required_hours, type )
+        return res
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to get availble slots")
+        raise HTTPException(status_code=500, detail=f"Failed to get availble slots, {str(e)}")
 
 
 
@@ -66,21 +70,20 @@ async def create_repair_booking(new_booking: BookingCreate,user_vehicle: UserVeh
         t = str(e)
         raise HTTPException(status_code=500, detail="Some error occured, {}".format(t))
 
-
 # the problem with service booking is i should get all the booking data at once , the services they picked the booking details etc, 
-@router.post('/create_booking/service')
-async def create_service_booking(new_booking: BookingCreate = Body(...), booked_services:List[int] = Body(...),user_vehicle:UserVehicleCreate = Body(...), payment_details: Payment = Body(...), db:AsyncSession = Depends(get_db)):
+
+@router.post('/create_booking/service', response_model=None)
+async def create_service_booking(new_booking: BookingCreate = Body(...), booked_services:List[int] = Body(...),user_vehicle:UserVehicleCreate = Body(...), payment_details: PaymentCreate = Body(...), db:AsyncSession = Depends(get_db)):
 
     # get booking create first -> store all the booked services -> perform aggreagtions (total amount , total time) -> then commit 
     # so that the order flow wont change , also i need to get the data of the users vehicles
 
     # create the booking entry
     try :
-        user_vehicle_entry = await check_if_entry_exists(UserVehicle, db, user_id = booking.user_id, vehicle_no = user_vehicle.vehicle_no)
+        user_vehicle_entry = await check_if_entry_exists(UserVehicle, db, user_id = new_booking.user_id, vehicle_no = user_vehicle.vehicle_no)
         user_veh = None
 
 
-        await commit_changes(db)
 
 
         if user_vehicle_entry is None:
@@ -99,9 +102,27 @@ async def create_service_booking(new_booking: BookingCreate = Body(...), booked_
 
         # now perform the aggregations then get the updated value
 
+
+
         total_time = total_time + ( 60 if booking.pickup_required else 0)
 
         est_completion_time = booking.booked_date + timedelta(minutes = total_time) 
+
+        required_time_span = []
+
+        start = booking.booked_date.hour
+
+        # add one hour to it for each 60 mins
+        total_hours = math.ceil(total_time / 60)
+        for start in range(start, start + total_hours):
+            required_time_span.append(start)
+
+        # lock available hours
+        shed_id = await lock_required_hours(booking.booked_date, required_time_span, db)
+        
+        if (shed_id <= 0):
+            raise HTTPException(status_code=500, detail=f"Failed to lock required hours for users,{required_time_span}")
+
 
         res = await update_entry_by_id(Booking, booking.booking_id, db, total_amount = total_price, estimated_completion_time = est_completion_time, total_time = total_time)
 
@@ -130,14 +151,63 @@ async def create_service_booking(new_booking: BookingCreate = Body(...), booked_
 
 
 @router.patch('/update_booking')
-async def update_booking_status(booking_id: int,status:str, db:AsyncSession = Depends(get_db)):
+async def update_booking_status(booking_id: int,status:str,background_tasks: BackgroundTasks, db:AsyncSession = Depends(get_db)):
 
     # update the status of the booking take necessary actions
     try:
-        updated_row_count = await handle_booking_status_change(booking_id=booking_id, status=status, db=db)
+        updated_row_count = await handle_booking_status_change(booking_id, status, db, background_tasks)
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Some error occured, {str(e)}")
+    
+
+@router.patch('/update_booked_service_status')
+async def update_status_of_booked_service(booked_service_id: int,background_tasks: BackgroundTasks, db:AsyncSession = Depends(get_db)):
+
+    try:
+
+        # check if entry exists
+        booked_service:BookedService = await check_if_id_exists(booked_service_id, BookedService, db)
+
+        if booked_service is None:
+            raise HTTPException(status_code=404, detail="Booked service id not found")
+        
+        booked_service.status = True
+
+        await update_entry_by_id(BookedService, booked_service_id, db, status = True)
+
+        await commit_changes(db)
+
+        background_tasks.add_task(send_booked_service_update_notification, booked_service)
+
+        return {"msg" : "booked service updated successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error occured while updating booked service status, {str(e)}")
+
+@router.patch('/update_booked_repair_status')
+async def update_status_of_booked_service(booked_repair_id: int,background_tasks: BackgroundTasks, db:AsyncSession = Depends(get_db)):
+
+    try:
+
+        # check if entry exists
+        booked_repair:BookedRepair = await check_if_id_exists(booked_repair_id, BookedRepair, db)
+
+        if booked_repair is None:
+            raise HTTPException(status_code=404, detail="Booked service id not found")
+        
+        booked_repair.status = True
+
+        await update_entry_by_id(BookedService, booked_repair_id, db, status = True)
+
+        await commit_changes(db)
+
+        background_tasks.add_task(send_booked_repair_update_notification, booked_repair)
+
+        return {"msg" : "booked service updated successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error occured while updating booked service status, {str(e)}")
 
 
 @router.post('/create_bill')

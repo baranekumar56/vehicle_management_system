@@ -107,12 +107,12 @@ db_availability_cache_updater = """
         updated_rows integer;
     BEGIN
 
-        FOR rec in SELECT * from availability_cache where booking_date = day AND active = true LOOP
+        FOR rec in SELECT * from availabilitycache where day = booking_date AND active = true LOOP
 
             IF rec.available_hours @> required_hours THEN
                 
                 UPDATE 
-                    availability_cache 
+                    availabilitycache 
                 SET 
                     available_hours = array_diff(rec.available_hours, required_hours), version = version + 1
                 WHERE 
@@ -256,8 +256,11 @@ booking_total_amount_compute_for_repair = """
 
 booking_payment_status_updater = """
 
+    DROP TRIGGER IF EXISTS update_booking_status_on_payment on payment ;
+
+
     CREATE OR REPLACE FUNCTION update_booking_payment_status ()
-    AS $$
+    RETURNS TRIGGER AS $$
     DECLARE
         total_paid_amount int default 0;
     BEGIN

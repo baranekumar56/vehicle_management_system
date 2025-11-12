@@ -17,6 +17,7 @@ class BaseBookedRepair(BaseModel):
     cancelled_by_admin : bool = False
     cancelled_by_user : bool = False
     removable : bool = True
+    
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -56,6 +57,7 @@ class BaseBookedRepair(BaseModel):
 class BookedRepairCreate(BaseBookedRepair):
 
     created_at : datetime = Field(..., default_factory=datetime.now)
+    completed_at : datetime | None = Field(None)
 
 
 class BookedRepair(BookedRepairCreate):

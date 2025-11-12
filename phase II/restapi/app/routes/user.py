@@ -1,10 +1,10 @@
 
-from fastapi import APIRouter, Query, Form, File, UploadFile, Depends, HTTPException, Response
+from fastapi import APIRouter, Query, Form, File, Request, UploadFile, Depends, HTTPException, Response
 from pydantic import Field
 from app.database.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import select, update, insert
-from app.auth.jwt_handler import create_access_token, create_refresh_token, verify_password, hash_password
+from app.auth.jwt_handler import create_access_token, create_refresh_token, verify_password, hash_password, verify_token
 from app.schema.user import User, UserCreate, UserLoginRequest, MechanicCreate, Mechanic as ModelMechanic, MechanicDBInsert
 from app.models.user.User import Users as DBUser
 from app.models.user.User import Mechanic
@@ -13,6 +13,8 @@ from app.schema.user_vehicle import UserVehicle as ModelUserVehicle, UserVehicle
 from app.models.user.User import UserVehicle
 from app.auth.jwt_bearer import JWTBearer
 from app.database.database import schedule_settings
+from uuid import uuid1
+from app.database.database import blacklist
 
 from app.crud.user import *
 from app.crud.generic import *
@@ -70,10 +72,16 @@ async def login(
             payload['user_email'] = user['user_email']
             payload["user_id"] = user['user_id']
             payload['role_id'] = user['role_id']
+            payload['token_id'] = uuid1()
 
+            tokens = [payload['token_id']]
 
             access_token = create_access_token(payload=payload)
+            payload["token_id"] = uuid1()
+            tokens.append(payload['token_id'])
             refresh_token = create_refresh_token(payload=payload)
+
+            
             
             response.set_cookie('refresh_token', str(refresh_token) )
 
@@ -103,9 +111,16 @@ async def signup(response: Response, user: UserCreate, db:AsyncSession = Depends
         payload['user_email'] = user['user_email']
         payload["user_id"] = user['user_id']
         payload['role_id'] = user['role_id']
+        payload['token_id'] = uuid1()
+
+        tokens = [payload['token_id']]
 
         access_token = create_access_token(payload=payload)
+        payload["token_id"] = uuid1()
+        tokens.append(payload['token_id'])
         refresh_token = create_refresh_token(payload=payload)
+
+            
             
         response.set_cookie('refresh_token', str(refresh_token) )
 
@@ -118,11 +133,32 @@ async def signup(response: Response, user: UserCreate, db:AsyncSession = Depends
         print(str(e))
         raise HTTPException(status_code=400, detail={"msg": "unexpected error occured", "detail": str(e)})
 
+@router.get('/log_out')
+async def log_out_user(request: Request, payload = Depends(JWTBearer())):
+
+    try:
+
+        refresh_token = verify_token(request.cookies.get('refresh_token'))
+
+        if refresh_token is None:
+            raise HTTPException(status_code=403, detail="unauthorized user")
+        
+        if payload is None:
+            raise HTTPException(status_code=403, detail="unauthorized access, access token missing")
+
+        # add the tokens to black list
+        tokens = [{"_id":refresh_token['token_id']}, {"_id":payload['token_id']}]
+
+        await blacklist.insert_many(tokens)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error occured during log out, {str(e)}")
 
 
-@router.get('/filter')
-async def filter_users():
-    pass
+
+# @router.get('/users')
+# async def filter_users(filters :  = Body):
+#     pass
 
 
 @router.patch('/deactivate_user/{user_id}')

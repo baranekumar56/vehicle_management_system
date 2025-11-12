@@ -5,3 +5,6 @@ from app.routes.vehicle import router as vehicle_router
 from app.routes.booking import router as booking_router
 from app.routes.package import router as package_router
 from app.routes.garage import router as garage_router
+from app.routes.inventory import router as inventory_router
+from app.routes.bulk import router as batch_router
+from app.routes.payment import router as payment_router

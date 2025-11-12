@@ -24,9 +24,7 @@ class RequirementUpdate(BaseModel):
     quantity : int
     booking_id: int
     
-
-
-
+    
 class NeededItemCreate(BaseModel):
 
     booking_id : int

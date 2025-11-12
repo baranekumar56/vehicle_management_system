@@ -20,12 +20,12 @@ def connect_to_grpc_service():
 stub = connect_to_grpc_service()
 
 
-async def get_available_slots(stub, required_hours):
+async def get_available_slots(stub, required_hours, type):
     loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(executor, get_available_slots_sync, stub, required_hours)
+    return await loop.run_in_executor(executor, get_available_slots_sync, stub, required_hours, type)
 
-def get_available_slots_sync(stub, required_hours):
-    req = AvailabilityRequirements(required_hours=required_hours)
+def get_available_slots_sync(stub, required_hours, type):
+    req = AvailabilityRequirements(required_hours=required_hours, booking_type = type)
     response = stub.get_available_hours(req) 
     return [[slot.available_date, slot.available_hours] for slot in response.slots]
 

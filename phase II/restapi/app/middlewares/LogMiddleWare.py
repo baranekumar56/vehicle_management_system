@@ -24,10 +24,14 @@ class Logger(BaseHTTPMiddleware):
         start_time = datetime.now()
 
         auth = request.headers.get('auth')
-        doc['user_id'] = auth['user_id']
+        if auth != None:
+            doc['user_id'] = auth['user_id']
+        else:
+            doc['user_id'] = "guest user"
+
         doc['url'] = request.url.path
         doc['request_id'] = str(uuid.uuid1())
-        request.headers['request_id'] = doc['request_id']
+        request.state.request_id =  doc['request_id']
         doc['route'] = request.url.path
         doc['type'] = "entry"
         doc['timestamp'] = str(datetime.now())
@@ -39,7 +43,7 @@ class Logger(BaseHTTPMiddleware):
         doc['type'] = "exit"
         doc['timestamp'] = str(datetime.now())
         doc['response_status_code'] = response.status_code
-        doc['response_time'] = end_time - start_time
+        doc['response_time'] = str(end_time - start_time)
         
         asyncio.create_task(self.log_event(doc.copy()))
 

@@ -51,8 +51,9 @@ app.include_router(router=vehicle_service_router, prefix='/vehicle_service', tag
 app.include_router(router=booking_router, prefix='/booking', tags=['booking'])
 app.include_router(router=package_router, prefix='/package', tags=['package'])
 app.include_router(router=garage_router, prefix='/garage', tags=['garage'])
-
-
+app.include_router(router=payment_router, prefix='/payment' , tags=['payment'])
+app.include_router(router=batch_router, prefix='/bulk', tags=['bulk upload'])
+app.include_router(router=inventory_router, prefix='/inventory', tags=['inventory'])
 
 
 @app.get('/')

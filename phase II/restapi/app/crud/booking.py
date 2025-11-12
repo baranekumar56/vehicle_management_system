@@ -1,7 +1,8 @@
 
+from datetime import date
 from typing import List
 
-from fastapi import HTTPException
+from fastapi import BackgroundTasks, HTTPException
 from app.models.bookings.Booking import Booking, BookedRepair, BookedService, BookingStatus
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
@@ -9,6 +10,8 @@ from app.grpc_stubs.grpc_client import *
 from app.models.payment.Payment import Payment
 from app.schema.payment import Payment as ModelPayment, PaymentCreate
 from app.crud.generic import *
+from app.database.database import booking_status_change_log
+from app.notification_utils.util import *
 
 async def add_services_to_booked_services(booking:Booking, vehicle_service_ids: List[int], db:AsyncSession):
 
@@ -20,9 +23,15 @@ async def add_services_to_booked_services(booking:Booking, vehicle_service_ids: 
     row = res.first()
     return row.total_price, row.total_time
 
+async def lock_required_hours(booked_date: date, required_span: list[int], db:AsyncSession ):
+
+    query = await db.execute(text("SELECT * FROM cache_updater(:booked_date, :required_hours)"), {"required_hours": required_span, "booked_date" : booked_date})
+
+    shed_id = query.scalar()
+    return shed_id
 
 
-async def handle_booking_status_change(booking_id:int, status:str, db:AsyncSession):
+async def handle_booking_status_change(booking_id:int, status:str, db:AsyncSession, background_tasks: BackgroundTasks):
     
 
     # when are possible activity required statges 
@@ -35,8 +44,10 @@ async def handle_booking_status_change(booking_id:int, status:str, db:AsyncSessi
     if status in ['booked', 'billing', 'billing_confirmation', 'on_going']:
 
         # carry out status update and return the object
-        
-        updated_row_count = await update_entry_by_id(Booking, id=booking_id, db=db, status = status)
+        # check this later: when users clicks booking confirmation, check whether their current paid amount equals to current billed amount then ddont turn booking status to pending , else turn it to pending
+
+
+        updated_row_count = await update_entry_by_id(Booking, id=booking_id, db=db, status = status, payment_status = "pending")
 
     else :
 
@@ -90,11 +101,15 @@ async def handle_booking_status_change(booking_id:int, status:str, db:AsyncSessi
                     pass
 
 
-            updated_row_count = update_entry_by_id(Booking, id=booking_id, db=db, status = status)
+            updated_row_count = await  update_entry_by_id(Booking, id=booking_id, db=db, status = status)
 
-            # grpc_func_call()
+            # grpc_func_call()  
             # then call the grpc service 
             await handle_booking_state_change(stub=stub, booking_id=booking.booking_id, current_status=status, mechanic_id=0, schedule_id=0)
+
+    background_tasks.add_task(notify_user, booking.user_id, f"Your booking id {booking_id} has been updated to {status}")
+
+    await booking_status_change_log.insert_one({"booking_id": booking_id, "status" : status, "timestamp" : str(datetime.now())})
 
     await commit_changes(db)
 

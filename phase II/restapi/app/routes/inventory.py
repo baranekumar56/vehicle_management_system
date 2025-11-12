@@ -1,7 +1,7 @@
 
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from app.models.inventory.Inventory import Inventory, UsedItem
+from app.models.inventory.Inventory import Inventory, NeededItem
 from app.schema.inventory import ProductCreate, Product, NeededItem as ModelNeededItem , NeededItemCreate, RequirementUpdate
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.database import get_db

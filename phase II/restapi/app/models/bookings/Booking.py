@@ -49,6 +49,7 @@ class BookedService(Base):
    status = Column(Boolean, default=False)
    cancelled_by_admin = Column(Boolean, default=False)
    created_at = Column(DateTime(timezone=True), nullable=False)
+   completed_at = Column(DateTime(timezone=True))
 
 
 class BookedRepair(Base):
@@ -64,6 +65,8 @@ class BookedRepair(Base):
   cancelled_by_user = Column(Boolean, default=False)
   removable = Column(Boolean, default=True)
   created_at =  Column(DateTime(timezone=True), nullable=False)
+  completed_at = Column(DateTime(timezone=True))
+
   
 
 class Bill(Base):
